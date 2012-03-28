@@ -1,23 +1,3 @@
-/*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
-
 #define _CRT_SECURE_NO_DEPRECATE
 #include <cstdio>
 #include <iostream>
@@ -86,7 +66,7 @@ static void clreol()
 
 void strToLower(char* str)
 {
-    while (*str)
+    while(*str)
     {
         *str=tolower(*str);
         ++str;
@@ -118,7 +98,7 @@ void ReadLiquidTypeTableDBC()
     LiqType = new uint16[LiqType_maxid + 1];
     memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
 
-    for (uint32 x = 0; x < LiqType_count; ++x)
+    for(uint32 x = 0; x < LiqType_count; ++x)
         LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
 
     printf("Done! (%u LiqTypes loaded)\n", (unsigned int)LiqType_count);
@@ -144,17 +124,17 @@ int ExtractWmo()
                 // Copy files from archive
                 //std::cout << "found *.wmo file " << *fname << std::endl;
                 sprintf(szLocalFile, "%s/%s", szWorkDirWmo, GetPlainName(fname->c_str()));
-                fixnamen(szLocalFile, strlen(szLocalFile));
+                fixnamen(szLocalFile,strlen(szLocalFile));
                 FILE * n;
                 if ((n = fopen(szLocalFile, "rb"))== NULL)
                 {
                     int p = 0;
                     //Select root wmo files
-                    const char * rchr = strrchr(GetPlainName(fname->c_str()), 0x5f);
+                    const char * rchr = strrchr(GetPlainName(fname->c_str()),0x5f);
                     if (rchr != NULL)
                     {
                         char cpy[4];
-                        strncpy((char*)cpy, rchr, 4);
+                        strncpy((char*)cpy,rchr,4);
                         for (int i=0;i<4; ++i)
                         {
                             int m = cpy[i];
@@ -172,7 +152,7 @@ int ExtractWmo()
                             delete froot;
                             continue;
                         }
-                        FILE *output=fopen(szLocalFile, "wb");
+                        FILE *output=fopen(szLocalFile,"wb");
                         if (!output)
                         {
                             printf("couldn't open %s for writing!\n", szLocalFile);
@@ -189,13 +169,13 @@ int ExtractWmo()
                                 strcpy(temp, fname->c_str());
                                 temp[fname->length()-4] = 0;
                                 char groupFileName[1024];
-                                sprintf(groupFileName, "%s_%03d.wmo", temp, i);
-                                //printf("Trying to open groupfile %s\n", groupFileName);
+                                sprintf(groupFileName,"%s_%03d.wmo",temp, i);
+                                //printf("Trying to open groupfile %s\n",groupFileName);
                                 string s = groupFileName;
                                 WMOGroup * fgroup = new WMOGroup(s);
                                 if (!fgroup->open())
                                 {
-                                    printf("Could not open all Group file for: %s\n", GetPlainName(fname->c_str()));
+                                    printf("Could not open all Group file for: %s\n",GetPlainName(fname->c_str()));
                                     file_ok=false;
                                     break;
                                 }
@@ -205,7 +185,7 @@ int ExtractWmo()
                             }
                         }
                         fseek(output, 8, SEEK_SET); // store the correct no of vertices
-                        fwrite(&Wmo_nVertices, sizeof(int), 1, output);
+                        fwrite(&Wmo_nVertices,sizeof(int),1,output);
                         fclose(output);
                         delete froot;
                     }
@@ -238,9 +218,9 @@ void ParsMapFiles()
     char id[10];
     for (unsigned int i=0; i<map_count; ++i)
     {
-        sprintf(id, "%03u", map_ids[i].id);
-        sprintf(fn, "World\\Maps\\%s\\%s.wdt", map_ids[i].name, map_ids[i].name);
-        WDTFile WDT(fn, map_ids[i].name);
+        sprintf(id,"%03u",map_ids[i].id);
+        sprintf(fn,"World\\Maps\\%s\\%s.wdt", map_ids[i].name, map_ids[i].name);
+        WDTFile WDT(fn,map_ids[i].name);
         if (WDT.init(id, map_ids[i].id))
         {
             printf("Processing Map %u\n[", map_ids[i].id);
@@ -248,9 +228,9 @@ void ParsMapFiles()
             {
                 for (int y=0; y<64; ++y)
                 {
-                    if (ADTFile *ADT = WDT.GetMap(x, y))
+                    if (ADTFile *ADT = WDT.GetMap(x,y))
                     {
-                        //sprintf(id_filename, "%02u %02u %03u", x, y, map_ids[i].id);//!!!!!!!!!
+                        //sprintf(id_filename,"%02u %02u %03u",x,y,map_ids[i].id);//!!!!!!!!!
                         ADT->init(map_ids[i].id, x, y);
                         delete ADT;
                     }
@@ -267,20 +247,20 @@ void getGamePath()
 {
 #ifdef _WIN32
     HKEY key;
-    DWORD t, s;
+    DWORD t,s;
     LONG l;
     s = sizeof(input_path);
-    memset(input_path, 0, s);
-    l = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\World of Warcraft", 0, KEY_QUERY_VALUE, &key);
-    l = RegQueryValueExA(key, "InstallPath", 0, &t, (LPBYTE)input_path, &s);
+    memset(input_path,0,s);
+    l = RegOpenKeyExA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
+    l = RegQueryValueExA(key,"InstallPath",0,&t,(LPBYTE)input_path,&s);
     RegCloseKey(key);
     if (strlen(input_path) > 0)
     {
         if (input_path[strlen(input_path) - 1] != '\\') strcat(input_path, "\\");
     }
-    strcat(input_path, "Data\\");
+    strcat(input_path,"Data\\");
 #else
-    strcpy(input_path, "Data/");
+    strcpy(input_path,"Data/");
 #endif
 }
 
@@ -410,13 +390,13 @@ bool processArgv(int argc, char ** argv, const char *versionString)
     hasInputPathParam = false;
     bool preciseVectorData = false;
 
-    for (int i=1; i< argc; ++i)
+    for(int i=1; i< argc; ++i)
     {
-        if (strcmp("-s", argv[i]) == 0)
+        if (strcmp("-s",argv[i]) == 0)
         {
             preciseVectorData = false;
         }
-        else if (strcmp("-d", argv[i]) == 0)
+        else if (strcmp("-d",argv[i]) == 0)
         {
             if ((i+1)<argc)
             {
@@ -431,11 +411,11 @@ bool processArgv(int argc, char ** argv, const char *versionString)
                 result = false;
             }
         }
-        else if (strcmp("-?", argv[1]) == 0)
+        else if (strcmp("-?",argv[1]) == 0)
         {
             result = false;
         }
-        else if (strcmp("-l", argv[i]) == 0)
+        else if (strcmp("-l",argv[i]) == 0)
         {
             preciseVectorData = true;
         }
@@ -447,7 +427,7 @@ bool processArgv(int argc, char ** argv, const char *versionString)
     }
     if (!result)
     {
-        printf("Extract %s.\n", versionString);
+        printf("Extract %s.\n",versionString);
         printf("%s [-?][-s][-l][-d <path>]\n", argv[0]);
         printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
         printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
@@ -491,7 +471,7 @@ int main(int argc, char ** argv)
         }
     }
 
-    printf("Extract %s. Beginning work ....\n", versionString);
+    printf("Extract %s. Beginning work ....\n",versionString);
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     // Create the working directory
     if (mkdir(szWorkDirWmo
@@ -513,7 +493,7 @@ int main(int argc, char ** argv)
 
     if (gOpenArchives.empty())
     {
-        printf("FATAL ERROR: None MPQ archive found by path '%s'. Use -d option with proper path.\n", input_path);
+        printf("FATAL ERROR: None MPQ archive found by path '%s'. Use -d option with proper path.\n",input_path);
         return 1;
     }
     ReadLiquidTypeTableDBC();
@@ -535,11 +515,11 @@ int main(int argc, char ** argv)
         }
         map_count=dbc->getRecordCount ();
         map_ids=new map_id[map_count];
-        for (unsigned int x=0;x<map_count;++x)
+        for(unsigned int x=0;x<map_count;++x)
         {
             map_ids[x].id=dbc->getRecord (x).getUInt(0);
-            strcpy(map_ids[x].name, dbc->getRecord(x).getString(1));
-            printf("Map - %s\n", map_ids[x].name);
+            strcpy(map_ids[x].name,dbc->getRecord(x).getString(1));
+            printf("Map - %s\n",map_ids[x].name);
         }
 
         delete dbc;
@@ -551,11 +531,11 @@ int main(int argc, char ** argv)
     clreol();
     if (!success)
     {
-        printf("ERROR: Extract %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n", versionString, preciseVectorData);
+        printf("ERROR: Extract %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n",versionString, preciseVectorData);
         getchar();
     }
 
-    printf("Extract %s. Work complete. No errors.\n", versionString);
+    printf("Extract %s. Work complete. No errors.\n",versionString);
     delete [] LiqType;
     return 0;
 }

@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -43,14 +51,14 @@ class instance_shadow_labyrinth : public InstanceMapScript
 public:
     instance_shadow_labyrinth() : InstanceMapScript("instance_shadow_labyrinth", 555) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
     {
-        return new instance_shadow_labyrinth_InstanceMapScript(map);
+        return new instance_shadow_labyrinth_InstanceMapScript(pMap);
     }
 
     struct instance_shadow_labyrinth_InstanceMapScript : public InstanceScript
     {
-        instance_shadow_labyrinth_InstanceMapScript(Map* map) : InstanceScript(map) {}
+        instance_shadow_labyrinth_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
@@ -80,32 +88,32 @@ public:
             return false;
         }
 
-        void OnGameObjectCreate(GameObject* go)
+        void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
         {
-            switch (go->GetEntry())
+            switch(pGo->GetEntry())
             {
                 case REFECTORY_DOOR:
-                    m_uiRefectoryDoorGUID = go->GetGUID();
+                    m_uiRefectoryDoorGUID = pGo->GetGUID();
                     if (m_auiEncounter[2] == DONE)
-                        go->SetGoState(GO_STATE_ACTIVE);
+                        pGo->SetGoState(GO_STATE_ACTIVE);
                     break;
                 case SCREAMING_HALL_DOOR:
-                    m_uiScreamingHallDoorGUID = go->GetGUID();
+                    m_uiScreamingHallDoorGUID = pGo->GetGUID();
                     if (m_auiEncounter[3] == DONE)
-                        go->SetGoState(GO_STATE_ACTIVE);
+                        pGo->SetGoState(GO_STATE_ACTIVE);
                     break;
             }
         }
 
-        void OnCreatureCreate(Creature* creature)
+        void OnCreatureCreate(Creature* pCreature, bool /*add*/)
         {
-            switch (creature->GetEntry())
+            switch(pCreature->GetEntry())
             {
                 case 18732:
-                    m_uiGrandmasterVorpil = creature->GetGUID();
+                    m_uiGrandmasterVorpil = pCreature->GetGUID();
                     break;
                 case 18796:
-                    if (creature->isAlive())
+                    if (pCreature->isAlive())
                     {
                         ++m_uiFelOverseerCount;
                         sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Shadow Labyrinth: counting %u Fel Overseers.", m_uiFelOverseerCount);
@@ -116,7 +124,7 @@ public:
 
         void SetData(uint32 type, uint32 uiData)
         {
-            switch (type)
+            switch(type)
             {
                 case TYPE_HELLMAW:
                     m_auiEncounter[0] = uiData;
@@ -125,7 +133,7 @@ public:
                 case TYPE_OVERSEER:
                     if (uiData != DONE)
                     {
-                        sLog->outError("TSCR: Shadow Labyrinth: TYPE_OVERSEER did not expect other data than DONE");
+                        sLog->outDebug(LOG_FILTER_TSCR, "TSCR: Shadow Labyrinth: TYPE_OVERSEER did not expect other data than DONE");
                         return;
                     }
                     if (m_uiFelOverseerCount)
@@ -167,8 +175,8 @@ public:
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' '
-                    << m_auiEncounter[2] << ' ' << m_auiEncounter[3] << ' ' << m_auiEncounter[4];
+                saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
+                    << m_auiEncounter[2] << " " << m_auiEncounter[3] << " " << m_auiEncounter[4];
 
                 str_data = saveStream.str();
 
@@ -179,7 +187,7 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            switch (type)
+            switch(type)
             {
                 case TYPE_HELLMAW: return m_auiEncounter[0];
                 case TYPE_OVERSEER: return m_auiEncounter[1];

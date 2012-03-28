@@ -1,28 +1,33 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "HostileRefManager.h"
 #include "ThreatManager.h"
 #include "Unit.h"
 #include "DBCStructure.h"
 #include "SpellMgr.h"
-#include "SpellInfo.h"
 
 HostileRefManager::~HostileRefManager()
 {
@@ -30,36 +35,39 @@ HostileRefManager::~HostileRefManager()
 }
 
 //=================================================
-// send threat to all my hateres for the victim
-// The victim is hated than by them as well
+// send threat to all my hateres for the pVictim
+// The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
 
-void HostileRefManager::threatAssist(Unit* victim, float baseThreat, SpellInfo const* threatSpell)
+void HostileRefManager::threatAssist(Unit *pVictim, float fThreat, SpellEntry const *pThreatSpell, bool pSingleTarget)
 {
-    HostileReference* ref = getFirst();
-    float threat = ThreatCalcHelper::calcThreat(victim, iOwner, baseThreat, (threatSpell ? threatSpell->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL), threatSpell);
-    threat /= getSize();
-    while (ref)
-    {
-        if (ThreatCalcHelper::isValidProcess(victim, ref->getSource()->getOwner(), threatSpell))
-            ref->getSource()->doAddThreat(victim, threat);
+    HostileReference* ref;
 
+    float size = pSingleTarget ? 1.0f : getSize();            // if pSingleTarget do not divide threat
+    ref = getFirst();
+    while (ref != NULL)
+    {
+        float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, fThreat, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);
+        if (pVictim == getOwner())
+            ref->addThreat(threat / size);          // It is faster to modify the threat durectly if possible
+        else
+            ref->getSource()->addThreat(pVictim, threat / size);
         ref = ref->next();
     }
 }
 
 //=================================================
 
-void HostileRefManager::addTempThreat(float threat, bool apply)
+void HostileRefManager::addTempThreat(float fThreat, bool apply)
 {
     HostileReference* ref = getFirst();
 
-    while (ref)
+    while (ref != NULL)
     {
         if (apply)
         {
             if (ref->getTempThreatModifier() == 0.0f)
-                ref->addTempThreat(threat);
+                ref->addTempThreat(fThreat);
         }
         else
             ref->resetTempThreat();
@@ -70,12 +78,14 @@ void HostileRefManager::addTempThreat(float threat, bool apply)
 
 //=================================================
 
-void HostileRefManager::addThreatPercent(int32 percent)
+void HostileRefManager::addThreatPercent(int32 iPercent)
 {
-    HostileReference* ref = getFirst();
-    while (ref)
+    HostileReference* ref;
+
+    ref = getFirst();
+    while (ref != NULL)
     {
-        ref->addThreatPercent(percent);
+        ref->addThreatPercent(iPercent);
         ref = ref->next();
     }
 }
@@ -83,12 +93,14 @@ void HostileRefManager::addThreatPercent(int32 percent)
 //=================================================
 // The online / offline status is given to the method. The calculation has to be done before
 
-void HostileRefManager::setOnlineOfflineState(bool isOnline)
+void HostileRefManager::setOnlineOfflineState(bool bIsOnline)
 {
-    HostileReference* ref = getFirst();
-    while (ref)
+    HostileReference* ref;
+
+    ref = getFirst();
+    while (ref != NULL)
     {
-        ref->setOnlineOfflineState(isOnline);
+        ref->setOnlineOfflineState(bIsOnline);
         ref = ref->next();
     }
 }
@@ -143,13 +155,13 @@ void HostileRefManager::deleteReferencesForFaction(uint32 faction)
 //=================================================
 // delete one reference, defined by Unit
 
-void HostileRefManager::deleteReference(Unit* creature)
+void HostileRefManager::deleteReference(Unit *pCreature)
 {
     HostileReference* ref = getFirst();
     while (ref)
     {
         HostileReference* nextRef = ref->next();
-        if (ref->getSource()->getOwner() == creature)
+        if (ref->getSource()->getOwner() == pCreature)
         {
             ref->removeReference();
             delete ref;
@@ -162,15 +174,15 @@ void HostileRefManager::deleteReference(Unit* creature)
 //=================================================
 // set state for one reference, defined by Unit
 
-void HostileRefManager::setOnlineOfflineState(Unit* creature, bool isOnline)
+void HostileRefManager::setOnlineOfflineState(Unit *pCreature, bool bIsOnline)
 {
     HostileReference* ref = getFirst();
     while (ref)
     {
         HostileReference* nextRef = ref->next();
-        if (ref->getSource()->getOwner() == creature)
+        if (ref->getSource()->getOwner() == pCreature)
         {
-            ref->setOnlineOfflineState(isOnline);
+            ref->setOnlineOfflineState(bIsOnline);
             break;
         }
         ref = nextRef;
@@ -187,7 +199,7 @@ void HostileRefManager::UpdateVisibility()
         HostileReference* nextRef = ref->next();
         if (!ref->getSource()->getOwner()->canSeeOrDetect(getOwner()))
         {
-            nextRef = ref->next();
+            HostileReference* nextRef = ref->next();
             ref->removeReference();
             delete ref;
         }

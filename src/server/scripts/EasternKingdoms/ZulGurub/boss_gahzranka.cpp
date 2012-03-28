@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -33,24 +40,29 @@ EndScriptData */
 class boss_gahzranka : public CreatureScript
 {
     public:
-        boss_gahzranka() : CreatureScript("boss_gahzranka") {}
+
+        boss_gahzranka()
+            : CreatureScript("boss_gahzranka")
+        {
+        }
 
         struct boss_gahzrankaAI : public ScriptedAI
         {
-            boss_gahzrankaAI(Creature* creature) : ScriptedAI(creature) {}
-
+            boss_gahzrankaAI(Creature *c) : ScriptedAI(c) {}
             uint32 Frostbreath_Timer;
             uint32 MassiveGeyser_Timer;
             uint32 Slam_Timer;
 
             void Reset()
             {
-                Frostbreath_Timer    = 8000;
-                MassiveGeyser_Timer  = 25000;
-                Slam_Timer           = 17000;
+                Frostbreath_Timer = 8000;
+                MassiveGeyser_Timer = 25000;
+                Slam_Timer = 17000;
             }
 
-            void EnterCombat(Unit* /*who*/) {}
+            void EnterCombat(Unit * /*who*/)
+            {
+            }
 
             void UpdateAI(const uint32 diff)
             {
@@ -62,7 +74,7 @@ class boss_gahzranka : public CreatureScript
                 if (Frostbreath_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_FROSTBREATH);
-                    Frostbreath_Timer = urand(7000, 11000);
+                    Frostbreath_Timer = 7000 + rand()%4000;
                 } else Frostbreath_Timer -= diff;
 
                 //MassiveGeyser_Timer
@@ -71,14 +83,14 @@ class boss_gahzranka : public CreatureScript
                     DoCast(me->getVictim(), SPELL_MASSIVEGEYSER);
                     DoResetThreat();
 
-                    MassiveGeyser_Timer = urand(22000, 32000);
+                    MassiveGeyser_Timer = 22000 + rand()%10000;
                 } else MassiveGeyser_Timer -= diff;
 
                 //Slam_Timer
                 if (Slam_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_SLAM);
-                    Slam_Timer = urand(12000, 20000);
+                    Slam_Timer = 12000 + rand()%8000;
                 } else Slam_Timer -= diff;
 
                 DoMeleeAttackIfReady();

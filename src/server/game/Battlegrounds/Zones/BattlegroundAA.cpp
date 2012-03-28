@@ -1,75 +1,77 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "Battleground.h"
 #include "BattlegroundAA.h"
 #include "Language.h"
 #include "Player.h"
 
-BattlegroundAA::BattlegroundAA()
-{
-    _StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
-    _StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
-    _StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_15S;
-    _StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
-    //we must set messageIds
-    _StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_ARENA_ONE_MINUTE;
-    _StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
-    _StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
-    _StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
+BattlegroundAA::BattlegroundAA() {
+	m_StartDelayTimes[BG_STARTING_EVENT_FIRST] = BG_START_DELAY_1M;
+	m_StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
+	m_StartDelayTimes[BG_STARTING_EVENT_THIRD] = BG_START_DELAY_15S;
+	m_StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
+	//we must set messageIds
+	m_StartMessageIds[BG_STARTING_EVENT_FIRST] = LANG_ARENA_ONE_MINUTE;
+	m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
+	m_StartMessageIds[BG_STARTING_EVENT_THIRD] = LANG_ARENA_FIFTEEN_SECONDS;
+	m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattlegroundAA::~BattlegroundAA()
-{
+BattlegroundAA::~BattlegroundAA() {
 }
 
-void BattlegroundAA::StartingEventCloseDoors()
-{
+void BattlegroundAA::Update(uint32 diff) {
+	Battleground::Update(diff);
 }
 
-void BattlegroundAA::StartingEventOpenDoors()
-{
+void BattlegroundAA::StartingEventCloseDoors() {
 }
 
-void BattlegroundAA::AddPlayer(Player* player)
-{
-    Battleground::AddPlayer(player);
-    //create score and add it to map, default values are set in constructor
-    BattlegroundAAScore* sc = new BattlegroundAAScore;
-
-    _PlayerScores[player->GetGUID()] = sc;
+void BattlegroundAA::StartingEventOpenDoors() {
 }
 
-void BattlegroundAA::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/)
-{
+void BattlegroundAA::AddPlayer(Player *plr) {
+	Battleground::AddPlayer(plr);
+	//create score and add it to map, default values are set in constructor
+	BattlegroundAAScore* sc = new BattlegroundAAScore;
+
+	m_PlayerScores[plr->GetGUID()] = sc;
 }
 
-void BattlegroundAA::HandleKillPlayer(Player* player, Player* killer)
-{
-    Battleground::HandleKillPlayer(player, killer);
+void BattlegroundAA::RemovePlayer(Player * /*plr*/, uint64 /*guid*/) {
 }
 
-void BattlegroundAA::HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/)
-{
+void BattlegroundAA::HandleKillPlayer(Player* player, Player* killer) {
+	Battleground::HandleKillPlayer(player, killer);
 }
 
-bool BattlegroundAA::SetupBattleground()
-{
-    return true;
+void BattlegroundAA::HandleAreaTrigger(Player * /*Source*/,
+		uint32 /*Trigger*/) {
+}
+
+bool BattlegroundAA::SetupBattleground() {
+	return true;
 }

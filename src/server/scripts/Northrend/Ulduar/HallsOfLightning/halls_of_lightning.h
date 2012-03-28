@@ -1,10 +1,12 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -27,6 +29,7 @@ enum eTypes
     DATA_IONAR              = 2,
     DATA_LOKEN              = 3,
     DATA_VOLKHAN            = 4,
+	DATA_VOLKHAN_ANVIL		= 9,
 
     TYPE_BJARNGRIM          = 10,
     TYPE_IONAR              = 11,
@@ -37,6 +40,7 @@ enum eTypes
     NPC_VOLKHAN             = 28587,
     NPC_IONAR               = 28546,
     NPC_LOKEN               = 28923,
+	NPC_VOLKHAN_ANVIL		= 28823,
 
     GO_BJARNGRIM_DOOR       = 191416,                       //_doors10
     GO_VOLKHAN_DOOR         = 191325,                       //_doors07

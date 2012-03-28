@@ -1,10 +1,12 @@
  /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -50,11 +52,11 @@ class npc_jaina_proudmoore : public CreatureScript
 public:
     npc_jaina_proudmoore() : CreatureScript("npc_jaina_proudmoore") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
     {
         player->PlayerTalkClass->ClearMenus();
         hyjalAI* ai = CAST_AI(hyjalAI, creature->AI());
-        switch (action)
+        switch (uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 ai->StartEvent(player);
@@ -105,15 +107,15 @@ public:
         ai->EnterEvadeMode();
 
         ai->Spells[0].SpellId = SPELL_BLIZZARD;
-        ai->Spells[0].Cooldown = urand(15000, 35000);
+        ai->Spells[0].Cooldown = 15000 + rand()%20000;
         ai->Spells[0].TargetType = TARGETTYPE_RANDOM;
 
         ai->Spells[1].SpellId = SPELL_PYROBLAST;
-        ai->Spells[1].Cooldown = urand(5500, 9500);
+        ai->Spells[1].Cooldown = 5500 + rand()%4000;
         ai->Spells[1].TargetType = TARGETTYPE_RANDOM;
 
         ai->Spells[2].SpellId = SPELL_SUMMON_ELEMENTALS;
-        ai->Spells[2].Cooldown = urand(15000, 45000);
+        ai->Spells[2].Cooldown = 15000 + rand()%30000;
         ai->Spells[2].TargetType = TARGETTYPE_SELF;
 
         return ai;
@@ -125,12 +127,12 @@ class npc_thrall : public CreatureScript
 public:
     npc_thrall() : CreatureScript("npc_thrall") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
     {
         player->PlayerTalkClass->ClearMenus();
         hyjalAI* ai = CAST_AI(hyjalAI, creature->AI());
         ai->DeSpawnVeins();//despawn the alliance veins
-        switch (action)
+        switch (uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 ai->StartEvent(player);
@@ -186,11 +188,11 @@ public:
         ai->EnterEvadeMode();
 
         ai->Spells[0].SpellId = SPELL_CHAIN_LIGHTNING;
-        ai->Spells[0].Cooldown = urand(3000, 8000);
+        ai->Spells[0].Cooldown = 3000 + rand()%5000;
         ai->Spells[0].TargetType = TARGETTYPE_VICTIM;
 
         ai->Spells[1].SpellId = SPELL_SUMMON_DIRE_WOLF;
-        ai->Spells[1].Cooldown = urand(6000, 41000);
+        ai->Spells[1].Cooldown = 6000 + rand()%35000;
         ai->Spells[1].TargetType = TARGETTYPE_RANDOM;
 
         return ai;
@@ -210,10 +212,10 @@ public:
         return ai;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF)
+        if (uiAction == GOSSIP_ACTION_INFO_DEF)
         {
                 ItemPosCountVec dest;
                 uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, ITEM_TEAR_OF_GODDESS, 1);

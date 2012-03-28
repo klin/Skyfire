@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -30,7 +38,6 @@ npc_daranelle
 npc_overseer_nuaar
 npc_saikkal_the_elder
 go_legion_obelisk
-go_thunderspike
 EndContentData */
 
 #include "ScriptPCH.h"
@@ -54,14 +61,14 @@ class mobs_bladespire_ogre : public CreatureScript
 public:
     mobs_bladespire_ogre() : CreatureScript("mobs_bladespire_ogre") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mobs_bladespire_ogreAI (creature);
+        return new mobs_bladespire_ogreAI (pCreature);
     }
 
     struct mobs_bladespire_ogreAI : public ScriptedAI
     {
-        mobs_bladespire_ogreAI(Creature* c) : ScriptedAI(c) {}
+        mobs_bladespire_ogreAI(Creature *c) : ScriptedAI(c) {}
 
         void Reset() { }
 
@@ -105,14 +112,14 @@ class mobs_nether_drake : public CreatureScript
 public:
     mobs_nether_drake() : CreatureScript("mobs_nether_drake") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mobs_nether_drakeAI (creature);
+        return new mobs_nether_drakeAI (pCreature);
     }
 
     struct mobs_nether_drakeAI : public ScriptedAI
     {
-        mobs_nether_drakeAI(Creature* c) : ScriptedAI(c) {}
+        mobs_nether_drakeAI(Creature *c) : ScriptedAI(c) {}
 
         bool IsNihil;
         uint32 NihilSpeech_Timer;
@@ -135,7 +142,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit *who)
         {
             if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 return;
@@ -157,7 +164,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell)
+        void SpellHit(Unit *caster, const SpellEntry *spell)
         {
             if (spell->Id == SPELL_T_PHASE_MODULATOR && caster->GetTypeId() == TYPEID_PLAYER)
             {
@@ -194,7 +201,7 @@ public:
             {
                 if (NihilSpeech_Timer <= diff)
                 {
-                    switch (NihilSpeech_Phase)
+                    switch(NihilSpeech_Phase)
                     {
                         case 0:
                             DoScriptText(SAY_NIHIL_1, me);
@@ -237,9 +244,9 @@ public:
 
             if (ManaBurn_Timer <= diff)
             {
-                Unit* target = me->getVictim();
-                if (target && target->getPowerType() == POWER_MANA)
-                    DoCast(target, SPELL_MANA_BURN);
+                Unit *pTarget = me->getVictim();
+                if (pTarget && pTarget->getPowerType() == POWER_MANA)
+                    DoCast(pTarget, SPELL_MANA_BURN);
                 ManaBurn_Timer = 8000+rand()%8000;
             } else ManaBurn_Timer -= diff;
 
@@ -269,20 +276,20 @@ class npc_daranelle : public CreatureScript
 public:
     npc_daranelle() : CreatureScript("npc_daranelle") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new npc_daranelleAI (creature);
+        return new npc_daranelleAI (pCreature);
     }
 
     struct npc_daranelleAI : public ScriptedAI
     {
-        npc_daranelleAI(Creature* c) : ScriptedAI(c) {}
+        npc_daranelleAI(Creature *c) : ScriptedAI(c) {}
 
         void Reset() { }
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit *who)
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
             {
@@ -310,23 +317,23 @@ class npc_overseer_nuaar : public CreatureScript
 public:
     npc_overseer_nuaar() : CreatureScript("npc_overseer_nuaar") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF+1)
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
-            player->SEND_GOSSIP_MENU(10533, creature->GetGUID());
-            player->AreaExploredOrEventHappens(10682);
+            pPlayer->SEND_GOSSIP_MENU(10533, pCreature->GetGUID());
+            pPlayer->AreaExploredOrEventHappens(10682);
         }
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (player->GetQuestStatus(10682) == QUEST_STATUS_INCOMPLETE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        if (pPlayer->GetQuestStatus(10682) == QUEST_STATUS_INCOMPLETE)
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-        player->SEND_GOSSIP_MENU(10532, creature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(10532, pCreature->GetGUID());
 
         return true;
     }
@@ -344,29 +351,29 @@ class npc_saikkal_the_elder : public CreatureScript
 public:
     npc_saikkal_the_elder() : CreatureScript("npc_saikkal_the_elder") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
-        player->PlayerTalkClass->ClearMenus();
-        switch (action)
+        pPlayer->PlayerTalkClass->ClearMenus();
+        switch (uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SELECT_STE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-                player->SEND_GOSSIP_MENU(10795, creature->GetGUID());
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SELECT_STE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                pPlayer->SEND_GOSSIP_MENU(10795, pCreature->GetGUID());
                 break;
             case GOSSIP_ACTION_INFO_DEF+2:
-                player->TalkedToCreature(creature->GetEntry(), creature->GetGUID());
-                player->SEND_GOSSIP_MENU(10796, creature->GetGUID());
+                pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetGUID());
+                pPlayer->SEND_GOSSIP_MENU(10796, pCreature->GetGUID());
                 break;
         }
         return true;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (player->GetQuestStatus(10980) == QUEST_STATUS_INCOMPLETE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_STE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        if (pPlayer->GetQuestStatus(10980) == QUEST_STATUS_INCOMPLETE)
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_STE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-        player->SEND_GOSSIP_MENU(10794, creature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(10794, pCreature->GetGUID());
 
         return true;
     }
@@ -381,11 +388,11 @@ class go_legion_obelisk : public GameObjectScript
 public:
     go_legion_obelisk() : GameObjectScript("go_legion_obelisk") { }
 
-    bool OnGossipHello(Player* player, GameObject* go)
+    bool OnGossipHello(Player* pPlayer, GameObject* pGo)
     {
-        if (player->GetQuestStatus(10821) == QUEST_STATUS_INCOMPLETE)
+        if (pPlayer->GetQuestStatus(10821) == QUEST_STATUS_INCOMPLETE)
         {
-            switch (go->GetEntry())
+            switch(pGo->GetEntry())
             {
                 case LEGION_OBELISK_ONE:
                       obelisk_one = true;
@@ -406,7 +413,7 @@ public:
 
             if (obelisk_one == true && obelisk_two == true && obelisk_three == true && obelisk_four == true && obelisk_five == true)
             {
-                go->SummonCreature(19963, 2943.40f, 4778.20f, 284.49f, 0.94f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                pGo->SummonCreature(19963, 2943.40f, 4778.20f, 284.49f, 0.94f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
                 //reset global var
                 obelisk_one = false;
                 obelisk_two = false;
@@ -426,11 +433,9 @@ public:
 
 enum eBloodmaul
 {
-    NPC_OGRE_BRUTE                              = 19995,
-    NPC_QUEST_CREDIT                            = 21241,
-    GO_KEG                                      = 184315,
-    QUEST_GETTING_THE_BLADESPIRE_TANKED         = 10512,
-    QUEST_BLADESPIRE_KEGGER                     = 10545,
+    NPC_OGRE_BRUTE        = 19995,
+    NPC_QUEST_CREDIT      = 21241,
+    GO_KEG                = 184315
 };
 
 class npc_bloodmaul_brutebane : public CreatureScript
@@ -438,14 +443,14 @@ class npc_bloodmaul_brutebane : public CreatureScript
 public:
     npc_bloodmaul_brutebane() : CreatureScript("npc_bloodmaul_brutebane") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new npc_bloodmaul_brutebaneAI(creature);
+        return new npc_bloodmaul_brutebaneAI (pCreature);
     }
 
     struct npc_bloodmaul_brutebaneAI : public ScriptedAI
     {
-        npc_bloodmaul_brutebaneAI(Creature* creature) : ScriptedAI(creature)
+        npc_bloodmaul_brutebaneAI(Creature *c) : ScriptedAI(c)
         {
            if (Creature* Ogre = me->FindNearestCreature(NPC_OGRE_BRUTE, 50, true))
            {
@@ -474,14 +479,14 @@ class npc_ogre_brute : public CreatureScript
 public:
     npc_ogre_brute() : CreatureScript("npc_ogre_brute") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new npc_ogre_bruteAI(creature);
+        return new npc_ogre_bruteAI(pCreature);
     }
 
     struct npc_ogre_bruteAI : public ScriptedAI
     {
-        npc_ogre_bruteAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_ogre_bruteAI(Creature *c) : ScriptedAI(c) {}
 
         uint64 PlayerGUID;
 
@@ -490,22 +495,19 @@ public:
             PlayerGUID = 0;
         }
 
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit *who)
         {
             if (!who || (!who->isAlive())) return;
 
-            if (me->IsWithinDistInMap(who, 50.0f))
+            if (me->IsWithinDistInMap(who, 50.0f) && (who->GetTypeId() == TYPEID_PLAYER) && who->ToPlayer()->GetQuestStatus(10512) == QUEST_STATUS_INCOMPLETE)
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    if (who->ToPlayer()->GetQuestStatus(QUEST_GETTING_THE_BLADESPIRE_TANKED) == QUEST_STATUS_INCOMPLETE
-                        || who->ToPlayer()->GetQuestStatus(QUEST_BLADESPIRE_KEGGER) == QUEST_STATUS_INCOMPLETE)
-                        PlayerGUID = who->GetGUID();
+                PlayerGUID = who->GetGUID();
             }
         }
 
         void MovementInform(uint32 /*type*/, uint32 id)
         {
-            Player* player = Unit::GetPlayer(*me, PlayerGUID);
+            Player* pPlayer = Unit::GetPlayer(*me, PlayerGUID);
             if (id == 1)
             {
                 GameObject* Keg = me->FindNearestGameObject(GO_KEG, 20);
@@ -515,8 +517,8 @@ public:
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->GetMotionMaster()->MoveTargetedHome();
                 Creature* Credit = me->FindNearestCreature(NPC_QUEST_CREDIT, 50, true);
-                if (player && Credit)
-                    player->KilledMonster(Credit->GetCreatureTemplate(), Credit->GetGUID());
+                if (pPlayer && Credit)
+                    pPlayer->KilledMonster(Credit->GetCreatureInfo(), Credit->GetGUID());
             }
         }
 
@@ -530,29 +532,8 @@ public:
 };
 
 /*######
-## go_thunderspike
+## AddSC
 ######*/
-
-enum TheThunderspike
-{
-    NPC_GOR_GRIMGUT     = 21319,
-    QUEST_THUNDERSPIKE  = 10526,
-};
-
-class go_thunderspike : public GameObjectScript
-{
-    public:
-        go_thunderspike() : GameObjectScript("go_thunderspike") { }
-
-        bool OnGossipHello(Player* player, GameObject* go)
-        {
-            if (player->GetQuestStatus(QUEST_THUNDERSPIKE) == QUEST_STATUS_INCOMPLETE && !go->FindNearestCreature(NPC_GOR_GRIMGUT, 25.0f, true))
-                if (Creature* gorGrimgut = go->SummonCreature(NPC_GOR_GRIMGUT, -2413.4f, 6914.48f, 25.01f, 3.67f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000))
-                    gorGrimgut->AI()->AttackStart(player);
-
-            return true;
-        }
-};
 
 void AddSC_blades_edge_mountains()
 {
@@ -564,5 +545,4 @@ void AddSC_blades_edge_mountains()
     new go_legion_obelisk();
     new npc_bloodmaul_brutebane();
     new npc_ogre_brute();
-    new go_thunderspike();
 }

@@ -1,10 +1,12 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -38,14 +40,14 @@ class instance_halls_of_lightning : public InstanceMapScript
 public:
     instance_halls_of_lightning() : InstanceMapScript("instance_halls_of_lightning", 602) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
     {
-        return new instance_halls_of_lightning_InstanceMapScript(map);
+        return new instance_halls_of_lightning_InstanceMapScript(pMap);
     }
 
     struct instance_halls_of_lightning_InstanceMapScript : public InstanceScript
     {
-        instance_halls_of_lightning_InstanceMapScript(Map* map) : InstanceScript(map) {}
+        instance_halls_of_lightning_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {}
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
@@ -53,6 +55,7 @@ public:
         uint64 m_uiIonarGUID;
         uint64 m_uiLokenGUID;
         uint64 m_uiVolkhanGUID;
+	    uint64 m_uiVolkhanAnvilGUID;
 
         uint64 m_uiBjarngrimDoorGUID;
         uint64 m_uiVolkhanDoorGUID;
@@ -68,6 +71,7 @@ public:
             m_uiVolkhanGUID          = 0;
             m_uiIonarGUID            = 0;
             m_uiLokenGUID            = 0;
+		    m_uiVolkhanAnvilGUID	 = 0;
 
             m_uiBjarngrimDoorGUID    = 0;
             m_uiVolkhanDoorGUID      = 0;
@@ -91,6 +95,9 @@ public:
                     break;
                 case NPC_LOKEN:
                     m_uiLokenGUID = creature->GetGUID();
+                    break;
+                case NPC_VOLKHAN_ANVIL:
+                    m_uiVolkhanAnvilGUID = creature->GetGUID();
                     break;
             }
         }
@@ -139,8 +146,12 @@ public:
             {
                 case TYPE_BJARNGRIM:
                     if (uiData == DONE)
+				{
                         if (GameObject* pDoor = instance->GetGameObject(m_uiBjarngrimDoorGUID))
                             pDoor->SetGoState(GO_STATE_ACTIVE);
+					GameObject* pGo = instance->GetGameObject(m_uiBjarngrimDoorGUID);
+					pGo->SetGoState(GO_STATE_ACTIVE);
+				}
                     m_auiEncounter[0] = uiData;
                     break;
                 case TYPE_VOLKHAN:
@@ -158,8 +169,7 @@ public:
                 case TYPE_LOKEN:
                     if (uiData == DONE)
                     {
-                        if (GameObject* pDoor = instance->GetGameObject(m_uiLokenDoorGUID))
-                            pDoor->SetGoState(GO_STATE_ACTIVE);
+                        DoUseDoorOrButton(m_uiLokenDoorGUID);
 
                         // Appears to be type 5 GO with animation. Need to figure out how this work, code below only placeholder
                         if (GameObject* pGlobe = instance->GetGameObject(m_uiLokenGlobeGUID))
@@ -201,6 +211,8 @@ public:
                     return m_uiIonarGUID;
                 case DATA_LOKEN:
                     return m_uiLokenGUID;
+			case DATA_VOLKHAN_ANVIL:
+				return m_uiVolkhanAnvilGUID;
             }
             return 0;
         }

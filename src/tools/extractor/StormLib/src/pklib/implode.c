@@ -147,7 +147,7 @@ static void SortBuffer(TCmpStruct * pWork, unsigned char * buffer_begin, unsigne
     //  offs 0x001: Number of occurences of PAIR_HASH 1
     //  ...
     //  offs 0x8F7: Number of occurences of PAIR_HASH 0x8F7 (the highest hash value)
-    for (buffer_ptr = buffer_begin; buffer_ptr < buffer_end; buffer_ptr++)
+    for(buffer_ptr = buffer_begin; buffer_ptr < buffer_end; buffer_ptr++)
         pWork->phash_to_index[BYTE_PAIR_HASH(buffer_ptr)]++;
 
     // Step 2: Convert the table to the array of PAIR_HASH amounts.
@@ -158,7 +158,7 @@ static void SortBuffer(TCmpStruct * pWork, unsigned char * buffer_begin, unsigne
     //  offs 0x001: Number of occurences of PAIR_HASH 1 or lower
     //  ...
     //  offs 0x8F7: Number of occurences of PAIR_HASH 0x8F7 or lower
-    for (phash_to_index = pWork->phash_to_index; phash_to_index < &pWork->phash_to_index_end; phash_to_index++)
+    for(phash_to_index = pWork->phash_to_index; phash_to_index < &pWork->phash_to_index_end; phash_to_index++)
     {
         total_sum = total_sum + phash_to_index[0];
         phash_to_index[0] = total_sum;
@@ -166,7 +166,7 @@ static void SortBuffer(TCmpStruct * pWork, unsigned char * buffer_begin, unsigne
 
     // Step 3: Convert the table to the array of indexes.
     // Now, each element contains index to the first occurence of given PAIR_HASH
-    for (buffer_end--; buffer_end >= buffer_begin; buffer_end--)
+    for(buffer_end--; buffer_end >= buffer_begin; buffer_end--)
     {
         byte_pair_hash = BYTE_PAIR_HASH(buffer_end);
         byte_pair_offs = (unsigned short)(buffer_end - pWork->work_buff);
@@ -264,7 +264,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
     phash_offs = pWork->phash_offs + phash_offs_index;
     if (*phash_offs < min_phash_offs)
     {
-        while (*phash_offs < min_phash_offs)
+        while(*phash_offs < min_phash_offs)
         {
             phash_offs_index++;
             phash_offs++;
@@ -287,7 +287,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
     // that it is also a byte match, because PAIR_HASH is not unique.
     // We compare the bytes and count the length of the repetition
     input_data_ptr = input_data;
-    for (;;)
+    for(;;)
     {
         // If the first byte of the repetition and the so-far-last byte
         // of the repetition are equal, we will compare the blocks.
@@ -299,7 +299,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
             equal_byte_count = 2;
 
             // Now count how many more bytes are equal
-            while (equal_byte_count < MAX_REP_LENGTH)
+            while(equal_byte_count < MAX_REP_LENGTH)
             {
                 prev_repetition++;
                 input_data_ptr++;
@@ -388,7 +388,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
 
     // Note: I failed to figure out what does the table "offs09BC" mean.
     // If anyone has an idea, let me know to zezula_at_volny_dot_cz
-    for (offs_in_rep = 1; offs_in_rep < rep_length; )
+    for(offs_in_rep = 1; offs_in_rep < rep_length; )
     {
         if (input_data[offs_in_rep] != input_data[di_val])
         {
@@ -409,7 +409,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
     prev_rep_end = prev_repetition + rep_length;
     rep_length2 = rep_length;
 
-    for (;;)
+    for(;;)
     {
         rep_length2 = pWork->offs09BC[rep_length2];
         if (rep_length2 == 0xFFFF)
@@ -428,7 +428,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
             if (prev_repetition >= repetition_limit)
                 return rep_length;
         }
-        while (prev_repetition + rep_length2 < prev_rep_end);
+        while(prev_repetition + rep_length2 < prev_rep_end);
 
         // Verify if the last but one byte from the repetition matches
         // the last but one byte from the input data.
@@ -455,7 +455,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
                 if (prev_repetition >= repetition_limit)
                     return rep_length;
             }
-            while (prev_repetition[rep_length - 2] != pre_last_byte || prev_repetition[0] != input_data[0]);
+            while(prev_repetition[rep_length - 2] != pre_last_byte || prev_repetition[0] != input_data[0]);
 
             // Reset the length of the repetition to 2 bytes only
             prev_rep_end = prev_repetition + 2;
@@ -463,7 +463,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
         }
 
         // Find out how many more characters are equal to the first repetition.
-        while (*prev_rep_end == input_data[rep_length2])
+        while(*prev_rep_end == input_data[rep_length2])
         {
             if (++rep_length2 >= 0x204)
                 break;
@@ -480,7 +480,7 @@ static unsigned int FindRep(TCmpStruct * pWork, unsigned char * input_data)
 
             // Update the additional elements in the "offs09BC" table
             // to reflect new rep length
-            while (offs_in_rep < rep_length2)
+            while(offs_in_rep < rep_length2)
             {
                 if (input_data[offs_in_rep] != input_data[di_val])
                 {
@@ -513,14 +513,14 @@ static void WriteCmpData(TCmpStruct * pWork)
     memset(&pWork->out_buff[2], 0, sizeof(pWork->out_buff) - 2);
     pWork->out_bits = 0;
 
-    while (input_data_ended == 0)
+    while(input_data_ended == 0)
     {
         unsigned int bytes_to_load = 0x1000;
         int total_loaded = 0;
         int bytes_loaded;
 
         // Load the bytes from the input stream, up to 0x1000 bytes
-        while (bytes_to_load != 0)
+        while(bytes_to_load != 0)
         {
             bytes_loaded = pWork->read_buf((char *)pWork->work_buff + pWork->dsize_bytes + 0x204 + total_loaded,
                                                   &bytes_to_load,
@@ -554,7 +554,7 @@ static void WriteCmpData(TCmpStruct * pWork)
 
         // Search the PAIR_HASHes of the loaded blocks. Also, include
         // previously compressed data, if any.
-        switch (phase)
+        switch(phase)
         {
             case 0:
                 SortBuffer(pWork, input_data, input_data_end + 1);
@@ -574,11 +574,11 @@ static void WriteCmpData(TCmpStruct * pWork)
         }
 
         // Perform the compression of the current block
-        while (input_data < input_data_end)
+        while(input_data < input_data_end)
         {
             // Find if the current byte sequence wasn't there before.
             rep_length = FindRep(pWork, input_data);
-            while (rep_length != 0)
+            while(rep_length != 0)
             {
                 // If we found repetition of 2 bytes, that is 0x100 or fuhrter back,
                 // don't bother. Storing the distance of 0x100 bytes would actually
@@ -704,7 +704,7 @@ unsigned int PKEXPORT implode(
     pWork->dsize_mask  = 0x0F;
 
     // Test dictionary size
-    switch (*dsize)
+    switch(*dsize)
     {
         case CMP_IMPLODE_DICT_SIZE3:    // 0x1000 bytes
             pWork->dsize_bits++;
@@ -724,10 +724,10 @@ unsigned int PKEXPORT implode(
     }
 
     // Test the compression type
-    switch (*type)
+    switch(*type)
     {
         case CMP_BINARY: // We will compress data with binary compression type
-            for (nChCode = 0, nCount = 0; nCount < 0x100; nCount++)
+            for(nChCode = 0, nCount = 0; nCount < 0x100; nCount++)
             {
                 pWork->nChBits[nCount]  = 9;
                 pWork->nChCodes[nCount] = (unsigned short)nChCode;
@@ -736,7 +736,7 @@ unsigned int PKEXPORT implode(
             break;
 
         case CMP_ASCII: // We will compress data with ASCII compression type
-            for (nCount = 0; nCount < 0x100; nCount++)
+            for(nCount = 0; nCount < 0x100; nCount++)
             {
                 pWork->nChBits[nCount]  = (unsigned char )(ChBitsAsc[nCount] + 1);
                 pWork->nChCodes[nCount] = (unsigned short)(ChCodeAsc[nCount] * 2);
@@ -747,11 +747,11 @@ unsigned int PKEXPORT implode(
             return CMP_INVALID_MODE;
     }
 
-    for (i = 0; i < 0x10; i++)
+    for(i = 0; i < 0x10; i++)
     {
         if (1 << ExLenBits[i])
         {
-            for (nCount2 = 0; nCount2 < (1 << ExLenBits[i]); nCount2++)
+            for(nCount2 = 0; nCount2 < (1 << ExLenBits[i]); nCount2++)
             {
                 pWork->nChBits[nCount]  = (unsigned char)(ExLenBits[i] + LenBits[i] + 1);
                 pWork->nChCodes[nCount] = (unsigned short)((nCount2 << (LenBits[i] + 1)) | ((LenCode[i] & 0xFFFF00FF) * 2) | 1);

@@ -1,9 +1,11 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -21,190 +23,178 @@
 #define ENCOUNTERS 5
 
 /* Boss Encounters
-   General Husam
-   High Prophet Barim
-   Lockmaw
-   Augh
-   Siamat
+ General Husam
+ High Prophet Barim
+ Lockmaw
+ Augh
+ Siamat
  */
 
-class instance_lost_city_of_the_tolvir : public InstanceMapScript
-{
+class instance_lost_city_of_the_tolvir: public InstanceMapScript {
 public:
-    instance_lost_city_of_the_tolvir() : InstanceMapScript("instance_lost_city_of_the_tolvir", 755) { }
+	instance_lost_city_of_the_tolvir() :
+			InstanceMapScript("instance_lost_city_of_the_tolvir", 755) {
+	}
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
-    {
-        return new instance_lost_city_of_the_tolvir_InstanceMapScript(map);
-    }
+	InstanceScript* GetInstanceScript(InstanceMap* map) const {
+		return new instance_lost_city_of_the_tolvir_InstanceMapScript(map);
+	}
 
-    struct instance_lost_city_of_the_tolvir_InstanceMapScript: public InstanceScript
-    {
-        instance_lost_city_of_the_tolvir_InstanceMapScript(InstanceMap* map) : InstanceScript(map) {}
+	struct instance_lost_city_of_the_tolvir_InstanceMapScript: public InstanceScript {
+		instance_lost_city_of_the_tolvir_InstanceMapScript(InstanceMap* map) :
+				InstanceScript(map) {
+		}
 
-        uint32 Encounter[ENCOUNTERS];
+		uint32 uiEncounter[ENCOUNTERS];
 
-        uint64 GeneralHusam;
-        uint64 HighProphetBarim;
-        uint64 Lockmaw;
-        uint64 Augh;
-        uint64 Siamat;
-        uint64 TeamInInstance;
+		uint64 uiGeneralHusam;
+		uint64 uiHighProphetBarim;
+		uint64 uiLockmaw;
+		uint64 uiAugh;
+		uint64 uiSiamat;
+		uint64 uiTeamInInstance;
 
-        void Initialize()
-        {
-            GeneralHusam           = 0;
-            HighProphetBarim       = 0;
-            Lockmaw                = 0;
-            Augh                   = 0;
-            Siamat                 = 0;
+		void Initialize() {
+			uiGeneralHusam = 0;
+			uiHighProphetBarim = 0;
+			uiLockmaw = 0;
+			uiAugh = 0;
+			uiSiamat = 0;
 
-            for (uint8 i=0 ; i<ENCOUNTERS; ++i)
-                Encounter[i] = NOT_STARTED;
-        }
+			for (uint8 i = 0; i < ENCOUNTERS; ++i)
+				uiEncounter[i] = NOT_STARTED;
+		}
 
-        bool IsEncounterInProgress() const
-        {
-            for (uint8 i=0; i<ENCOUNTERS; ++i)
-            {
-                if (Encounter[i] == IN_PROGRESS)
-                    return true;
-            }
-            return false;
-        }
+		bool IsEncounterInProgress() const {
+			for (uint8 i = 0; i < ENCOUNTERS; ++i) {
+				if (uiEncounter[i] == IN_PROGRESS)
+					return true;
+			}
+			return false;
+		}
 
-        void OnCreatureCreate(Creature* creature, bool )
-        {
-            switch (creature->GetEntry())
-            {
-                 case BOSS_GENERAL_HUSAM:
-                     GeneralHusam = creature->GetGUID();
-                     break;
-                 case BOSS_HIGH_PROPHET_BARIM:
-                     HighProphetBarim = creature->GetGUID();
-                     break;
-                 case BOSS_LOCKMAW:
-                     Lockmaw = creature->GetGUID();
-                     break;
-                 case BOSS_AUGH:
-                     Augh = creature->GetGUID();
-                     break;
-                 case BOSS_SIAMAT:
-                     Siamat = creature->GetGUID();
-                     break;
-            }
-        }
+		void OnCreatureCreate(Creature* pCreature, bool) {
+			switch (pCreature->GetEntry()) {
+			case BOSS_GENERAL_HUSAM:
+				uiGeneralHusam = pCreature->GetGUID();
+				break;
+			case BOSS_HIGH_PROPHET_BARIM:
+				uiHighProphetBarim = pCreature->GetGUID();
+				break;
+			case BOSS_LOCKMAW:
+				uiLockmaw = pCreature->GetGUID();
+				break;
+			case BOSS_AUGH:
+				uiAugh = pCreature->GetGUID();
+				break;
+			case BOSS_SIAMAT:
+				uiSiamat = pCreature->GetGUID();
+				break;
+			}
+		}
 
-        uint64 getData64(uint32 identifier)
-        {
-            switch (identifier)
-            {
-                case DATA_GENERAL_HUSAM:
-                    return GeneralHusam;
-                case DATA_HIGH_PROPHET_BARIM:
-                    return HighProphetBarim;
-                case DATA_LOCKMAW:
-                    return Lockmaw;
-                case DATA_AUGH:
-                    return Augh;
-                case DATA_SIAMAT:
-                    return Siamat;
-            }
-            return 0;
-        }
+		uint64 getData64(uint32 identifier) {
+			switch (identifier) {
+			case DATA_GENERAL_HUSAM:
+				return uiGeneralHusam;
+			case DATA_HIGH_PROPHET_BARIM:
+				return uiHighProphetBarim;
+			case DATA_LOCKMAW:
+				return uiLockmaw;
+			case DATA_AUGH:
+				return uiAugh;
+			case DATA_SIAMAT:
+				return uiSiamat;
+			}
+			return 0;
+		}
 
-        void SetData(uint32 type, uint32 data)
-        {
-            switch (type)
-            {
-                case DATA_GENERAL_HUSAM_EVENT:
-                    Encounter[0] = data;
-                    break;
-                case DATA_HIGH_PROPHET_BARIM_EVENT:
-                    Encounter[1] = data;
-                    break;
-                case DATA_LOCKMAW_EVENT:
-                    Encounter[2] = data;
-                    break;
-                case DATA_AUGH_EVENT:
-                    Encounter[3] = data;
-                    break;
-                case DATA_SIAMAT_EVENT:
-                    Encounter[4] = data;
-                    break;
-            }
+		void SetData(uint32 type, uint32 data) {
+			switch (type) {
+			case DATA_GENERAL_HUSAM_EVENT:
+				uiEncounter[0] = data;
+				break;
+			case DATA_HIGH_PROPHET_BARIM_EVENT:
+				uiEncounter[1] = data;
+				break;
+			case DATA_LOCKMAW_EVENT:
+				uiEncounter[2] = data;
+				break;
+			case DATA_AUGH_EVENT:
+				uiEncounter[3] = data;
+				break;
+			case DATA_SIAMAT_EVENT:
+				uiEncounter[4] = data;
+				break;
+			}
 
-           if (data == DONE)
-               SaveToDB();
-        }
+			if (data == DONE)
+				SaveToDB();
+		}
 
-        uint32 GetData(uint32 type)
-        {
-            switch (type)
-            {
-                case DATA_GENERAL_HUSAM_EVENT:
-                    return Encounter[0];
-                case DATA_HIGH_PROPHET_BARIM_EVENT:
-                    return Encounter[1];
-                case DATA_LOCKMAW_EVENT:
-                    return Encounter[2];
-                case DATA_AUGH_EVENT:
-                    return Encounter[3];
-                case DATA_SIAMAT_EVENT:
-                    return Encounter[4];
-            }
-            return 0;
-        }
+		uint32 GetData(uint32 type) {
+			switch (type) {
+			case DATA_GENERAL_HUSAM_EVENT:
+				return uiEncounter[0];
+			case DATA_HIGH_PROPHET_BARIM_EVENT:
+				return uiEncounter[1];
+			case DATA_LOCKMAW_EVENT:
+				return uiEncounter[2];
+			case DATA_AUGH_EVENT:
+				return uiEncounter[3];
+			case DATA_SIAMAT_EVENT:
+				return uiEncounter[4];
+			}
+			return 0;
+		}
 
-        std::string GetSaveData()
-        {
-            OUT_SAVE_INST_DATA;
+		std::string GetSaveData() {
+			OUT_SAVE_INST_DATA;
 
-            std::string str_data;
-            std::ostringstream saveStream;
-            saveStream << "L V" << Encounter[0] << " " << Encounter[1]  << " " << Encounter[2]  << " " << Encounter[3] << " " << Encounter[4];
-            str_data = saveStream.str();
+			std::string str_data;
+			std::ostringstream saveStream;
+			saveStream << "L V" << uiEncounter[0] << " " << uiEncounter[1]
+					<< " " << uiEncounter[2] << " " << uiEncounter[3] << " "
+					<< uiEncounter[4];
+			str_data = saveStream.str();
 
-            OUT_SAVE_INST_DATA_COMPLETE;
-            return str_data;
-        }
+			OUT_SAVE_INST_DATA_COMPLETE;
+			return str_data;
+		}
 
-        void Load(const char* in)
-        {
-            if (!in)
-            {
-                OUT_LOAD_INST_DATA_FAIL;
-                return;
-            }
+		void Load(const char* in) {
+			if (!in) {
+				OUT_LOAD_INST_DATA_FAIL;
+				return;
+			}
 
-            OUT_LOAD_INST_DATA(in);
+			OUT_LOAD_INST_DATA(in);
 
-            char dataHead1, dataHead2;
-            uint16 data0, data1, data2, data3, data4;
+			char dataHead1, dataHead2;
+			uint16 data0, data1, data2, data3, data4;
 
-            std::istringstream loadStream(in);
-            loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3 >> data4;
+			std::istringstream loadStream(in);
+			loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2
+					>> data3 >> data4;
 
-            if (dataHead1 == 'L' && dataHead2 == 'V')
-            {
-                Encounter[0] = data0;
-                Encounter[1] = data1;
-                Encounter[2] = data2;
-                Encounter[3] = data3;
-                Encounter[4] = data4;
+			if (dataHead1 == 'L' && dataHead2 == 'V') {
+				uiEncounter[0] = data0;
+				uiEncounter[1] = data1;
+				uiEncounter[2] = data2;
+				uiEncounter[3] = data3;
+				uiEncounter[4] = data4;
 
-                for (uint8 i=0; i<ENCOUNTERS; ++i)
-                    if (Encounter[i] == IN_PROGRESS)
-                        Encounter[i] = NOT_STARTED;
-            }
-            else OUT_LOAD_INST_DATA_FAIL;
+				for (uint8 i = 0; i < ENCOUNTERS; ++i)
+					if (uiEncounter[i] == IN_PROGRESS)
+						uiEncounter[i] = NOT_STARTED;
+			} else
+				OUT_LOAD_INST_DATA_FAIL;
 
-            OUT_LOAD_INST_DATA_COMPLETE;
-        }
-    };
+			OUT_LOAD_INST_DATA_COMPLETE;
+		}
+	};
 };
 
-void AddSC_instance_lost_city_of_the_tolvir()
-{
-    new instance_lost_city_of_the_tolvir();
+void AddSC_instance_lost_city_of_the_tolvir() {
+	new instance_lost_city_of_the_tolvir();
 }

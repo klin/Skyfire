@@ -1,155 +1,228 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
+
+/* ScriptData
+ SDName: Instance_Ruins_of_Ahnqiraj
+ SD%Complete: 0
+ SDComment: Place holder
+ SDCategory: Ruins of Ahn'Qiraj
+ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "ruins_of_ahnqiraj.h"
 
-class instance_ruins_of_ahnqiraj : public InstanceMapScript
-{
-    public:
-        instance_ruins_of_ahnqiraj() : InstanceMapScript("instance_ruins_of_ahnqiraj", 509) {}
+#define MAX_ENCOUNTER 6
 
-        struct instance_ruins_of_ahnqiraj_InstanceMapScript : public InstanceScript
-        {
-            instance_ruins_of_ahnqiraj_InstanceMapScript(Map* map) : InstanceScript(map)
-            {
-                SetBossNumber(MAX_ENCOUNTER);
+/* Ruins of Ahn'Qiraj encounters:
+ 0 - Kurinnaxx
+ 1 - General Rajaxx
+ 2 - Moam
+ 3 - Buru the Gorger
+ 4 - Ayamiss the Hunter
+ 5 - Ossirian the Unscarred */
 
-                _kurinaxxGUID   = 0;
-                _rajaxxGUID     = 0;
-                _moamGUID       = 0;
-                _buruGUID       = 0;
-                _ayamissGUID    = 0;
-                _ossirianGUID   = 0;
-            }
+class instance_ruins_of_ahnqiraj: public InstanceMapScript {
+public:
+	instance_ruins_of_ahnqiraj() :
+			InstanceMapScript("instance_ruins_of_ahnqiraj", 509) {
+	}
 
-            void OnCreatureCreate(Creature* creature)
-            {
-                switch (creature->GetEntry())
-                {
-                    case NPC_KURINAXX:
-                        _kurinaxxGUID = creature->GetGUID();
-                        break;
-                    case NPC_RAJAXX:
-                        _rajaxxGUID = creature->GetGUID();
-                        break;
-                    case NPC_MOAM:
-                        _moamGUID = creature->GetGUID();
-                        break;
-                    case NPC_BURU:
-                        _buruGUID = creature->GetGUID();
-                        break;
-                    case NPC_AYAMISS:
-                        _ayamissGUID = creature->GetGUID();
-                        break;
-                    case NPC_OSSIRIAN:
-                        _ossirianGUID = creature->GetGUID();
-                        break;
-                }
-            }
+	InstanceScript* GetInstanceScript(InstanceMap* pMap) const {
+		return new instance_ruins_of_ahn_qiraj_InstanceMapScript(pMap);
+	}
 
-            bool SetBossState(uint32 bossId, EncounterState state)
-            {
-                if (!InstanceScript::SetBossState(bossId, state))
-                    return false;
+	struct instance_ruins_of_ahn_qiraj_InstanceMapScript: public InstanceScript {
+		instance_ruins_of_ahn_qiraj_InstanceMapScript(Map* pMap) :
+				InstanceScript(pMap) {
+			Initialize();
+		}
 
-                return true;
-            }
+		uint64 uiKurinaxx;
+		uint64 uiRajaxx;
+		uint64 uiMoam;
+		uint64 uiBuru;
+		uint64 uiAyamiss;
+		uint64 uiOssirian;
 
-            uint64 GetData64(uint32 type)
-            {
-                switch (type)
-                {
-                    case BOSS_KURINNAXX:
-                        return _kurinaxxGUID;
-                    case BOSS_RAJAXX:
-                        return _rajaxxGUID;
-                    case BOSS_MOAM:
-                        return _moamGUID;
-                    case BOSS_BURU:
-                        return _buruGUID;
-                    case BOSS_AYAMISS:
-                        return _ayamissGUID;
-                    case BOSS_OSSIRIAN:
-                        return _ossirianGUID;
-                }
+		uint16 m_auiEncounter[MAX_ENCOUNTER];
+		std::string str_data;
 
-                return 0;
-            }
+		void Initialize() {
+			memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-            std::string GetSaveData()
-            {
-                OUT_SAVE_INST_DATA;
+			uiKurinaxx = 0;
+			uiRajaxx = 0;
+			uiMoam = 0;
+			uiBuru = 0;
+			uiAyamiss = 0;
+			uiOssirian = 0;
+		}
 
-                std::ostringstream saveStream;
-                saveStream << "R A" << GetBossSaveData();
+		bool IsEncounterInProgress() const {
+			for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+				if (m_auiEncounter[i] == IN_PROGRESS)
+					return true;
 
-                OUT_SAVE_INST_DATA_COMPLETE;
-                return saveStream.str();
-            }
+			return false;
+		}
 
-            void Load(char const* data)
-            {
-                if (!data)
-                {
-                    OUT_LOAD_INST_DATA_FAIL;
-                    return;
-                }
+		void OnCreatureCreate(Creature* pCreature, bool /*add*/) {
+			switch (pCreature->GetEntry()) {
+			case CREATURE_KURINAXX:
+				uiKurinaxx = pCreature->GetGUID();
+				break;
+			case CREATURE_RAJAXX:
+				uiRajaxx = pCreature->GetGUID();
+				break;
+			case CREATURE_MOAM:
+				uiMoam = pCreature->GetGUID();
+				break;
+			case CREATURE_BURU:
+				uiBuru = pCreature->GetGUID();
+				break;
+			case CREATURE_AYAMISS:
+				uiAyamiss = pCreature->GetGUID();
+				break;
+			case CREATURE_OSSIRIAN:
+				uiOssirian = pCreature->GetGUID();
+				break;
+			}
+		}
 
-                OUT_LOAD_INST_DATA(data);
+		uint32 GetData(uint32 identifier) {
+			switch (identifier) {
+			case DATA_KURINNAXX_EVENT:
+				return m_auiEncounter[0];
+			case DATA_RAJAXX_EVENT:
+				return m_auiEncounter[1];
+			case DATA_MOAM_EVENT:
+				return m_auiEncounter[2];
+			case DATA_BURU_EVENT:
+				return m_auiEncounter[3];
+			case DATA_AYAMISS_EVENT:
+				return m_auiEncounter[4];
+			case DATA_OSSIRIAN_EVENT:
+				return m_auiEncounter[5];
+			}
 
-                char dataHead1, dataHead2;
+			return 0;
+		}
 
-                std::istringstream loadStream(data);
-                loadStream >> dataHead1 >> dataHead2;
+		void SetData(uint32 identifier, uint32 data) {
+			switch (identifier) {
+			case DATA_KURINNAXX_EVENT:
+				m_auiEncounter[0] = data;
+				break;
+			case DATA_RAJAXX_EVENT:
+				m_auiEncounter[1] = data;
+				break;
+			case DATA_MOAM_EVENT:
+				m_auiEncounter[2] = data;
+				break;
+			case DATA_BURU_EVENT:
+				m_auiEncounter[3] = data;
+				break;
+			case DATA_AYAMISS_EVENT:
+				m_auiEncounter[4] = data;
+				break;
+			case DATA_OSSIRIAN_EVENT:
+				m_auiEncounter[5] = data;
+				break;
+			}
 
-                if (dataHead1 == 'R' && dataHead2 == 'A')
-                {
-                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    {
-                        uint32 tmpState;
-                        loadStream >> tmpState;
-                        if (tmpState == IN_PROGRESS || tmpState > TO_BE_DECIDED)
-                            tmpState = NOT_STARTED;
-                        SetBossState(i, EncounterState(tmpState));
-                    }
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
+			if (data == DONE)
+				SaveToDB();
+		}
 
-                OUT_LOAD_INST_DATA_COMPLETE;
-            }
+		uint64 GetData64(uint32 uiIdentifier) {
+			switch (uiIdentifier) {
+			case DATA_KURINNAXX:
+				return uiKurinaxx;
+			case DATA_RAJAXX:
+				return uiRajaxx;
+			case DATA_MOAM:
+				return uiMoam;
+			case DATA_BURU:
+				return uiBuru;
+			case DATA_AYAMISS:
+				return uiAyamiss;
+			case DATA_OSSIRIAN:
+				return uiOssirian;
+			}
 
-        private:
-            uint64 _kurinaxxGUID;
-            uint64 _rajaxxGUID;
-            uint64 _moamGUID;
-            uint64 _buruGUID;
-            uint64 _ayamissGUID;
-            uint64 _ossirianGUID;
-        };
+			return 0;
+		}
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
-        {
-            return new instance_ruins_of_ahnqiraj_InstanceMapScript(map);
-        }
+		std::string GetSaveData() {
+			OUT_SAVE_INST_DATA;
+
+			std::ostringstream saveStream;
+			saveStream << "R A " << m_auiEncounter[0] << " "
+					<< m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+					<< m_auiEncounter[3] << " " << m_auiEncounter[4] << " "
+					<< m_auiEncounter[5];
+
+			str_data = saveStream.str();
+
+			OUT_SAVE_INST_DATA_COMPLETE;
+			return str_data;
+		}
+
+		void Load(const char* in) {
+			if (!in) {
+				OUT_LOAD_INST_DATA_FAIL;
+				return;
+			}
+
+			OUT_LOAD_INST_DATA(in);
+
+			char dataHead1, dataHead2;
+			uint16 data0, data1, data2, data3, data4, data5;
+
+			std::istringstream loadStream(in);
+			loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2
+					>> data3 >> data4 >> data5;
+
+			if (dataHead1 == 'R' && dataHead2 == 'A') {
+				m_auiEncounter[0] = data0;
+				m_auiEncounter[1] = data1;
+				m_auiEncounter[2] = data2;
+				m_auiEncounter[3] = data3;
+				m_auiEncounter[4] = data4;
+				m_auiEncounter[5] = data5;
+
+				for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+					if (m_auiEncounter[i] == IN_PROGRESS)
+						m_auiEncounter[i] = NOT_STARTED;
+			} else
+				OUT_LOAD_INST_DATA_FAIL;
+		}
+	};
 };
 
-void AddSC_instance_ruins_of_ahnqiraj()
-{
-    new instance_ruins_of_ahnqiraj();
+void AddSC_instance_ruins_of_ahnqiraj() {
+	new instance_ruins_of_ahnqiraj();
 }

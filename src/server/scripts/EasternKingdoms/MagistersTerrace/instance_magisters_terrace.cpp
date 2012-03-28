@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -39,7 +42,7 @@ EndScriptData */
 class instance_magisters_terrace : public InstanceMapScript
 {
 public:
-    instance_magisters_terrace() : InstanceMapScript("instance_magisters_terrace", 585) {}
+    instance_magisters_terrace() : InstanceMapScript("instance_magisters_terrace", 585) { }
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const
     {
@@ -50,8 +53,8 @@ public:
     {
         instance_magisters_terrace_InstanceMapScript(Map* map) : InstanceScript(map) {}
 
-        uint32 Encounter[MAX_ENCOUNTER];
-        uint32 delrissaDeathCount;
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        uint32 DelrissaDeathCount;
 
         std::list<uint64> FelCrystals;
         std::list<uint64>::const_iterator CrystalItr;
@@ -69,21 +72,21 @@ public:
 
         void Initialize()
         {
-            memset(&Encounter, 0, sizeof(Encounter));
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
             FelCrystals.clear();
 
-            delrissaDeathCount       = 0;
+            DelrissaDeathCount = 0;
 
-            SelinGUID                = 0;
-            DelrissaGUID             = 0;
-            VexallusDoorGUID         = 0;
-            SelinDoorGUID            = 0;
-            SelinEncounterDoorGUID   = 0;
-            DelrissaDoorGUID         = 0;
-            KaelDoorGUID             = 0;
-            KaelStatue[0]            = 0;
-            KaelStatue[1]            = 0;
+            SelinGUID = 0;
+            DelrissaGUID = 0;
+            VexallusDoorGUID = 0;
+            SelinDoorGUID = 0;
+            SelinEncounterDoorGUID = 0;
+            DelrissaDoorGUID = 0;
+            KaelDoorGUID = 0;
+            KaelStatue[0] = 0;
+            KaelStatue[1] = 0;
 
             InitializedItr = false;
         }
@@ -91,7 +94,7 @@ public:
         bool IsEncounterInProgress() const
         {
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                if (Encounter[i] == IN_PROGRESS)
+                if (m_auiEncounter[i] == IN_PROGRESS)
                     return true;
             return false;
         }
@@ -100,11 +103,11 @@ public:
         {
             switch (identifier)
             {
-                case DATA_SELIN_EVENT:          return Encounter[0];
-                case DATA_VEXALLUS_EVENT:       return Encounter[1];
-                case DATA_DELRISSA_EVENT:       return Encounter[2];
-                case DATA_KAELTHAS_EVENT:       return Encounter[3];
-                case DATA_DELRISSA_DEATH_COUNT: return delrissaDeathCount;
+                case DATA_SELIN_EVENT:          return m_auiEncounter[0];
+                case DATA_VEXALLUS_EVENT:       return m_auiEncounter[1];
+                case DATA_DELRISSA_EVENT:       return m_auiEncounter[2];
+                case DATA_KAELTHAS_EVENT:       return m_auiEncounter[3];
+                case DATA_DELRISSA_DEATH_COUNT: return DelrissaDeathCount;
                 case DATA_FEL_CRYSTAL_SIZE:     return FelCrystals.size();
             }
             return 0;
@@ -114,29 +117,26 @@ public:
         {
             switch (identifier)
             {
-                case DATA_SELIN_EVENT:
-                    Encounter[0] = data;
-                    break;
+                case DATA_SELIN_EVENT:       m_auiEncounter[0] = data;  break;
                 case DATA_VEXALLUS_EVENT:
                     if (data == DONE)
                         DoUseDoorOrButton(VexallusDoorGUID);
-                    Encounter[1] = data;
+                    m_auiEncounter[1] = data;
                     break;
                 case DATA_DELRISSA_EVENT:
                     if (data == DONE)
                         DoUseDoorOrButton(DelrissaDoorGUID);
                     if (data == IN_PROGRESS)
-                        delrissaDeathCount = 0;
-                    Encounter[2] = data;
+                        DelrissaDeathCount = 0;
+                    m_auiEncounter[2] = data;
                     break;
-                case DATA_KAELTHAS_EVENT:
-                    Encounter[3] = data;
-                    break;
+                case DATA_KAELTHAS_EVENT:    m_auiEncounter[3] = data;  break;
+
                 case DATA_DELRISSA_DEATH_COUNT:
                     if (data == SPECIAL)
-                        ++delrissaDeathCount;
+                        ++DelrissaDeathCount;
                     else
-                        delrissaDeathCount = 0;
+                        DelrissaDeathCount = 0;
                     break;
             }
         }
@@ -155,20 +155,15 @@ public:
         {
             switch (go->GetEntry())
             {
-                case 187896:  VexallusDoorGUID = go->GetGUID();
-                break;
-                case 187979:  SelinDoorGUID = go->GetGUID();             // SunwellRaid Gate 02
-                break;
-                case 188065:  SelinEncounterDoorGUID = go->GetGUID();    // Assembly Chamber Door
-                break;
-                case 187770:  DelrissaDoorGUID = go->GetGUID();
-                break;
-                case 188064:  KaelDoorGUID = go->GetGUID();
-                break;
-                case 188165:  KaelStatue[0] = go->GetGUID();
-                break;
-                case 188166:  KaelStatue[1] = go->GetGUID();
-                break;
+                case 187896:  VexallusDoorGUID = go->GetGUID();       break;
+                //SunwellRaid Gate 02
+                case 187979:  SelinDoorGUID = go->GetGUID();          break;
+                //Assembly Chamber Door
+                case 188065:  SelinEncounterDoorGUID = go->GetGUID(); break;
+                case 187770:  DelrissaDoorGUID = go->GetGUID();       break;
+                case 188064:  KaelDoorGUID = go->GetGUID();           break;
+                case 188165:  KaelStatue[0] = go->GetGUID();          break;
+                case 188166:  KaelStatue[1] = go->GetGUID();          break;
             }
         }
 

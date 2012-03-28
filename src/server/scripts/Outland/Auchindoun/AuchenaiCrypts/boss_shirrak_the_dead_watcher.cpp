@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -45,14 +53,14 @@ class boss_shirrak_the_dead_watcher : public CreatureScript
 public:
     boss_shirrak_the_dead_watcher() : CreatureScript("boss_shirrak_the_dead_watcher") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_shirrak_the_dead_watcherAI (creature);
+        return new boss_shirrak_the_dead_watcherAI (pCreature);
     }
 
     struct boss_shirrak_the_dead_watcherAI : public ScriptedAI
     {
-        boss_shirrak_the_dead_watcherAI(Creature* c) : ScriptedAI(c)
+        boss_shirrak_the_dead_watcherAI(Creature *c) : ScriptedAI(c)
         {
         }
 
@@ -72,19 +80,19 @@ public:
             FocusedTargetGUID = 0;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         { }
 
-        void JustSummoned(Creature* summoned)
+        void JustSummoned(Creature *summoned)
         {
             if (summoned && summoned->GetEntry() == ENTRY_FOCUS_FIRE)
             {
                 summoned->CastSpell(summoned, SPELL_FOCUS_FIRE_VISUAL, false);
                 summoned->setFaction(me->getFaction());
                 summoned->SetLevel(me->getLevel());
-                summoned->AddUnitState(UNIT_STATE_ROOT);
+                summoned->AddUnitState(UNIT_STAT_ROOT);
 
-                if (Unit* pFocusedTarget = Unit::GetUnit(*me, FocusedTargetGUID))
+                if (Unit *pFocusedTarget = Unit::GetUnit(*me, FocusedTargetGUID))
                     summoned->AI()->AttackStart(pFocusedTarget);
             }
         }
@@ -95,8 +103,8 @@ public:
             if (Inhibitmagic_Timer <= diff)
             {
                 float dist;
-                Map* map = me->GetMap();
-                Map::PlayerList const &PlayerList = map->GetPlayers();
+                Map* pMap = me->GetMap();
+                Map::PlayerList const &PlayerList = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     if (Player* i_pl = i->getSource())
                         if (i_pl->isAlive() && (dist = i_pl->IsWithinDist(me, 45)))
@@ -136,18 +144,20 @@ public:
             if (FocusFire_Timer <= diff)
             {
                 // Summon Focus Fire & Emote
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
-                if (target && target->GetTypeId() == TYPEID_PLAYER && target->isAlive())
+                Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1);
+                if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive())
                 {
-                    FocusedTargetGUID = target->GetGUID();
-                    me->SummonCreature(ENTRY_FOCUS_FIRE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 5500);
+                    FocusedTargetGUID = pTarget->GetGUID();
+                    me->SummonCreature(ENTRY_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 5500);
 
                     // TODO: Find better way to handle emote
                     // Emote
-                    std::string emote(EMOTE_FOCUSES_ON);
-                    emote.append(target->GetName());
-                    emote.push_back('!');
-                    me->MonsterTextEmote(emote.c_str(), 0, true);
+                    std::string *emote = new std::string(EMOTE_FOCUSES_ON);
+                    emote->append(pTarget->GetName());
+                    emote->append("!");
+                    const char* text = emote->c_str();
+                    me->MonsterTextEmote(text, 0, true);
+                    delete emote;
                 }
                 FocusFire_Timer = 15000+(rand()%5000);
             } else FocusFire_Timer -= diff;
@@ -162,14 +172,14 @@ class mob_focus_fire : public CreatureScript
 public:
     mob_focus_fire() : CreatureScript("mob_focus_fire") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new mob_focus_fireAI (creature);
+        return new mob_focus_fireAI (pCreature);
     }
 
     struct mob_focus_fireAI : public ScriptedAI
     {
-        mob_focus_fireAI(Creature* c) : ScriptedAI(c)
+        mob_focus_fireAI(Creature *c) : ScriptedAI(c)
         {
         }
 
@@ -182,7 +192,7 @@ public:
             fiery1 = fiery2 = true;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         { }
 
         void UpdateAI(const uint32 diff)

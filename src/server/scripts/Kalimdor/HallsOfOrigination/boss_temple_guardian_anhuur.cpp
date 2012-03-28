@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2011-2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -17,10 +20,12 @@
  */
 
  /*
- SFName: boss_templeguardian_anhuur
- SF%Complete: 80%
- SFComment: Add object handling.
- SFCategory: Halls Of Origination
+ Made By: Jenova
+ Project: Atlantiss Core
+ SDName: boss_templeguardian_anhuur
+ SD%Complete: 80%
+ SDComment: Add object handling.
+ SDCategory: Halls Of Origination
 
  Known Bugs:
 
@@ -101,12 +106,12 @@ class boss_temple_guardian_anhuur : public CreatureScript
         {
             boss_temple_guardian_anhuurAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = creature->GetInstanceScript();
+                pInstance = creature->GetInstanceScript();
             }
 
             std::list<uint64> SummonList;
 
-            InstanceScript *instance;
+            InstanceScript *pInstance;
 
             uint8 Phase;
             uint8 PhaseCount;
@@ -117,8 +122,8 @@ class boss_temple_guardian_anhuur : public CreatureScript
 
             void Reset()
             {
-                if (instance)
-                    instance->SetData(DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT, NOT_STARTED);
+                if (pInstance)
+                    pInstance->SetData(DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT, NOT_STARTED);
 
                 Phase = PHASE_NORMAL;
                 PhaseCount = 0;
@@ -137,24 +142,24 @@ class boss_temple_guardian_anhuur : public CreatureScript
 
                 for (std::list<uint64>::const_iterator itr = SummonList.begin(); itr != SummonList.end(); ++itr)
                 {
-                    if (Creature* temp = Unit::GetCreature(*me, *itr))
-                        if (temp)
-                            temp->DisappearAndDie();
+                    if (Creature* pTemp = Unit::GetCreature(*me, *itr))
+                        if (pTemp)
+                            pTemp->DisappearAndDie();
                 }
                 SummonList.clear();
             }
 
-            void JustSummoned(Creature* summon)
+            void JustSummoned(Creature* pSummon)
             {
-                SummonList.push_back(summon->GetGUID());
+                SummonList.push_back(pSummon->GetGUID());
             }
 
             void ChangePhase()
             {
                 DoTeleportTo(-640.527f, 334.855f, 78.345f, 1.54f);
                 me->SetOrientation(1.54f);
-                for (uint32 x = 0; x<21; ++x)
-                   me->SummonCreature(NPC_PIT_SNAKE, SpawnPosition[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                for(uint32 x = 0; x<21; ++x)
+                   me->SummonCreature(NPC_PIT_SNAKE,SpawnPosition[x],TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
 
                 DoCast(me, SPELL_SHIELD_OF_LIGHT);
                 DoCast(me, SPELL_REVERBERATING_HYMN);
@@ -164,10 +169,10 @@ class boss_temple_guardian_anhuur : public CreatureScript
                 Phase = PHASE_SHIELD;
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
 
-                if (Creature *light1 = me->SummonCreature(40183, -603.465f, 334.38f, 65.4f, 3.12f, TEMPSUMMON_CORPSE_DESPAWN, 1000))
+                if (Creature *light1 = me->SummonCreature(40183, -603.465f, 334.38f, 65.4f, 3.12f,TEMPSUMMON_CORPSE_DESPAWN, 1000))
                     light1->CastSpell(me, SPELL_BEAM_LEFT, false);
 
-                if (Creature *light2 = me->SummonCreature(40183, -678.132f, 334.212f, 64.9f, 0.24f, TEMPSUMMON_CORPSE_DESPAWN, 1000))
+                if (Creature *light2 = me->SummonCreature(40183, -678.132f, 334.212f, 64.9f, 0.24f,TEMPSUMMON_CORPSE_DESPAWN, 1000))
                     light2->CastSpell(me, SPELL_BEAM_RIGHT, false);
             }
 
@@ -180,8 +185,8 @@ class boss_temple_guardian_anhuur : public CreatureScript
             {
                 RemoveSummons();
                 //Talk(SAY_DEATH);
-                if (instance)
-                    instance->SetData(DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT, DONE);
+                if (pInstance)
+                    pInstance->SetData(DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT, DONE);
 
                 GameObject* Bridge = me->FindNearestGameObject(GO_ANHUUR_BRIDGE, 200);
                 if (Bridge)
@@ -190,7 +195,7 @@ class boss_temple_guardian_anhuur : public CreatureScript
 
             void SummonedCreatureDespawn(Creature* summon)
             {
-                switch (summon->GetEntry())
+                switch(summon->GetEntry())
                 {
                     case 40183:
                         FlameCount--;
@@ -202,8 +207,8 @@ class boss_temple_guardian_anhuur : public CreatureScript
             {
                 //Talk(SAY_AGGRO);
 
-                if (instance)
-                    instance->SetData(DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT, IN_PROGRESS);
+                if (pInstance)
+                    pInstance->SetData(DATA_TEMPLE_GUARDIAN_ANHUUR_EVENT, IN_PROGRESS);
 
                 DoZoneInCombat();
             }
@@ -213,7 +218,8 @@ class boss_temple_guardian_anhuur : public CreatureScript
                 if (!UpdateVictim() && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
                     return;
 
-                if ((me->HealthBelowPct(34) && Phase == PHASE_NORMAL && PhaseCount == 1) || (me->HealthBelowPct(67) && Phase == PHASE_NORMAL && PhaseCount == 0))
+                if ((me->HealthBelowPct(34) && Phase == PHASE_NORMAL && PhaseCount == 1) ||
+                    (me->HealthBelowPct(67) && Phase == PHASE_NORMAL && PhaseCount == 0))
                 {
                     ChangePhase();
                 }
@@ -224,7 +230,7 @@ class boss_temple_guardian_anhuur : public CreatureScript
                     FlameCount = 2;
                 }
 
-                if (!me->HasUnitState(UNIT_STATE_CASTING) && Phase == PHASE_SHIELD)
+                if (!me->HasUnitState(UNIT_STAT_CASTING) && Phase == PHASE_SHIELD)
                 {
                     Phase = PHASE_NORMAL;
                     RemoveSummons();
@@ -234,17 +240,15 @@ class boss_temple_guardian_anhuur : public CreatureScript
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         DoCast(target, SPELL_DIVINE_RECKONING);
-                    DivineReckoningTimer = urand(15000, 18000);
-                }
-                else DivineReckoningTimer -= diff;
+                    DivineReckoningTimer = urand(15000,18000);
+                } else DivineReckoningTimer -= diff;
 
                 if (SearingFlameTimer <= diff && Phase == PHASE_NORMAL)
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         target->CastSpell(target, SPELL_SEARING_FLAME_SUMM, true);
                     SearingFlameTimer = 8000;
-                }
-                else SearingFlameTimer -= diff;
+                } else SearingFlameTimer -= diff;
 
                 DoMeleeAttackIfReady();
             }
@@ -256,11 +260,11 @@ class go_beacon_of_light : public GameObjectScript
 public:
     go_beacon_of_light() : GameObjectScript("go_beacon_of_light") { }
 
-    bool OnGossipHello(Player* player, GameObject* go)
+    bool OnGossipHello(Player* pPlayer, GameObject* pGO)
     {
-        player->CastSpell(go, 68398, false);
+        pPlayer->CastSpell(pGO, 68398, false);
 
-        if (Creature* beam = go->FindNearestCreature(40183, 14.0f, true))
+        if (Creature* beam = pGO->FindNearestCreature(40183, 14.0f, true))
             beam->Kill(beam);
 
         return true;

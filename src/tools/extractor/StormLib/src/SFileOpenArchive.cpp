@@ -169,7 +169,7 @@ bool WINAPI SFileOpenArchive(
         ULONGLONG SearchPos = 0;
         DWORD dwHeaderID;
 
-        while (SearchPos < FileSize)
+        while(SearchPos < FileSize)
         {
             DWORD dwBytesAvailable = MPQ_HEADER_SIZE_V4;
 
@@ -298,7 +298,7 @@ bool WINAPI SFileOpenArchive(
         ULONGLONG RawFilePos;
 
         // Parse all file entries
-        for (pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
+        for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
         {
             // If that file entry is valid, check the file position
             if (pFileEntry->dwFlags & MPQ_FILE_EXISTS)

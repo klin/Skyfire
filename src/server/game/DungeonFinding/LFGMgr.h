@@ -1,28 +1,33 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _LFGMGR_H
 #define _LFGMGR_H
 
 #include "Common.h"
-#include "LFG.h"
 #include <ace/Singleton.h>
+#include "LFG.h"
 
 class LfgGroupData;
 class LfgPlayerData;
@@ -109,7 +114,7 @@ enum LfgRoleCheckState
     LFG_ROLECHECK_NO_ROLE                        = 6       // Someone selected no role
 };
 
-/// Answer state (Also used to check compatibilities)
+/// Answer state (Also used to check compatibilites)
 enum LfgAnswer
 {
     LFG_ANSWER_PENDING                           = -1,
@@ -255,10 +260,9 @@ struct LfgPlayerBoot
 class LFGMgr
 {
     friend class ACE_Singleton<LFGMgr, ACE_Null_Mutex>;
-    private:
+    public:
         LFGMgr();
         ~LFGMgr();
-    public:
         void Update(uint32 diff);
 
         // Reward
@@ -267,55 +271,52 @@ class LFGMgr
         LfgReward const* GetRandomDungeonReward(uint32 dungeon, uint8 level);
 
         // Queue
-        void Join(Player* player, uint8 roles, const LfgDungeonSet& dungeons, const std::string& comment);
-        void Leave(Player* player, Group* group = NULL);
+        void Join(Player* plr, uint8 roles, const LfgDungeonSet& dungeons, const std::string& comment);
+        void Leave(Player* plr, Group* grp = NULL);
 
         // Role Check
         void UpdateRoleCheck(uint64& gguid, uint64 guid = 0, uint8 roles = ROLE_NONE);
 
         // Proposals
-        void UpdateProposal(uint32 proposalId, uint64 guid, bool accept);
+        void UpdateProposal(uint32 proposalId, const uint64& guid, bool accept);
 
         // Teleportation
-        void TeleportPlayer(Player* player, bool out, bool fromOpcode = false);
+        void TeleportPlayer(Player* plr, bool out, bool fromOpcode = false);
 
         // Vote kick
-        void InitBoot(Group* group, uint64 kguid, uint64 vguid, std::string reason);
-        void UpdateBoot(Player* player, bool accept);
-        void OfferContinue(Group* group);
+        void InitBoot(Group* grp, const uint64& kguid, const uint64& vguid, std::string reason);
+        void UpdateBoot(Player* plr, bool accept);
+        void OfferContinue(Group* grp);
 
-        void InitializeLockedDungeons(Player* player);
+        void InitializeLockedDungeons(Player* plr);
 
-        void _LoadFromDB(Field* fields, uint64 guid);
-        void _SaveToDB(uint64 guid, uint32 db_guid);
-
-        void SetComment(uint64 guid, const std::string& comment);
-        const LfgLockMap& GetLockedDungeons(uint64 guid);
-        LfgState GetState(uint64 guid);
-        const LfgDungeonSet& GetSelectedDungeons(uint64 guid);
-        uint32 GetDungeon(uint64 guid, bool asId = true);
-        void SetState(uint64 guid, LfgState state);
-        void ClearState(uint64 guid);
-        void RemovePlayerData(uint64 guid);
-        void RemoveGroupData(uint64 guid);
-        uint8 GetKicksLeft(uint64 gguid);
-        uint8 GetVotesNeeded(uint64 gguid);
-        bool IsTeleported(uint64 pguid);
-        void SetRoles(uint64 guid, uint8 roles);
-        void SetSelectedDungeons(uint64 guid, const LfgDungeonSet& dungeons);
+        void SetComment(const uint64& guid, const std::string& comment);
+        const LfgLockMap& GetLockedDungeons(const uint64& guid);
+        LfgState GetState(const uint64& guid);
+        const LfgDungeonSet& GetSelectedDungeons(const uint64& guid);
+        uint32 GetDungeon(const uint64& guid, bool asId = true);
+        void ClearState(const uint64& guid);
+        void RemovePlayerData(const uint64& guid);
+        void RemoveGroupData(const uint64& guid);
+        uint8 GetKicksLeft(const uint64& gguid);
+        uint8 GetVotesNeeded(const uint64& gguid);
+        void SetRoles(const uint64& guid, uint8 roles);
 
     private:
 
-        uint8 GetRoles(uint64 guid);
-        const std::string& GetComment(uint64 gguid);
-        void RestoreState(uint64 guid);
-        void SetDungeon(uint64 guid, uint32 dungeon);
-        void SetLockedDungeons(uint64 guid, const LfgLockMap& lock);
-        void DecreaseKicksLeft(uint64 guid);
+        uint8 GetRoles(const uint64& guid);
+        const std::string& GetComment(const uint64& gguid);
+        void RestoreState(const uint64& guid);
+        void SetState(const uint64& guid, LfgState state);
+        void SetDungeon(const uint64& guid, uint32 dungeon);
+        void SetSelectedDungeons(const uint64& guid, const LfgDungeonSet& dungeons);
+        void SetLockedDungeons(const uint64& guid, const LfgLockMap& lock);
+        void DecreaseKicksLeft(const uint64& guid);
+        void NoExiste(uint8 lala);
 
         // Queue
-        void AddToQueue(uint64 guid, uint8 queueId);
-        bool RemoveFromQueue(uint64 guid);
+        void AddToQueue(const uint64& guid, uint8 queueId);
+        bool RemoveFromQueue(const uint64& guid);
 
         // Proposals
         void RemoveProposal(LfgProposalMap::iterator itProposal, LfgUpdateType type);
@@ -354,12 +355,11 @@ class LFGMgr
         LfgGuidListMap m_currentQueue;                     ///< Ordered list. Used to find groups
         LfgGuidListMap m_newToQueue;                       ///< New groups to add to queue
         LfgCompatibleMap m_CompatibleMap;                  ///< Compatible dungeons
-        LfgGuidList m_teleport;                            ///< Players being teleported
         // Rolecheck - Proposal - Vote Kicks
         LfgRoleCheckMap m_RoleChecks;                      ///< Current Role checks
         LfgProposalMap m_Proposals;                        ///< Current Proposals
         LfgPlayerBootMap m_Boots;                          ///< Current player kicks
-        LfgPlayerDataMap _Players;                        ///< Player data
+        LfgPlayerDataMap m_Players;                        ///< Player data
         LfgGroupDataMap m_Groups;                          ///< Group data
 };
 

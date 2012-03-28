@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,36 +23,40 @@
 /* ScriptData
 SDName: Boss_Ironaya
 SD%Complete: 100
-SDComment: TODO: Move defines2enums, Add texts/says to db and make enum
+SDComment:
 SDCategory: Uldaman
 EndScriptData */
 
 #include "ScriptPCH.h"
 
-#define SAY_AGGRO                    -1070000
+#define SAY_AGGRO                   -1070000
 
-#define SPELL_ARCINGSMASH            8374
-#define SPELL_KNOCKAWAY              10101
-#define SPELL_WSTOMP                 11876
+#define SPELL_ARCINGSMASH           8374
+#define SPELL_KNOCKAWAY             10101
+#define SPELL_WSTOMP                11876
 
 class boss_ironaya : public CreatureScript
 {
     public:
-        boss_ironaya() : CreatureScript("boss_ironaya") {}
+
+        boss_ironaya()
+            : CreatureScript("boss_ironaya")
+        {
+        }
 
         struct boss_ironayaAI : public ScriptedAI
         {
             boss_ironayaAI(Creature* creature) : ScriptedAI(creature) {}
 
-            uint32 ArcingTimer;
+            uint32 uiArcingTimer;
             bool bHasCastedWstomp;
             bool bHasCastedKnockaway;
 
             void Reset()
             {
-                ArcingTimer          = 3000;
-                bHasCastedKnockaway  = false;
-                bHasCastedWstomp     = false;
+                uiArcingTimer = 3000;
+                bHasCastedKnockaway = false;
+                bHasCastedWstomp = false;
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -57,7 +64,7 @@ class boss_ironaya : public CreatureScript
                 DoScriptText(SAY_AGGRO, me);
             }
 
-            void UpdateAI(const uint32 Diff)
+            void UpdateAI(const uint32 uiDiff)
             {
                 //Return since we have no target
                 if (!UpdateVictim())
@@ -81,12 +88,12 @@ class boss_ironaya : public CreatureScript
                     bHasCastedKnockaway = true;
                 }
 
-                //ArcingTimer
-                if (ArcingTimer <= Diff)
+                //uiArcingTimer
+                if (uiArcingTimer <= uiDiff)
                 {
                     DoCast(me, SPELL_ARCINGSMASH);
-                    ArcingTimer = 13000;
-                } else ArcingTimer -= Diff;
+                    uiArcingTimer = 13000;
+                } else uiArcingTimer -= uiDiff;
 
                 if (!bHasCastedWstomp && HealthBelowPct(25))
                 {

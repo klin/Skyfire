@@ -26,7 +26,7 @@
    @param  saltlen         The length of the salt used (octets)
    @param  hash_idx        The index of the hash desired
    @param  modulus_bitlen  The bit length of the RSA modulus
-   @param  res             [out] The result of the comparison, 1 == valid, 0 == invalid
+   @param  res             [out] The result of the comparison, 1==valid, 0==invalid
    @return CRYPT_OK if successful (even if the comparison failed)
 */
 int pkcs_1_pss_decode(const unsigned char *msghash, unsigned long msghashlen,
@@ -172,6 +172,6 @@ LBL_ERR:
 
 #endif /* LTC_PKCS_1 */
 
-/* $Source: /cvs/libtom/libtomcrypt/src/pk/pkcs1/pkcs_1_pss_decode.c, v $ */
+/* $Source: /cvs/libtom/libtomcrypt/src/pk/pkcs1/pkcs_1_pss_decode.c,v $ */
 /* $Revision: 1.11 $ */
 /* $Date: 2007/05/12 14:32:35 $ */

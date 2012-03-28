@@ -1,9 +1,11 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2010 - 2012 Project SkyFire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -169,7 +171,7 @@ public:
             Unit* target = NULL;
             target = me->SelectNearestTarget(5.0f);
             if (target && target->GetTypeId() == TYPEID_PLAYER)
-                if (target->ToPlayer()->GetQuestStatus(28414) == QUEST_STATUS_INCOMPLETE)
+                if(target->ToPlayer()->GetQuestStatus(28414) == QUEST_STATUS_INCOMPLETE)
                     target->ToPlayer()->KilledMonsterCredit(37203, 0);
         }
     };

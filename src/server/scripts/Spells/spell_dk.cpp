@@ -1,10 +1,12 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -37,7 +39,6 @@ enum DeathKnightSpells
     DK_SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED  = 63611,
     DK_SPELL_UNHOLY_PRESENCE                    = 48265,
     DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
-    DK_SPELL_NECROTIC_STRIKE                    = 73975,
 };
 
 class spell_dk_necrotic_strike : public SpellScriptLoader
@@ -49,32 +50,37 @@ public:
     {
         PrepareSpellScript(spell_dk_necrotic_strike_SpellScript);
 
+        enum Spells
+        {
+            DK_SPELL_NECROTIC_STRIKE = 73975,
+        };
+
         bool Validate(SpellEntry const * /*spellEntry*/)
         {
             return sSpellStore.LookupEntry(DK_SPELL_NECROTIC_STRIKE);
         }
 
-        void HandleBeforeHit()
-        {
-            if (Unit* target = GetHitUnit())
-            {
-                if (!target->HasAura(73975))
-                    target->SetHealAbsorb(0.0f);
-            }
-        }
-
         void HandleAfterHit()
         {
+            Unit* caster = GetCaster();
+
             if (Unit* target = GetHitUnit())
             {
-                float absorb = GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f + target->GetHealAbsorb();
-                target->SetHealAbsorb(absorb);
+                if (!target)//
+                    return;
+                    int32 nsbp = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f;//initial scale
+                    int32 getheal = target->GetAbsorbHeal();//Get current absorb value if any
+                    int32 heal = nsbp + getheal;//define &| combine values
+
+                if (Aura* NS = target->GetAura(73975))
+                {
+                    target->SetAbsorbHeal(heal);//set absorb value
+                }
             }
         }
 
         void Register()
         {
-            BeforeHit += SpellHitFn(spell_dk_necrotic_strike_SpellScript::HandleBeforeHit);
             AfterHit += SpellHitFn(spell_dk_necrotic_strike_SpellScript::HandleAfterHit);
         }
     };
@@ -99,7 +105,7 @@ class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
 
             bool Load()
             {
-                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+                absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
                 return true;
             }
 
@@ -140,20 +146,20 @@ class spell_dk_anti_magic_shell_self : public SpellScriptLoader
             uint32 absorbPct, hpPct;
             bool Load()
             {
-                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+                absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
                 if (GetCaster()->HasSpell(49224))
                     absorbPct += 8;
                 if (GetCaster()->HasSpell(49610))
                     absorbPct += 16;
                 if (GetCaster()->HasSpell(49611))
                     absorbPct += 25;
-                hpPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+                hpPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_1, GetCaster());
                 return true;
             }
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellEntry const* /*spellEntry*/)
             {
-                return sSpellMgr->GetSpellInfo(DK_SPELL_RUNIC_POWER_ENERGIZE);
+                return sSpellStore.LookupEntry(DK_SPELL_RUNIC_POWER_ENERGIZE);
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
@@ -204,24 +210,24 @@ class spell_dk_anti_magic_zone : public SpellScriptLoader
 
             bool Load()
             {
-                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+                absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
                 return true;
             }
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellEntry const* /*spellEntry*/)
             {
-                return sSpellMgr->GetSpellInfo(DK_SPELL_ANTI_MAGIC_SHELL_TALENT);
+                return sSpellStore.LookupEntry(DK_SPELL_ANTI_MAGIC_SHELL_TALENT);
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
-                SpellInfo const* talentSpell = sSpellMgr->GetSpellInfo(DK_SPELL_ANTI_MAGIC_SHELL_TALENT);
-                amount = talentSpell->Effects[EFFECT_0].CalcValue(GetCaster());
-                if (Unit* caster = GetCaster())
-                {
-                    if (Player* player = caster->ToPlayer())
-                        amount += int32(2 * player->GetTotalAttackPowerValue(BASE_ATTACK));
-                }
+                SpellEntry const* talentSpell = sSpellStore.LookupEntry(DK_SPELL_ANTI_MAGIC_SHELL_TALENT);
+                amount = SpellMgr::CalculateSpellEffectAmount(talentSpell, EFFECT_0, GetCaster());
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+                if (Player* player = caster->ToPlayer())
+                     amount += int32(2 * player->GetTotalAttackPowerValue(BASE_ATTACK));
             }
 
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
@@ -299,7 +305,7 @@ class spell_dk_death_pact : public SpellScriptLoader
                 {
                     if ((*itr)->GetTypeId() == TYPEID_UNIT
                         && (*itr)->GetOwnerGUID() == GetCaster()->GetGUID()
-                        && (*itr)->ToCreature()->GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD)
+                        && (*itr)->ToCreature()->GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD)
                     {
                         unit_to_add = (*itr);
                         break;
@@ -320,7 +326,7 @@ class spell_dk_death_pact : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_dk_death_pact_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ALLY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_dk_death_pact_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ALLY_DST);
             }
         };
 
@@ -340,9 +346,9 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellEntry const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
+                if (!sSpellStore.LookupEntry(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
                     return false;
                 return true;
             }
@@ -379,9 +385,9 @@ class spell_dk_blood_boil : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dk_blood_boil_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
+            bool Validate(SpellEntry const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_BLOOD_BOIL_TRIGGERED))
+                if (!sSpellStore.LookupEntry(DK_SPELL_BLOOD_BOIL_TRIGGERED))
                     return false;
                 return true;
             }
@@ -424,11 +430,11 @@ public:
     class spell_dk_improved_blood_presence_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_dk_improved_blood_presence_AuraScript)
-        bool Validate(SpellInfo const* /*entry*/)
+        bool Validate(SpellEntry const* /*entry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(DK_SPELL_BLOOD_PRESENCE))
+            if (!sSpellStore.LookupEntry(DK_SPELL_BLOOD_PRESENCE))
                 return false;
-            if (!sSpellMgr->GetSpellInfo(DK_SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED))
+            if (!sSpellStore.LookupEntry(DK_SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED))
                 return false;
             return true;
         }
@@ -472,11 +478,11 @@ public:
     class spell_dk_improved_unholy_presence_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_dk_improved_unholy_presence_AuraScript)
-        bool Validate(SpellInfo const* /*entry*/)
+        bool Validate(SpellEntry const* /*entry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(DK_SPELL_UNHOLY_PRESENCE))
+            if (!sSpellStore.LookupEntry(DK_SPELL_UNHOLY_PRESENCE))
                 return false;
-            if (!sSpellMgr->GetSpellInfo(DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED))
+            if (!sSpellStore.LookupEntry(DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED))
                 return false;
             return true;
         }
@@ -487,7 +493,7 @@ public:
             if (target->HasAura(DK_SPELL_UNHOLY_PRESENCE) && !target->HasAura(DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED))
             {
                 // Not listed as any effect, only base points set in dbc
-                int32 basePoints0 = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+                int32 basePoints0 = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
                 target->CastCustomSpell(target, DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED, &basePoints0 , &basePoints0, &basePoints0, true, 0, aurEff);
             }
         }
@@ -585,7 +591,7 @@ class spell_dk_chains_of_ice : public SpellScriptLoader
 
 void AddSC_deathknight_spell_scripts()
 {
-    new spell_dk_necrotic_strike();
+    new spell_dk_necrotic_strike();    
     new spell_dk_anti_magic_shell_raid();
     new spell_dk_anti_magic_shell_self();
     new spell_dk_anti_magic_zone();

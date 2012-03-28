@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -66,13 +69,17 @@ enum eSpells
 
     // Phase 3 spells
     SPELL_BELLOWING_ROAR         = 18431,
+
+    SPELL_LAIRGUARDCLEAVE       = 15284,
+    SPELL_LAIRGUARDBLASTNOVA    = 68958,
+    SPELL_LAIRGUARDIGNITE       = 68960
 };
 
 struct sOnyxMove
 {
-    uint32 locId;
-    uint32 locIdEnd;
-    uint32 spellId;
+    uint32 uiLocId;
+    uint32 uiLocIdEnd;
+    uint32 uiSpellId;
     float fX, fY, fZ;
 };
 
@@ -115,66 +122,68 @@ public:
     {
         boss_onyxiaAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            instance = creature->GetInstanceScript();
+            m_instance = creature->GetInstanceScript();
             Reset();
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
         }
 
-        InstanceScript* instance;
+        InstanceScript* m_instance;
         SummonList Summons;
 
-        uint32 phase;
+        uint32 m_uiPhase;
 
-        uint32 flameBreathTimer;
-        uint32 cleaveTimer;
-        uint32 tailSweepTimer;
-        uint32 wingBuffetTimer;
+        uint32 m_uiFlameBreathTimer;
+        uint32 m_uiCleaveTimer;
+        uint32 m_uiTailSweepTimer;
+        uint32 m_uiWingBuffetTimer;
 
-        uint32 movePoint;
-        uint32 movementTimer;
-        sOnyxMove* _pPointData;
+        uint32 m_uiMovePoint;
+        uint32 m_uiMovementTimer;
+        sOnyxMove* m_pPointData;
 
-        uint32 fireballTimer;
-        uint32 whelpTimer;
-        uint32 lairGuardTimer;
-        uint32 deepBreathTimer;
+        uint32 m_uiFireballTimer;
+        uint32 m_uiWhelpTimer;
+        uint32 m_uiLairGuardTimer;
+        uint32 m_uiDeepBreathTimer;
 
-        uint32 bellowingRoarTimer;
+        uint32 m_uiBellowingRoarTimer;
 
-        uint8 SummonWhelpCount;
-        bool _bIsMoving;
+        uint8 m_uiSummonWhelpCount;
+        bool m_bIsMoving;
 
         void Reset()
         {
-            if (!IsCombatMovementAllowed())
+            if (!IsCombatMovement())
                 SetCombatMovement(true);
 
-            phase = PHASE_START;
+            m_uiPhase = PHASE_START;
 
-            flameBreathTimer = urand(10000, 20000);
-            tailSweepTimer = urand(15000, 20000);
-            cleaveTimer = urand(2000, 5000);
-            wingBuffetTimer = urand(10000, 20000);
+            m_uiFlameBreathTimer = urand(10000, 20000);
+            m_uiTailSweepTimer = urand(15000, 20000);
+            m_uiCleaveTimer = urand(2000, 5000);
+            m_uiWingBuffetTimer = urand(10000, 20000);
 
-            movePoint = urand(0, 5);
-            movementTimer = 14000;
-            _pPointData = GetMoveData();
+            m_uiMovePoint = urand(0, 5);
+            m_uiMovementTimer = 14000;
+            m_pPointData = GetMoveData();
 
-            fireballTimer = 15000;
-            whelpTimer = 60000;
-            lairGuardTimer = 60000;
-            deepBreathTimer = 85000;
+            m_uiFireballTimer = 15000;
+            m_uiWhelpTimer = 60000;
+            m_uiLairGuardTimer = 60000;
+            m_uiDeepBreathTimer = 85000;
 
-            bellowingRoarTimer = 30000;
+            m_uiBellowingRoarTimer = 30000;
 
             Summons.DespawnAll();
-            SummonWhelpCount = 0;
-            _bIsMoving = false;
+            m_uiSummonWhelpCount = 0;
+            m_bIsMoving = false;
 
-            if (instance)
+            if (m_instance)
             {
-                instance->SetData(DATA_ONYXIA, NOT_STARTED);
-                instance->SetData(DATA_ONYXIA_PHASE, phase);
-                instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
+                m_instance->SetData(DATA_ONYXIA, NOT_STARTED);
+                m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
+                m_instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
             }
         }
 
@@ -182,18 +191,18 @@ public:
         {
             DoScriptText(SAY_AGGRO, me);
             me->SetInCombatWithZone();
-
-            if (instance)
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            if (m_instance)
             {
-                instance->SetData(DATA_ONYXIA, IN_PROGRESS);
-                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
+                m_instance->SetData(DATA_ONYXIA, IN_PROGRESS);
+                m_instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
             }
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            if (instance)
-                instance->SetData(DATA_ONYXIA, DONE);
+            if (m_instance)
+                m_instance->SetData(DATA_ONYXIA, DONE);
 
             Summons.DespawnAll();
         }
@@ -207,7 +216,7 @@ public:
             switch (summoned->GetEntry())
             {
                 case NPC_WHELP:
-                    ++SummonWhelpCount;
+                    ++m_uiSummonWhelpCount;
                     break;
                 case NPC_LAIRGUARD:
                     summoned->setActive(true);
@@ -226,17 +235,17 @@ public:
             DoScriptText(SAY_KILL, me);
         }
 
-        void SpellHit(Unit* /*pCaster*/, const SpellInfo* spell)
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell)
         {
-            if (spell->Id == SPELL_BREATH_EAST_TO_WEST ||
-                spell->Id == SPELL_BREATH_WEST_TO_EAST ||
-                spell->Id == SPELL_BREATH_SE_TO_NW ||
-                spell->Id == SPELL_BREATH_NW_TO_SE ||
-                spell->Id == SPELL_BREATH_SW_TO_NE ||
-                spell->Id == SPELL_BREATH_NE_TO_SW)
+            if (pSpell->Id == SPELL_BREATH_EAST_TO_WEST ||
+                pSpell->Id == SPELL_BREATH_WEST_TO_EAST ||
+                pSpell->Id == SPELL_BREATH_SE_TO_NW ||
+                pSpell->Id == SPELL_BREATH_NW_TO_SE ||
+                pSpell->Id == SPELL_BREATH_SW_TO_NE ||
+                pSpell->Id == SPELL_BREATH_NE_TO_SW)
             {
-                _pPointData = GetMoveData();
-                movePoint = _pPointData->locIdEnd;
+                m_pPointData = GetMoveData();
+                m_uiMovePoint = m_pPointData->uiLocIdEnd;
 
                 me->SetSpeed(MOVE_FLIGHT, 1.5f);
                 me->GetMotionMaster()->MovePoint(8, MiddleRoomLocation);
@@ -250,72 +259,72 @@ public:
                 switch (id)
                 {
                     case 8:
-                        _pPointData = GetMoveData();
-                        if (_pPointData)
+                        m_pPointData = GetMoveData();
+                        if (m_pPointData)
                         {
                             me->SetSpeed(MOVE_FLIGHT, 1.0f);
-                            me->GetMotionMaster()->MovePoint(_pPointData->locId, _pPointData->fX, _pPointData->fY, _pPointData->fZ);
+                            me->GetMotionMaster()->MovePoint(m_pPointData->uiLocId, m_pPointData->fX, m_pPointData->fY, m_pPointData->fZ);
                         }
                         break;
                     case 9:
                         me->GetMotionMaster()->MoveChase(me->getVictim());
-                        bellowingRoarTimer = 1000;
+                        m_uiBellowingRoarTimer = 1000;
                         break;
                     case 10:
                         me->SetFlying(true);
                         me->GetMotionMaster()->MovePoint(11, Phase2Location.GetPositionX(), Phase2Location.GetPositionY(), Phase2Location.GetPositionZ()+25);
                         me->SetSpeed(MOVE_FLIGHT, 1.0f);
                         DoScriptText(SAY_PHASE_2_TRANS, me);
-                        if (instance)
-                            instance->SetData(DATA_ONYXIA_PHASE, phase);
-                        whelpTimer = 5000;
-                        lairGuardTimer = 15000;
+                        if (m_instance)
+                            m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
+                        m_uiWhelpTimer = 5000;
+                        m_uiLairGuardTimer = 15000;
                         break;
                     case 11:
-                        if (_pPointData)
-                            me->GetMotionMaster()->MovePoint(_pPointData->locId, _pPointData->fX, _pPointData->fY, _pPointData->fZ);
+                        if (m_pPointData)
+                            me->GetMotionMaster()->MovePoint(m_pPointData->uiLocId, m_pPointData->fX, m_pPointData->fY, m_pPointData->fZ);
                         me->GetMotionMaster()->Clear(false);
                         me->GetMotionMaster()->MoveIdle();
 
                         break;
 
                     default:
-                        _bIsMoving = false;
+                        m_bIsMoving = false;
                         break;
                 }
             }
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* spell)
+        void SpellHitTarget(Unit* target, const SpellEntry* pSpell)
         {
             //Workaround - Couldn't find a way to group this spells (All Eruption)
-            if (((spell->Id >= 17086 && spell->Id <= 17095) ||
-                (spell->Id == 17097) ||
-                (spell->Id >= 18351 && spell->Id <= 18361) ||
-                (spell->Id >= 18564 && spell->Id <= 18576) ||
-                (spell->Id >= 18578 && spell->Id <= 18607) ||
-                (spell->Id == 18609) ||
-                (spell->Id >= 18611 && spell->Id <= 18628) ||
-                (spell->Id >= 21132 && spell->Id <= 21133) ||
-                (spell->Id >= 21135 && spell->Id <= 21139) ||
-                (spell->Id >= 22191 && spell->Id <= 22202) ||
-                (spell->Id >= 22267 && spell->Id <= 22268)) &&
+            if (((pSpell->Id >= 17086 && pSpell->Id <= 17095) ||
+                (pSpell->Id == 17097) ||
+                (pSpell->Id >= 18351 && pSpell->Id <= 18361) ||
+                (pSpell->Id >= 18564 && pSpell->Id <= 18576) ||
+                (pSpell->Id >= 18578 && pSpell->Id <= 18607) ||
+                (pSpell->Id == 18609) ||
+                (pSpell->Id >= 18611 && pSpell->Id <= 18628) ||
+                (pSpell->Id >= 21132 && pSpell->Id <= 21133) ||
+                (pSpell->Id >= 21135 && pSpell->Id <= 21139) ||
+                (pSpell->Id >= 22191 && pSpell->Id <= 22202) ||
+                (pSpell->Id >= 22267 && pSpell->Id <= 22268)) &&
                 (target->GetTypeId() == TYPEID_PLAYER))
             {
-                if (instance)
+                if (m_instance)
                 {
-                    instance->SetData(DATA_SHE_DEEP_BREATH_MORE, FAIL);
+                    m_instance->SetData(DATA_SHE_DEEP_BREATH_MORE, FAIL);
                 }
             }
         }
 
         sOnyxMove* GetMoveData()
         {
-            uint32 maxCount = sizeof(aMoveData)/sizeof(sOnyxMove);
+            uint32 uiMaxCount = sizeof(aMoveData)/sizeof(sOnyxMove);
 
-            for (uint32 i = 0; i < maxCount; ++i)
+            for (uint32 i = 0; i < uiMaxCount; ++i)
             {
-                if (aMoveData[i].locId == movePoint)
+                if (aMoveData[i].uiLocId == m_uiMovePoint)
                     return &aMoveData[i];
             }
 
@@ -324,84 +333,86 @@ public:
 
         void SetNextRandomPoint()
         {
-            uint32 maxCount = sizeof(aMoveData)/sizeof(sOnyxMove);
+            uint32 uiMaxCount = sizeof(aMoveData)/sizeof(sOnyxMove);
 
-            uint32 iTemp = rand()%(maxCount-1);
+            uint32 iTemp = rand()%(uiMaxCount-1);
 
-            if (iTemp >= movePoint)
+            if (iTemp >= m_uiMovePoint)
                 ++iTemp;
 
-            movePoint = iTemp;
+            m_uiMovePoint = iTemp;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 uiDiff)
         {
             if (!UpdateVictim())
                 return;
 
             //Common to PHASE_START && PHASE_END
-            if (phase == PHASE_START || phase == PHASE_END)
+            if (m_uiPhase == PHASE_START || m_uiPhase == PHASE_END)
             {
                 //Specific to PHASE_START || PHASE_END
-                if (phase == PHASE_START)
+                if (m_uiPhase == PHASE_START)
                 {
                     if (HealthBelowPct(60))
                     {
                         SetCombatMovement(false);
-                        phase = PHASE_BREATH;
+                        m_uiPhase = PHASE_BREATH;
+                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT,SPELL_EFFECT_ATTACK_ME, true);
                         me->GetMotionMaster()->MovePoint(10, Phase2Location);
                         return;
                     }
                 }
                 else
                 {
-                    if (bellowingRoarTimer <= diff)
+                    if (m_uiBellowingRoarTimer <= uiDiff)
                     {
                         DoCastVictim(SPELL_BELLOWING_ROAR);
                         // Eruption
-                        GameObject* floor = NULL;
+                        GameObject* pFloor = NULL;
                         Trinity::GameObjectInRangeCheck check(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 15);
-                        Trinity::GameObjectLastSearcher<Trinity::GameObjectInRangeCheck> searcher(me, floor, check);
+                        Trinity::GameObjectLastSearcher<Trinity::GameObjectInRangeCheck> searcher(me, pFloor, check);
                         me->VisitNearbyGridObject(30, searcher);
-                        if (instance && floor)
-                            instance->SetData64(DATA_FLOOR_ERUPTION_GUID, floor->GetGUID());
-                        bellowingRoarTimer = 30000;
+                        if (m_instance && pFloor)
+                            m_instance->SetData64(DATA_FLOOR_ERUPTION_GUID, pFloor->GetGUID());
+                        m_uiBellowingRoarTimer = 30000;
                     }
                     else
-                        bellowingRoarTimer -= diff;
+                        m_uiBellowingRoarTimer -= uiDiff;
                 }
 
-                if (flameBreathTimer <= diff)
+                if (m_uiFlameBreathTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_FLAME_BREATH);
-                    flameBreathTimer = urand(10000, 20000);
+                    m_uiFlameBreathTimer = urand(10000, 20000);
                 }
                 else
-                    flameBreathTimer -= diff;
+                    m_uiFlameBreathTimer -= uiDiff;
 
-                if (tailSweepTimer <= diff)
+                if (m_uiTailSweepTimer <= uiDiff)
                 {
                     DoCastAOE(SPELL_TAIL_SWEEP);
-                    tailSweepTimer = urand(15000, 20000);
+                    m_uiTailSweepTimer = urand(15000, 20000);
                 }
                 else
-                    tailSweepTimer -= diff;
+                    m_uiTailSweepTimer -= uiDiff;
 
-                if (cleaveTimer <= diff)
+                if (m_uiCleaveTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_CLEAVE);
-                    cleaveTimer = urand(2000, 5000);
+                    m_uiCleaveTimer = urand(2000, 5000);
                 }
                 else
-                    cleaveTimer -= diff;
+                    m_uiCleaveTimer -= uiDiff;
 
-                if (wingBuffetTimer <= diff)
+                if (m_uiWingBuffetTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_WING_BUFFET);
-                    wingBuffetTimer = urand(15000, 30000);
+                    m_uiWingBuffetTimer = urand(15000, 30000);
                 }
                 else
-                    wingBuffetTimer -= diff;
+                    m_uiWingBuffetTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();
             }
@@ -409,92 +420,161 @@ public:
             {
                 if (HealthBelowPct(40))
                 {
-                    phase = PHASE_END;
-                    if (instance)
-                        instance->SetData(DATA_ONYXIA_PHASE, phase);
+                    m_uiPhase = PHASE_END;
+                    if (m_instance)
+                        m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
                     DoScriptText(SAY_PHASE_3_TRANS, me);
 
                     SetCombatMovement(true);
                     me->SetFlying(false);
-                    _bIsMoving = false;
-                    me->GetMotionMaster()->MovePoint(9, me->GetHomePosition());
+                    m_bIsMoving = false;
+                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                    me->ApplySpellImmune(0, IMMUNITY_EFFECT,SPELL_EFFECT_ATTACK_ME, false);
+                    me->GetMotionMaster()->MovePoint(9,me->GetHomePosition());
                     return;
                 }
 
-                if (deepBreathTimer <= diff)
+                if (m_uiDeepBreathTimer <= uiDiff)
                 {
-                    if (!_bIsMoving)
+                    if (!m_bIsMoving)
                     {
                         if (me->IsNonMeleeSpellCasted(false))
                             me->InterruptNonMeleeSpells(false);
 
                         DoScriptText(EMOTE_BREATH, me);
-                        DoCast(me, _pPointData->spellId);
-                        deepBreathTimer = 70000;
+                        DoCast(me, m_pPointData->uiSpellId);
+                        m_uiDeepBreathTimer = 70000;
                     }
                 }
                 else
-                    deepBreathTimer -= diff;
+                    m_uiDeepBreathTimer -= uiDiff;
 
-                if (movementTimer <= diff)
+                if (m_uiMovementTimer <= uiDiff)
                 {
-                    if (!_bIsMoving)
+                    if (!m_bIsMoving)
                     {
                         SetNextRandomPoint();
-                        _pPointData = GetMoveData();
+                        m_pPointData = GetMoveData();
 
-                        if (!_pPointData)
+                        if (!m_pPointData)
                             return;
 
-                        me->GetMotionMaster()->MovePoint(_pPointData->locId, _pPointData->fX, _pPointData->fY, _pPointData->fZ);
-                        _bIsMoving = true;
-                        movementTimer = 25000;
+                        me->GetMotionMaster()->MovePoint(m_pPointData->uiLocId, m_pPointData->fX, m_pPointData->fY, m_pPointData->fZ);
+                        m_bIsMoving = true;
+                        m_uiMovementTimer = 25000;
                     }
                 }
                 else
-                    movementTimer -= diff;
+                    m_uiMovementTimer -= uiDiff;
 
-                if (fireballTimer <= diff)
+                if (m_uiFireballTimer <= uiDiff)
                 {
                     if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_FIREBALL);
 
-                        fireballTimer = 8000;
+                        m_uiFireballTimer = 8000;
                     }
                 }
                 else
-                    fireballTimer -= diff;
+                    m_uiFireballTimer -= uiDiff;
 
-                if (lairGuardTimer <= diff)
+                if (m_uiLairGuardTimer <= uiDiff)
                 {
                     me->SummonCreature(NPC_LAIRGUARD, aSpawnLocations[2].GetPositionX(), aSpawnLocations[2].GetPositionY(), aSpawnLocations[2].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
-                    lairGuardTimer = 30000;
+                    m_uiLairGuardTimer = 30000;
                 }
                 else
-                    lairGuardTimer -= diff;
+                    m_uiLairGuardTimer -= uiDiff;
 
-                if (whelpTimer <= diff)
+                if (m_uiWhelpTimer <= uiDiff)
                 {
                     me->SummonCreature(NPC_WHELP, aSpawnLocations[0].GetPositionX(), aSpawnLocations[0].GetPositionY(), aSpawnLocations[0].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
                     me->SummonCreature(NPC_WHELP, aSpawnLocations[1].GetPositionX(), aSpawnLocations[1].GetPositionY(), aSpawnLocations[1].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
-                    if (SummonWhelpCount >= RAID_MODE(20, 40))
+                    if (m_uiSummonWhelpCount >= RAID_MODE(20, 40))
                     {
-                        SummonWhelpCount = 0;
-                        whelpTimer = 90000;
+                        m_uiSummonWhelpCount = 0;
+                        m_uiWhelpTimer = 90000;
                     }
                     else
-                        whelpTimer = 500;
+                        m_uiWhelpTimer = 500;
                 }
                 else
-                    whelpTimer -= diff;
+                    m_uiWhelpTimer -= uiDiff;
             }
         }
+    };
+};
+
+class npc_onyxia_lairguard : public CreatureScript
+{
+public:
+    npc_onyxia_lairguard() : CreatureScript("npc_onyxia_lairguard") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_onyxia_lairguardAI(creature);
+    }
+
+    struct npc_onyxia_lairguardAI : public ScriptedAI
+    {
+        npc_onyxia_lairguardAI(Creature* creature) : ScriptedAI(creature)
+        {
+            m_instance = creature->GetInstanceScript();
+            Reset();
+        }
+
+        InstanceScript* m_instance;
+
+        uint32 m_uiLairGuardCleaveTimer;
+
+        bool novadone;
+        bool ignitedone;
+
+        void Reset()
+        {
+            novadone = false;
+            ignitedone = false;
+
+            m_uiLairGuardCleaveTimer = urand(5000, 10000);
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STAT_CASTING))
+                return;
+
+            if (!ignitedone)
+            {
+                DoCast(me, SPELL_LAIRGUARDIGNITE);
+                ignitedone = true;
+            }
+
+            if (!novadone && HealthBelowPct(25))
+            {
+                DoCast(me, SPELL_LAIRGUARDBLASTNOVA, true);
+                novadone = true;
+            }
+
+	        if (m_uiLairGuardCleaveTimer <= uiDiff)
+            {
+                DoCast(me->getVictim(), SPELL_LAIRGUARDCLEAVE);
+                m_uiLairGuardCleaveTimer = urand(5000, 10000);
+            }
+            else
+                m_uiLairGuardCleaveTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+	    }
     };
 };
 
 void AddSC_boss_onyxia()
 {
     new boss_onyxia();
+    new npc_onyxia_lairguard();
 }

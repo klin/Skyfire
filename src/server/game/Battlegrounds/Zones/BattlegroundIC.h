@@ -1,20 +1,25 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef __BATTLEGROUNDIC_H
@@ -94,6 +99,7 @@ enum gameobjectsIC
 
     GO_FLAGPOLE_1 = 195131,
     GO_FLAGPOLE_2 = 195439,
+    GO_FLAGPOLE_3 = 195131,
 
     GO_GUNSHIP_PORTAL_1 = 195371,
     GO_GUNSHIP_PORTAL_2 = 196413,
@@ -270,7 +276,6 @@ enum BG_IC_GOs
     BG_IC_GO_FLAGPOLE_1_3,
     BG_IC_GO_FLAGPOLE_1_4,
     BG_IC_GO_FLAGPOLE_1_5,
-    BG_IC_GO_FLAGPOLE_1_6,
 
     BG_IC_GO_HANGAR_BANNER,
 
@@ -625,7 +630,6 @@ const ICGo BG_IC_ObjSpawnlocs[MAX_NORMAL_GAMEOBJECTS_SPAWNS] =
     {BG_IC_GO_FLAGPOLE_1_3, GO_FLAGPOLE_1, 807.78f, -1000.07f, 132.381f, -1.91986f}, // Flagpole
     {BG_IC_GO_FLAGPOLE_1_4, GO_FLAGPOLE_1, 776.229f, -804.283f, 6.45052f, 1.6057f}, // Flagpole
     {BG_IC_GO_FLAGPOLE_1_5, GO_FLAGPOLE_1, 251.016f, -1159.32f, 17.2376f, -2.25147f}, // Flagpole
-    {BG_IC_GO_FLAGPOLE_1_6, GO_FLAGPOLE_1, 1269.502f, -400.809f, 37.62525f, -1.762782f}, // Flagpole
 
     {BG_IC_GO_HORDE_KEEP_PORTCULLIS, GO_HORDE_KEEP_PORTCULLIS, 1283.05f, -765.878f, 50.8297f, -3.13286f}, // Horde Keep Portcullis
 
@@ -786,15 +790,15 @@ const Position TeleportToTransportPosition = {661.0f, -1244.0f, 288.0f, 0.0f};
 
 const float BG_IC_SpiritGuidePos[MAX_NODE_TYPES+2][4] =
 {
-    {0.0f, 0.0f, 0.0f, 0.0f},                    // no grave
-    {0.0f, 0.0f, 0.0f, 0.0f},                    // no grave
-    {629.57f, -279.83f, 11.33f, 0.0f},           // dock
-    {780.729f, -1103.08f, 135.51f, 2.27f},       // hangar
-    {775.74f, -652.77f, 9.31f, 4.27f},           // workshop
-    {278.42f, -883.20f, 49.89f, 1.53f},          // alliance starting base
-    {1300.91f, -834.04f, 48.91f, 1.69f},         // horde starting base
-    {438.86f, -310.04f, 51.81f, 5.87f},          // last resort alliance
-    {1148.65f, -1250.98f, 16.60f, 1.74f},        // last resort horde
+    {0.0f, 0.0f, 0.0f, 0.0f},                     // no grave
+    {0.0f, 0.0f, 0.0f, 0.0f},                     // no grave
+    {629.57f, -279.83f, 11.33f, 0.0f},            // dock
+    {780.729f, -1103.08f, 135.51f, 2.27f},        // hangar
+    {775.74f, -652.77f, 9.31f, 4.27f},            // workshop
+    {278.42f, -883.20f, 49.89f, 1.53f},           // alliance starting base
+    {1300.91f, -834.04f, 48.91f, 1.69f},          // horde starting base
+    {438.86f, -310.04f, 51.81f, 5.87f},           // last resort alliance
+    {1148.65f, -1250.98f, 16.60f, 1.74f},         // last resort horde
 };
 
 const Position hordeGunshipPassengers[5] =
@@ -850,114 +854,116 @@ enum HonorRewards
 
 class BattlegroundICScore : public BattlegroundScore
 {
-    public:
-        BattlegroundICScore() : BasesAssaulted(0), BasesDefended(0) {};
-        virtual ~BattlegroundICScore() {};
-        uint32 BasesAssaulted;
-        uint32 BasesDefended;
+public:
+    BattlegroundICScore() : BasesAssaulted(0), BasesDefended(0) {};
+    virtual ~BattlegroundICScore() {};
+    uint32 BasesAssaulted;
+    uint32 BasesDefended;
 };
 
 class BattlegroundIC : public Battleground
 {
-    public:
-        BattlegroundIC();
-        ~BattlegroundIC();
+    friend class BattlegroundMgr;
 
-        /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* player);
-        virtual void StartingEventCloseDoors();
-        virtual void StartingEventOpenDoors();
-        virtual void PostUpdateImpl(uint32 diff);
+public:
+    BattlegroundIC();
+    ~BattlegroundIC();
+    void Update(uint32 diff);
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
-        bool SetupBattleground();
-        void SpawnLeader(uint32 teamid);
-        void HandleKillUnit(Creature* unit, Player* killer);
-        void HandleKillPlayer(Player* player, Player* killer);
-        void EndBattleground(uint32 winner);
-        void EventPlayerClickedOnFlag(Player* source, GameObject* /*target_obj*/);
+    /* inherited from BattlegroundClass */
+    virtual void AddPlayer(Player *plr);
+    virtual void StartingEventCloseDoors();
+    virtual void StartingEventOpenDoors();
 
-        void EventPlayerDamagedGO(Player* /*player*/, GameObject* go, uint32 eventType);
-        void DestroyGate(Player* player, GameObject* go);
+    void RemovePlayer(Player *plr, uint64 guid);
+    void HandleAreaTrigger(Player *Source, uint32 Trigger);
+    bool SetupBattleground();
+    void SpawnLeader(uint32 teamid);
+    void HandleKillUnit(Creature *unit, Player *killer);
+    void HandleKillPlayer(Player* player, Player* killer);
+    void EndBattleground(uint32 winner);
+    void EventPlayerClickedOnFlag(Player *source, GameObject* /*target_obj*/);
 
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
+    void EventPlayerDamagedGO(Player* /*plr*/, GameObject* go, uint8 hitType, uint32 destroyedEvent);
+    void DestroyGate(Player* pl, GameObject* /*go*/, uint32 destroyedEvent);
 
-        /* Scorekeeping */
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
+    virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
-        void FillInitialWorldStates(WorldPacket& data);
+    /* Scorekeeping */
+    void UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor = true);
 
-        void DoAction(uint32 action, uint64 var);
+    void FillInitialWorldStates(WorldPacket& data);
 
-        virtual void HandlePlayerResurrect(Player* player);
+    virtual void DoAction(uint32 action, uint64 var);
 
-        uint32 GetNodeState(uint8 nodeType) { return (uint8)nodePoint[nodeType].nodeState; }
+    virtual void HandlePlayerResurrect(Player* player);
 
-        virtual bool IsAllNodesConrolledByTeam(uint32 team) const;  // overwrited
-    private:
-        uint32 closeFortressDoorsTimer;
-        bool doorsClosed;
-        uint32 docksTimer;
-        uint32 resourceTimer;
-        uint32 siegeEngineWorkshopTimer;
-        uint16 factionReinforcements[2];
-        BG_IC_GateState GateStatus[6];
-        ICNodePoint nodePoint[7];
+    uint32 GetNodeState(uint8 nodeType) { return (uint8)nodePoint[nodeType].nodeState; }
 
-        Transport* gunshipAlliance;
-        Transport* gunshipHorde;
+    virtual bool IsAllNodesConrolledByTeam(uint32 team) const;  // overwrited
+private:
+    uint32 closeFortressDoorsTimer;
+    bool doorsClosed;
+    uint32 docksTimer;
+    uint32 resourceTimer;
+    uint32 siegeEngineWorkshopTimer;
+    uint16 factionReinforcements[2];
+    BG_IC_GateState GateStatus[6];
+    ICNodePoint nodePoint[7];
 
-        uint32 GetNextBanner(ICNodePoint* nodePoint, uint32 team, bool returnDefinitve);
+    Transport* gunshipAlliance;
+    Transport* gunshipHorde;
 
-        uint32 GetGateIDFromEntry(uint32 id)
+    uint32 GetNextBanner(ICNodePoint* nodePoint, uint32 team, bool returnDefinitve);
+
+    uint32 GetGateIDFromEntry(uint32 id)
+    {
+        uint32 i = 0;
+        switch(id)
         {
-            uint32 i = 0;
-            switch (id)
-            {
-                case GO_HORDE_GATE_1: i = BG_IC_H_FRONT ;break;
-                case GO_HORDE_GATE_2: i = BG_IC_H_WEST ;break;
-                case GO_HORDE_GATE_3: i = BG_IC_H_EAST ;break;
-                case GO_ALLIANCE_GATE_3: i = BG_IC_A_FRONT ;break;
-                case GO_ALLIANCE_GATE_1: i = BG_IC_A_WEST ;break;
-                case GO_ALLIANCE_GATE_2: i = BG_IC_A_EAST ;break;
-            }
-            return i;
+        case GO_HORDE_GATE_1: i = BG_IC_H_FRONT ;break;
+        case GO_HORDE_GATE_2: i = BG_IC_H_WEST ;break;
+        case GO_HORDE_GATE_3: i = BG_IC_H_EAST ;break;
+        case GO_ALLIANCE_GATE_3: i = BG_IC_A_FRONT ;break;
+        case GO_ALLIANCE_GATE_1: i = BG_IC_A_WEST ;break;
+        case GO_ALLIANCE_GATE_2: i = BG_IC_A_EAST ;break;
         }
+        return i;
+    }
 
-        uint32 GetWorldStateFromGateEntry(uint32 id, bool open)
+    uint32 GetWorldStateFromGateEntry(uint32 id, bool open)
+    {
+        uint32 uws = 0;
+
+        switch(id)
         {
-            uint32 uws = 0;
-
-            switch (id)
-            {
-                case GO_HORDE_GATE_1:
-                    uws = (open ? BG_IC_GATE_FRONT_H_WS_OPEN : BG_IC_GATE_FRONT_H_WS_CLOSED);
-                    break;
-                case GO_HORDE_GATE_2:
-                    uws = (open ? BG_IC_GATE_WEST_H_WS_OPEN : BG_IC_GATE_WEST_H_WS_CLOSED);
-                    break;
-                case GO_HORDE_GATE_3:
-                    uws = (open ? BG_IC_GATE_EAST_H_WS_OPEN : BG_IC_GATE_EAST_H_WS_CLOSED);
-                    break;
-                case GO_ALLIANCE_GATE_3:
-                    uws = (open ? BG_IC_GATE_FRONT_A_WS_OPEN : BG_IC_GATE_FRONT_A_WS_CLOSED);
-                    break;
-                case GO_ALLIANCE_GATE_1:
-                    uws = (open ? BG_IC_GATE_WEST_A_WS_OPEN : BG_IC_GATE_WEST_A_WS_CLOSED);
-                    break;
-                case GO_ALLIANCE_GATE_2:
-                    uws = (open ? BG_IC_GATE_EAST_A_WS_OPEN : BG_IC_GATE_EAST_A_WS_CLOSED);
-                    break;
-            }
-            return uws;
+        case GO_HORDE_GATE_1:
+            uws = (open ? BG_IC_GATE_FRONT_H_WS_OPEN : BG_IC_GATE_FRONT_H_WS_CLOSED);
+            break;
+        case GO_HORDE_GATE_2:
+            uws = (open ? BG_IC_GATE_WEST_H_WS_OPEN : BG_IC_GATE_WEST_H_WS_CLOSED);
+            break;
+        case GO_HORDE_GATE_3:
+            uws = (open ? BG_IC_GATE_EAST_H_WS_OPEN : BG_IC_GATE_EAST_H_WS_CLOSED);
+            break;
+        case GO_ALLIANCE_GATE_3:
+            uws = (open ? BG_IC_GATE_FRONT_A_WS_OPEN : BG_IC_GATE_FRONT_A_WS_CLOSED);
+            break;
+        case GO_ALLIANCE_GATE_1:
+            uws = (open ? BG_IC_GATE_WEST_A_WS_OPEN : BG_IC_GATE_WEST_A_WS_CLOSED);
+            break;
+        case GO_ALLIANCE_GATE_2:
+            uws = (open ? BG_IC_GATE_EAST_A_WS_OPEN : BG_IC_GATE_EAST_A_WS_CLOSED);
+            break;
         }
+        return uws;
+    }
 
-        void RealocatePlayers(ICNodePointType nodeType);
-        void UpdateNodeWorldState(ICNodePoint* nodePoint);
-        void HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture);
-        void HandleContestedNodes(ICNodePoint* nodePoint);
-        Transport* CreateTransport(uint32 goEntry, uint32 period);
-        void SendTransportInit(Player* player);
+    void RealocatePlayers(ICNodePointType nodeType);
+    void UpdateNodeWorldState(ICNodePoint* nodePoint);
+    void HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture);
+    void HandleContestedNodes(ICNodePoint* nodePoint);
+    Transport* CreateTransport(uint32 goEntry, uint32 period);
+    void SendTransportInit(Player* player);
 };
 #endif

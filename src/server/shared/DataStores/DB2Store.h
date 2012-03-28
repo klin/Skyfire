@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 Strawberry-Pr0jcts <http://www.strawberry-pr0jcts.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef DB2STORE_H
@@ -28,116 +35,99 @@
 #include "Implementation/WorldDatabase.h"
 #include "DatabaseEnv.h"
 
-#include <vector>
-
 template<class T>
-class DB2Storage
-{
-    typedef std::list<char*> StringPoolList;
-    typedef std::vector<T*> DataTableEx;
+class DB2Storage {
+	typedef std::list<char*> StringPoolList;
 public:
-    explicit DB2Storage(const char *f) : nCount(0), fieldCount(0), fmt(f), indexTable(NULL), m_dataTable(NULL) { }
-    ~DB2Storage() { Clear(); }
+	explicit DB2Storage(const char *f) :
+			nCount(0), fieldCount(0), fmt(f), indexTable(NULL), m_dataTable(
+					NULL) {
+	}
+	~DB2Storage() {
+		Clear();
+	}
 
-    T const* LookupEntry(uint32 id) const { return (id>=nCount)?NULL:indexTable[id]; }
-    uint32  GetNumRows() const { return nCount; }
-    char const* GetFormat() const { return fmt; }
-    uint32 GetFieldCount() const { return fieldCount; }
+	T const* LookupEntry(uint32 id) const {
+		return (id >= nCount) ? NULL : indexTable[id];
+	}
+	uint32 GetNumRows() const {
+		return nCount;
+	}
+	char const* GetFormat() const {
+		return fmt;
+	}
+	uint32 GetFieldCount() const {
+		return fieldCount;
+	}
 
-        /// Copies the provided entry and stores it.
-        void AddEntry(uint32 id, const T* entry)
-        {
-            if (LookupEntry(id))
-                return;
+	bool Load(char const* fn) {
+		DB2FileLoader db2;
+		// Check if load was sucessful, only then continue
+		if (!db2.Load(fn, fmt))
+			return false;
 
-            if (id >= nCount)
-            {
-                // reallocate index table
-                char** tmpIdxTable = new char*[id+1];
-                memset(tmpIdxTable, 0, (id+1) * sizeof(char*));
-                memcpy(tmpIdxTable, (char*)indexTable, nCount * sizeof(char*));
-                delete[] ((char*)indexTable);
-                nCount = id + 1;
-                indexTable = (T**)tmpIdxTable;
-            }
+		fieldCount = db2.GetCols();
 
-            T* entryDst = new T;
-            memcpy((char*)entryDst, (char*)entry, sizeof(T));
-            m_dataTableEx.push_back(entryDst);
-            indexTable[id] = entryDst;
-        }
+		// load raw non-string data
+		m_dataTable = (T*) db2.AutoProduceData(fmt, nCount,
+				(char**&) indexTable);
 
-    bool Load(char const* fn)
-    {
-        DB2FileLoader db2;
-        // Check if load was sucessful, only then continue
-        if (!db2.Load(fn, fmt))
-            return false;
+		// create string holders for loaded string fields
+		m_stringPoolList.push_back(
+				db2.AutoProduceStringsArrayHolders(fmt, (char*) m_dataTable));
 
-        fieldCount = db2.GetCols();
+		// load strings from dbc data
+		m_stringPoolList.push_back(
+				db2.AutoProduceStrings(fmt, (char*) m_dataTable));
 
-        // load raw non-string data
-        m_dataTable = (T*)db2.AutoProduceData(fmt, nCount, (char**&)indexTable);
+		// error in dbc file at loading if NULL
+		return indexTable != NULL;
+	}
 
-        // create string holders for loaded string fields
-        m_stringPoolList.push_back(db2.AutoProduceStringsArrayHolders(fmt, (char*)m_dataTable));
+	bool LoadStringsFrom(char const* fn) {
+		// DBC must be already loaded using Load
+		if (!indexTable)
+			return false;
 
-        // load strings from dbc data
-        m_stringPoolList.push_back(db2.AutoProduceStrings(fmt, (char*)m_dataTable));
+		DB2FileLoader db2;
+		// Check if load was successful, only then continue
+		if (!db2.Load(fn, fmt))
+			return false;
 
-        // error in dbc file at loading if NULL
-        return indexTable!=NULL;
-    }
+		// load strings from another locale dbc data
+		m_stringPoolList.push_back(
+				db2.AutoProduceStrings(fmt, (char*) m_dataTable));
 
-    bool LoadStringsFrom(char const* fn, uint8 locale)
-    {
-        // DBC must be already loaded using Load
-        if (!indexTable)
-            return false;
+		return true;
+	}
 
-        DB2FileLoader db2;
-        // Check if load was successful, only then continue
-        if (!db2.Load(fn, fmt))
-            return false;
+	void Clear() {
+		if (!indexTable)
+			return;
 
-        // load strings from another locale dbc data
-        m_stringPoolList.push_back(db2.AutoProduceStrings(fmt, (char*)m_dataTable, locale));
+		delete[] ((char*) indexTable);
+		indexTable = NULL;
+		delete[] ((char*) m_dataTable);
+		m_dataTable = NULL;
 
-        return true;
-    }
+		while (!m_stringPoolList.empty()) {
+			delete[] m_stringPoolList.front();
+			m_stringPoolList.pop_front();
+		}
+		nCount = 0;
+	}
 
-    void Clear()
-    {
-        if (!indexTable)
-            return;
-
-        delete[] ((char*)indexTable);
-        indexTable = NULL;
-        delete[] ((char*)m_dataTable);
-        m_dataTable = NULL;
-        for (typename DataTableEx::const_iterator itr = m_dataTableEx.begin(); itr != m_dataTableEx.end(); ++itr)
-            delete *itr;
-        m_dataTableEx.clear();
-
-        while (!m_stringPoolList.empty())
-        {
-            delete[] m_stringPoolList.front();
-            m_stringPoolList.pop_front();
-        }
-        nCount = 0;
-    }
-
-    void EraseEntry(uint32 id) { indexTable[id] = NULL; }
+	void EraseEntry(uint32 id) {
+		indexTable[id] = NULL;
+	}
 
 private:
-    uint32 nCount;
-    uint32 fieldCount;
-    uint32 recordSize;
-    char const* fmt;
-    T** indexTable;
-    T* m_dataTable;
-    DataTableEx m_dataTableEx;
-    StringPoolList m_stringPoolList;
+	uint32 nCount;
+	uint32 fieldCount;
+	char const* fmt;
+	T** indexTable;
+	T* m_dataTable;
+	StringPoolList m_stringPoolList;
 };
 
 #endif

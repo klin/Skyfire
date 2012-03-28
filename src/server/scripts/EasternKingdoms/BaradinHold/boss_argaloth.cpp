@@ -1,29 +1,33 @@
 /*
-* Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 3 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include"ScriptPCH.h"
 #include"baradin_hold.h"
 
 enum Spells
 {
-    SPELL_BERSERK              = 47008,
-    SPELL_CONSUMING_DARKNESS   = 88954,
-    SPELL_METEOR_SLASH         = 88942,
-    SPELL_FEL_FIRESTORM        = 88972,
+    SPELL_BERSERK = 47008,
+    SPELL_CONSUMING_DARKNESS = 88954,
+    SPELL_METEOR_SLASH = 88942,
+    SPELL_FEL_FIRESTORM = 88972,
 };
 
 enum Events
@@ -74,7 +78,7 @@ class boss_argaloth: public CreatureScript
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
             while (uint32 eventId = events.ExecuteEvent())

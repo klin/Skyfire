@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -18,7 +18,6 @@
  */
 
 #include "ScriptPCH.h"
-#include "CreatureTextMgr.h"
 #include "culling_of_stratholme.h"
 
 #define MAX_ENCOUNTER 5
@@ -33,7 +32,7 @@
 
 enum Texts
 {
-    SAY_CRATES_COMPLETED = 0,
+    SAY_CRATES_COMPLETED    = 0,
 };
 
 Position const ChromieSummonPos = {1813.298f, 1283.578f, 142.3258f, 3.878161f};
@@ -135,6 +134,8 @@ class instance_culling_of_stratholme : public InstanceMapScript
                     case GO_MALGANIS_CHEST_N:
                     case GO_MALGANIS_CHEST_H:
                         _malGanisChestGUID = go->GetGUID();
+						if (GameObject* go = instance->GetGameObject(_malGanisChestGUID))
+							go->SetLootState(GO_JUST_DEACTIVATED);
                         if (_encounterState[3] == DONE)
                             go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
                         break;
@@ -167,8 +168,13 @@ class instance_culling_of_stratholme : public InstanceMapScript
                                 break;
                             case DONE:
                                 HandleGameObject(_exitGateGUID, true);
+								if (GameObject* gov = instance->GetGameObject(_exitGateGUID))
+									gov->SetGoState(GO_STATE_ACTIVE);
                                 if (GameObject* go = instance->GetGameObject(_malGanisChestGUID))
+								{
                                     go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+									go->SetLootState(GO_ACTIVATED);
+								}
                                 break;
                         }
                         break;

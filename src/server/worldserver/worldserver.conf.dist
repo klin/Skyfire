@@ -1,5 +1,5 @@
 ################################################
-# SkyFireEMU World Server configuration file   #
+# ArkCORE World Server configuration file   #
 ################################################
 [worldserver]
 
@@ -8,6 +8,7 @@
 #
 #    EXAMPLE CONFIG
 #    CONNECTIONS AND DIRECTORIES
+#	 SCRIPTING SETTINGS
 #    PERFORMANCE SETTINGS
 #    SERVER LOGGING
 #    SERVER SETTINGS
@@ -57,7 +58,7 @@ RealmID = 1
 #    DataDir
 #        Description: Data directory setting.
 #        Important:   DataDir needs to be quoted, as the string might contain space characters.
-#        Example:     "@prefix@/share/skyfirecore"
+#        Example:     "@prefix@/share/arkcore"
 #        Default:     "."
 
 DataDir = "."
@@ -69,7 +70,7 @@ DataDir = "."
 #                     Logs directory must exists, or log file creation will be disabled.
 #        Default:     "" - (Log files will be stored in the current path)
 
-LogsDir = ""
+LogsDir = "logs"
 
 #
 #    LoginDatabaseInfo
@@ -86,9 +87,9 @@ LogsDir = ""
 #                     "127.0.0.1;3306;username;password;world"      - (WorldDatabaseInfo)
 #                     "127.0.0.1;3306;username;password;characters" - (CharacterDatabaseInfo)
 
-LoginDatabaseInfo     = "127.0.0.1;3306;skyfire;skyfire;auth"
-WorldDatabaseInfo     = "127.0.0.1;3306;skyfire;skyfire;world"
-CharacterDatabaseInfo = "127.0.0.1;3306;skyfire;skyfire;characters"
+LoginDatabaseInfo     = "127.0.0.1;3306;arkania;arkania;auth"
+WorldDatabaseInfo     = "127.0.0.1;3306;arkania;arkania;world"
+CharacterDatabaseInfo = "127.0.0.1;3306;arkania;arkania;characters"
 
 #
 #    LoginDatabase.WorkerThreads
@@ -141,6 +142,22 @@ BindIP = "0.0.0.0"
 
 #
 ###################################################################################################
+
+###############################################################################
+# SCRIPTING SETTINGS
+#
+#    Locale
+#        Setting for current (DBC) locale to use
+#
+#    EventAI Error reporting
+#        Default: 0 - Only startup
+#                 1 - Startup errors and Runtime event errors
+#                 2 - Startup errors, Runtime event errors, and Creation errors
+#
+###############################################################################
+
+Locale = 0
+EAIErrorLevel = 2
 
 ###################################################################################################
 # PERFORMANCE SETTINGS
@@ -281,7 +298,7 @@ vmap.enableHeight = 1
 #    vmap.ignoreSpellIds
 #        Description: These spells are ignored for LoS calculation.
 #                     List of ids with delimiter ','.
-#        Example:     "7720, 1337"
+#        Example:     "7720,1337"
 #        Default:     "7720"
 
 vmap.ignoreSpellIds = "7720"
@@ -452,7 +469,7 @@ LogFileLevel = 0
 #                   8 - Anything related to C++ AI, instance scripts, etc.
 #                  16 - Anything related to DB AI, such as SAI, EAI, CreatureAI
 #                  32 - Anything related to DB map scripts
-#                  64 - Anything related to network input/output, 
+#                  64 - Anything related to network input/output,
 #                        such as packet handlers and netcode logs
 #                 128 - Anything related to the spellsystem and aurasystem
 #                 256 - Anything related to the achievement system
@@ -558,7 +575,7 @@ GmLogFile = "GM.log"
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-GmLogTimestamp = 0
+GmLogTimestamp = 1
 
 #
 #    GmLogPerAccount
@@ -567,7 +584,7 @@ GmLogTimestamp = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-GmLogPerAccount = 0
+GmLogPerAccount = 1
 
 #
 #    RaLogFile
@@ -600,7 +617,7 @@ ArenaLog.ExtendedInfo = 0
 #        Example:     "SQLDev.log"    - (Enabled)
 #        Default:      ""             - (Disabled)
 
-SQLDeveloperLogFile = ""
+SQLDeveloperLogFile = "SQLDev.log"
 
 #
 #    SQLDriverLogFile
@@ -608,7 +625,7 @@ SQLDeveloperLogFile = ""
 #        Example:     "SQLDriver.log" - (Enabled)
 #        Default:      ""             - (Disabled)
 
-SQLDriverLogFile = ""
+SQLDriverLogFile = "sqldriver.log"
 
 #
 #    SQLDriverQueryLogging
@@ -849,7 +866,7 @@ RealmZone = 1
 #                     creation and forces rename request if not allowed symbols are used
 #        Default:     0 - (Disable, Limited server timezone dependent client check)
 #                     1 - (Enabled, Strictly basic Latin characters)
-#                     2 - (Enabled, Strictly realm zone specific, See RealmZone setting, 
+#                     2 - (Enabled, Strictly realm zone specific, See RealmZone setting,
 #                         Note: Client needs to have the appropriate fonts installed which support
 #                         the charset. For non-official localization, custom fonts need to be
 #                         placed in clientdir/Fonts.
@@ -863,7 +880,7 @@ StrictPlayerNames = 0
 #                     Prevents charter creation if not allowed symbols are used.
 #        Default:     0 - (Disable, Limited server timezone dependent client check)
 #                     1 - (Enabled, Strictly basic Latin characters)
-#                     2 - (Enabled, Strictly realm zone specific, See RealmZone setting, 
+#                     2 - (Enabled, Strictly realm zone specific, See RealmZone setting,
 #                         Note: Client needs to have the appropriate fonts installed which support
 #                         the charset. For non-official localization, custom fonts need to be
 #                         placed in clientdir/Fonts.
@@ -877,7 +894,7 @@ StrictCharterNames = 0
 #                     Prevents pet naming if not allowed symbols are used.
 #        Default:     0 - (Disable, Limited server timezone dependent client check)
 #                     1 - (Enabled, Strictly basic Latin characters)
-#                     2 - (Enabled, Strictly realm zone specific, See RealmZone setting, 
+#                     2 - (Enabled, Strictly realm zone specific, See RealmZone setting,
 #                         Note: Client needs to have the appropriate fonts installed which support
 #                         the charset. For non-official localization, custom fonts need to be
 #                         placed in clientdir/Fonts.
@@ -1006,14 +1023,13 @@ CharacterCreating.Disabled.ClassMask = 0
 #        Default:     50
 
 CharactersPerAccount = 50
-
 #
 #    CharactersPerRealm
 #        Description: Limit number of characters per account on this realm.
-#        Range:       1-12
-#        Default:     12 - (Client limitation)
+#        Range:       1-10
+#        Default:     10 - (Client limitation)
 
-CharactersPerRealm = 12
+CharactersPerRealm = 10
 
 #
 #    HeroicCharactersPerRealm
@@ -1115,9 +1131,9 @@ StartArenaPoints = 0
 #    RecruitAFriend.MaxLevel
 #        Description: Highest level up to which a character can benefit from the Recruit-A-Friend
 #                     experience multiplier.
-#        Default:     80
+#        Default:     60
 
-RecruitAFriend.MaxLevel = 80
+RecruitAFriend.MaxLevel = 60
 
 #
 #    RecruitAFriend.MaxDifference
@@ -1256,22 +1272,6 @@ Quests.HighLevelHideDiff = 7
 Quests.IgnoreRaid = 0
 
 #
-#    Quests.IgnoreAutoAccept
-#        Description: Ignore auto accept flag. Clients will have to manually accept all quests.
-#        Default:     0 - (Disabled, DB values determine if quest is marked auto accept or not.)
-#                     1 - (Enabled, clients will not be told to automatically accept any quest.)
-
-Quests.IgnoreAutoAccept = 0
-
-#
-#    Quests.IgnoreAutoComplete
-#        Description: Ignore auto complete flag. Clients will have to manually complete all quests.
-#        Default:     0 - (Disabled, DB values determine if quest is marked auto complete or not.)
-#                     1 - (Enabled, clients will not be told to automatically complete any quest.)
-
-Quests.IgnoreAutoComplete = 0
-
-#
 #    Guild.EventLogRecordsCount
 #        Description: Number of log entries for guild events that are stored per guild. Old entries
 #                     will be overwritten if the number of log entries exceed the configured value.
@@ -1309,7 +1309,7 @@ GuildAdvancement.MaxLevel = 25
 
 #        
 #    GuildAdvancement.ResetHour
-#        Reset Hourly XP Cap at specified hour of the day (0-23)
+#        Reset Daily XP Cap at specified hour of the day (0-23)
 #        Default: 3
 
 GuildAdvancement.ResetHour = 3
@@ -1406,10 +1406,10 @@ BeepAtStart = 1
 #    Motd
 #        Description: Message of the Day, displayed at login.
 #                     Use '@' for a newline and be sure to escape special characters.
-#        Example:     "Welcome to John\'s Server@This server runs on Skyfire Core."
-#        Default:     "Welcome to a Skyfire Core server."
+#        Example:     "Welcome to John\'s Server@This server runs on ArkCORE."
+#        Default:     "Welcome to a ArkCORE server."
 
-Motd = "Welcome to a Skyfire Core server.@If your seeing this message@it's because the developer hasnt read configs fully"
+Motd = "Welcome to a ArkCORE server.@If your seeing this message@it's because the developer hasnt read configs fully"
 
 #
 #    Server.LoginInfo
@@ -1417,7 +1417,7 @@ Motd = "Welcome to a Skyfire Core server.@If your seeing this message@it's becau
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Server.LoginInfo = 0
+Server.LoginInfo = 1
 
 #
 #    Command.LookupMaxResults
@@ -1437,10 +1437,10 @@ AllowTickets = 1
 #
 #     DungeonFinder.Enable
 #        Description: Dungeon and raid finder system.
-#                     0 - (Disabled)
-#        Default:     1 - (Enabled, Experimental as of still being in development)
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled, Experimental as of still being in development)
 
-DungeonFinder.Enable = 1
+DungeonFinder.Enable = 0
 
 #
 #   DB2.EnforceItemAttributes
@@ -2098,6 +2098,17 @@ Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
 
+#    Rate.XP.Kill.Premium
+#    Rate.XP.Quest.Premium
+#    Rate.XP.Explore.Premium
+#        XP rates Premium modifier
+#        Default: 1
+#
+
+Rate.XP.Kill.Premium    = 1
+Rate.XP.Quest.Premium   = 1
+Rate.XP.Explore.Premium = 1
+
 #
 #    Rate.RepairCost
 #        Description: Repair cost rate.
@@ -2129,7 +2140,7 @@ Rate.Damage.Fall = 1
 #    Rate.Auction.Time
 #    Rate.Auction.Deposit
 #    Rate.Auction.Cut
-#        Description: Auction rates (auction time, deposit get at auction start, 
+#        Description: Auction rates (auction time, deposit get at auction start,
 #                     auction cut from price at auction end)
 #        Default:     1 - (Rate.Auction.Time)
 #                     1 - (Rate.Auction.Deposit)
@@ -2303,8 +2314,8 @@ DurabilityLossChance.Block = 0.05
 #
 #    Death.SicknessLevel
 #        Description: Starting level for resurrection sickness.
-#        Example:     11 - (Level 1-10 characters will not be affected, 
-#                           Level 11-19 characters will be affected for 1 minute, 
+#        Example:     11 - (Level 1-10 characters will not be affected,
+#                           Level 11-19 characters will be affected for 1 minute,
 #                           Level 20-MaxPlayerLevel characters will be affected for 10 minutes)
 #         Default:    11               - (Enabled, See Example)
 #                     MaxPlayerLevel+1 - (Disabled)
@@ -2325,7 +2336,7 @@ Death.CorpseReclaimDelay.PvE = 0
 #
 #    Death.Bones.World
 #    Death.Bones.BattlegroundOrArena
-#        Description: Create bones instead of corpses at resurrection in normal zones, instances, 
+#        Description: Create bones instead of corpses at resurrection in normal zones, instances,
 #                     battleground or arenas.
 #        Default:     1 - (Enabled, Death.Bones.World)
 #                     1 - (Enabled, Death.Bones.BattlegroundOrArena)
@@ -2403,7 +2414,7 @@ Battleground.QueueAnnouncer.PlayerOnly = 0
 #
 #    Battleground.InvitationType
 #        Description: Set Battleground invitation type.
-#        Default:     0 - (Normal, Invite as much players to battlegrounds as queued, 
+#        Default:     0 - (Normal, Invite as much players to battlegrounds as queued,
 #                          Don't bother with balance)
 #                     1 - (Experimental, Don't allow to invite much more players
 #                          of one faction)
@@ -2592,9 +2603,9 @@ Arena.QueueAnnouncer.Enable = 0
 #
 #    Arena.ArenaSeason.ID
 #        Description: Current area season id shown in clients.
-#        Default:     9
+#        Default:     8
 
-Arena.ArenaSeason.ID = 9
+Arena.ArenaSeason.ID = 8
 
 #
 #    Arena.ArenaSeason.InProgress
@@ -2806,7 +2817,7 @@ HonorPointsAfterDuel = 0
 
 #
 #    AlwaysMaxWeaponSkill
-#        Description: Players will automatically gain max weapon/defense skill when logging in, 
+#        Description: Players will automatically gain max weapon/defense skill when logging in,
 #                     or leveling.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
@@ -2947,4 +2958,128 @@ PlayerDump.DisallowPaths = 1
 PlayerDump.DisallowOverwrite = 1
 
 #
+#   DuelResetCooldown
+#	Reseting cooldown and restore health when duel finished in the follow zones:
+#   Elwyn Forest, Durotar, Tirisfal, Tendrasil, Dun Morogh, Gurubashi Arena, Exodar, Mulgore
+#	Default: 1
+#
+
+DuelResetCooldown = 1
+
+#
 ###################################################################################################
+
+###################################################################################################
+# WINTERGRASP
+#
+#   OutdoorPvP.Wintergrasp.Enabled
+#       Determines whether the Wintergrasp battle is enabled or not.
+#       Default: 1 = Enable
+#                0 = Disable
+
+OutdoorPvP.Wintergrasp.Enabled = 1
+
+#
+#   OutdoorPvP.Wintergrasp.SaveState.Period
+#      Interval (in milliseconds) of Save Wintergrasp State Data to restore it after crash/shutdown/restart
+#      Default (60000 milliseconds)
+#      Warning:  Do not set it less 1 second!
+
+OutdoorPvP.Wintergrasp.SaveState.Period = 60000
+
+#   OutdoorPvP.Wintergrasp.StartTime
+#       The start time of the first battle after server starts (in minutes)
+#       Default: 30
+
+OutdoorPvP.Wintergrasp.StartTime = 360
+
+#   OutdoorPvP.Wintergrasp.BattleTime
+#       Time limit of a battle (in minutes)
+#       Default: 30
+
+OutdoorPvP.Wintergrasp.BattleTime = 30
+
+#   OutdoorPvP.Wintergrasp.Interval
+#       Interval between battles (in minutes)
+#       Default: 150
+
+OutdoorPvP.Wintergrasp.Interval = 150
+
+#   OutdoorPvP.Wintergrasp.CustomHonorRewards
+#       Defines whether custom honor rewards should be given to player
+#        for partaking in the Wintergrasp Battle.
+#        Default: 0 = Disable
+#                 1 = Enable
+
+OutdoorPvP.Wintergrasp.CustomHonorRewards = 0
+
+#   OutdoorPvP.Wintergrasp.CustomHonorBattleWin
+#       Defines the amount of honor points that should be given to the
+#        team winning the Wintergrasp Battle.
+#       Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#       Default: 3000
+
+OutdoorPvP.Wintergrasp.CustomHonorBattleWin = 3000
+
+#   OutdoorPvP.Wintergrasp.CustomHonorBattleLose
+#       Defines the amount of honor points that should be given to the
+#        team losing the Wintergrasp Battle.
+#       Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#       Default: 1250
+
+OutdoorPvP.Wintergrasp.CustomHonorBattleLose = 1250
+
+#   OutdoorPvP.Wintergrasp.CustomHonorDamageTower
+#       Defines the amount of honor points that should be given to the
+#        team for damaging a tower.
+#       Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#       Default: 750
+
+OutdoorPvP.Wintergrasp.CustomHonorDamageTower = 750
+
+#   OutdoorPvP.Wintergrasp.CustomHonorDestroyedTower
+#       Defines the amount of honor points that should be given to the
+#        team for destroying a tower.
+#       Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#       Default: 750
+
+OutdoorPvP.Wintergrasp.CustomHonorDestroyedTower = 750
+
+#   OutdoorPvP.Wintergrasp.CustomHonorDamagedBuilding
+#       Defines the amount of honor points that should be given to the
+#        team for damaged buildings after the battle.
+#       Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#       Default: 750
+
+OutdoorPvP.Wintergrasp.CustomHonorDamagedBuilding = 750
+
+#   OutdoorPvP.Wintergrasp.CustomHonorIntactBuilding
+#      Defines the amount of honor points that should be given to the
+#        team for intact buildings after the battle.
+#       Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#       Default: 1500
+
+OutdoorPvP.Wintergrasp.CustomHonorIntactBuilding = 1500
+
+#   OutdoorPvP.Wintergrasp.Antifarm.Enable
+#		Enable or Disable antifarm system
+#       Prevents start WG battle event if there are too low players (see options bellow)
+#       Default: 0 - Disabled
+#                1 - Enabled
+OutdoorPvP.Wintergrasp.Antifarm.Enable = 0
+
+#   OutdoorPvP.Wintergrasp.Antifarm.Atk
+#		Min count of attackers for antifarm
+#              (Default: 5)
+
+OutdoorPvP.Wintergrasp.Antifarm.Atk = 15
+
+#   OutdoorPvP.Wintergrasp.Antifarm.Def
+#		Min count of defenders for antifarm
+#              (Default: 5)
+
+OutdoorPvP.Wintergrasp.Antifarm.Def = 15
+
+#
+###################################################################################################
+

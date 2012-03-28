@@ -1,22 +1,28 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "DatabaseEnv.h"
 #include "AccountMgr.h"
 #include "ObjectAccessor.h"
@@ -24,45 +30,38 @@
 #include "Util.h"
 #include "SHA1.h"
 
-namespace AccountMgr
-{
-AccountOpResult CreateAccount(std::string username, std::string password)
+AccountMgr::AccountMgr() {
+}
+AccountMgr::~AccountMgr() {
+}
+
+AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password)
 {
     if (utf8length(username) > MAX_ACCOUNT_STR)
-        return AOR_NAME_TOO_LONG;                           // username's too long
+        return AOR_NAME_TOO_LONG; // username's too long
 
     normalizeString(username);
     normalizeString(password);
 
     if (GetId(username))
-        return AOR_NAME_ALREADY_EXIST;                       // username does already exist
+        return AOR_NAME_ALREDY_EXIST; // username does already exist
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_ADD_ACCOUNT);
+    LoginDatabase.PExecute("INSERT INTO account(username, sha_pass_hash, joindate) VALUES('%s', '%s', NOW())", username.c_str(), CalculateShaPassHash(username, password).c_str());
+    LoginDatabase.Execute("INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist, account LEFT JOIN realmcharacters ON acctid = account.id WHERE acctid IS NULL");
 
-    stmt->setString(0, username);
-    stmt->setString(1, CalculateShaPassHash(username, password));
-
-    LoginDatabase.Execute(stmt);
-
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_ADD_REALM_CHARS);
-
-    LoginDatabase.Execute(stmt);
-
-    return AOR_OK;                                          // everything's fine
+    return AOR_OK; // everything's fine
 }
 
-AccountOpResult DeleteAccount(uint32 accountId)
+AccountOpResult AccountMgr::DeleteAccount(uint32 accountId)
 {
     QueryResult result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id='%d'", accountId);
     if (!result)
-        return AOR_NAME_DOES_NOT_EXIST;                          // account doesn't exist
+        return AOR_NAME_NOT_EXIST; // account doesn't exist
 
     // existed characters list
     result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE account='%d'", accountId);
-    if (result)
-    {
-        do
-        {
+    if (result) {
+        do {
             uint32 guidLow = (*result)[0].GetUInt32();
             uint64 guid = MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
 
@@ -70,38 +69,33 @@ AccountOpResult DeleteAccount(uint32 accountId)
             if (Player* p = ObjectAccessor::FindPlayer(guid))
             {
                 WorldSession* s = p->GetSession();
-                s->KickPlayer();                            // mark session to remove at next session list update
-                s->LogoutPlayer(false);                     // logout player without waiting next session list update
+                s->KickPlayer(); // mark session to remove at next session list update
+                s->LogoutPlayer(false); // logout player without waiting next session list update
             }
-
-            Player::DeleteFromDB(guid, accountId, false);       // no need to update realm characters
-        } while (result->NextRow());
+            Player::DeleteFromDB(guid, accountId, false); // no need to update realm characters
+        }
+        while (result->NextRow());
     }
 
     // table realm specific but common for all characters of account for realm
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_TUTORIALS);
-    stmt->setUInt32(0, accountId);
-    CharacterDatabase.Execute(stmt);
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ACCOUNT_DATA);
-    stmt->setUInt32(0, accountId);
-    CharacterDatabase.Execute(stmt);
+    CharacterDatabase.PExecute("DELETE FROM character_tutorial WHERE account = '%u'", accountId);
+    CharacterDatabase.PExecute("DELETE FROM account_data WHERE account = '%u'", accountId);
 
     SQLTransaction trans = LoginDatabase.BeginTransaction();
 
-    trans->PAppend("DELETE FROM account WHERE id='%d'", accountId);
-    trans->PAppend("DELETE FROM account_access WHERE id ='%d'", accountId);
-    trans->PAppend("DELETE FROM realmcharacters WHERE acctid='%d'", accountId);
+    trans->PAppend("DELETE FROM account WHERE id = '%d'", accountId);
+    trans->PAppend("DELETE FROM account_access WHERE id = '%d'", accountId);
+    trans->PAppend("DELETE FROM realmcharacters WHERE acctid = '%d'", accountId);
 
     LoginDatabase.CommitTransaction(trans);
 
     return AOR_OK;
 }
 
-AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword)
-{
-    QueryResult result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id='%d'", accountId);
+AccountOpResult AccountMgr::ChangeUsername(uint32 accountId, std::string newUsername, std::string newPassword) {
+    QueryResult result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id = '%d'", accountId);
     if (!result)
-        return AOR_NAME_DOES_NOT_EXIST;                          // account doesn't exist
+        return AOR_NAME_NOT_EXIST; // account doesn't exist
 
     if (utf8length(newUsername) > MAX_ACCOUNT_STR)
         return AOR_NAME_TOO_LONG;
@@ -112,23 +106,19 @@ AccountOpResult ChangeUsername(uint32 accountId, std::string newUsername, std::s
     normalizeString(newUsername);
     normalizeString(newPassword);
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPDATE_USERNAME);
+    std::string safeNewUsername = newUsername;
+    LoginDatabase.EscapeString(safeNewUsername);
 
-    stmt->setString(0, newUsername);
-    stmt->setString(1, CalculateShaPassHash(newUsername, newPassword));
-    stmt->setUInt32(2, accountId);
-
-    LoginDatabase.Execute(stmt);
-
-    return AOR_OK;
+    LoginDatabase.PExecute("UPDATE account SET v='0', s='0', username='%s', sha_pass_hash='%s' WHERE id='%d'", safeNewUsername.c_str(), CalculateShaPassHash(newUsername, newPassword).c_str(), accountId);
+        return AOR_OK;
 }
 
-AccountOpResult ChangePassword(uint32 accountId, std::string newPassword)
+AccountOpResult AccountMgr::ChangePassword(uint32 accountId, std::string newPassword)
 {
     std::string username;
 
     if (!GetName(accountId, username))
-        return AOR_NAME_DOES_NOT_EXIST;                          // account doesn't exist
+        return AOR_NAME_NOT_EXIST; // account doesn't exist
 
     if (utf8length(newPassword) > MAX_ACCOUNT_STR)
         return AOR_PASS_TOO_LONG;
@@ -136,42 +126,38 @@ AccountOpResult ChangePassword(uint32 accountId, std::string newPassword)
     normalizeString(username);
     normalizeString(newPassword);
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPDATE_PASSWORD);
-
-    stmt->setString(0, CalculateShaPassHash(username, newPassword));
-    stmt->setUInt32(1, accountId);
-
-    LoginDatabase.Execute(stmt);
+    // also reset s and v to force update at next realmd login
+    LoginDatabase.PExecute("UPDATE account SET v = '0', s = '0', sha_pass_hash = '%s' WHERE id = '%d'", CalculateShaPassHash(username, newPassword).c_str(), accountId);
 
     return AOR_OK;
 }
 
-uint32 GetId(std::string username)
+uint32 AccountMgr::GetId(std::string username)
 {
     LoginDatabase.EscapeString(username);
     QueryResult result = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());
+
     return (result) ? (*result)[0].GetUInt32() : 0;
 }
 
-uint32 GetSecurity(uint32 accountId)
+uint32 AccountMgr::GetSecurity(uint32 accountId)
 {
     QueryResult result = LoginDatabase.PQuery("SELECT gmlevel FROM account_access WHERE id = '%u'", accountId);
     return (result) ? (*result)[0].GetUInt32() : 0;
 }
 
-uint32 GetSecurity(uint64 accountId, int32 realmId)
+uint32 AccountMgr::GetSecurity(uint64 accountId, int32 realmId)
 {
-    QueryResult result = (realmId == -1)
-        ? LoginDatabase.PQuery("SELECT gmlevel FROM account_access WHERE id = '%u' AND RealmID = '%d'", accountId, realmId)
-        : LoginDatabase.PQuery("SELECT gmlevel FROM account_access WHERE id = '%u' AND (RealmID = '%d' OR RealmID = '-1')", accountId, realmId);
+    QueryResult result = (realmId == -1) ?
+    LoginDatabase.PQuery("SELECT gmlevel FROM account_access WHERE id = '%u' AND RealmID = '%d'", accountId, realmId) :
+    LoginDatabase.PQuery("SELECT gmlevel FROM account_access WHERE id = '%u' AND (RealmID = '%d' OR RealmID = '-1')", accountId, realmId);
     return (result) ? (*result)[0].GetUInt32() : 0;
 }
 
-bool GetName(uint32 accountId, std::string& name)
+bool AccountMgr::GetName(uint32 accountId, std::string& name)
 {
     QueryResult result = LoginDatabase.PQuery("SELECT username FROM account WHERE id = '%u'", accountId);
-    if (result)
-    {
+    if (result) {
         name = (*result)[0].GetString();
         return true;
     }
@@ -179,7 +165,7 @@ bool GetName(uint32 accountId, std::string& name)
     return false;
 }
 
-bool CheckPassword(uint32 accountId, std::string password)
+bool AccountMgr::CheckPassword(uint32 accountId, std::string password)
 {
     std::string username;
 
@@ -193,32 +179,35 @@ bool CheckPassword(uint32 accountId, std::string password)
     return (result) ? true : false;
 }
 
-uint32 GetCharactersCount(uint32 accountId)
+uint32 AccountMgr::GetCharactersCount(uint32 accountId)
 {
     // check character count
     QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%d'", accountId);
     return (result) ? (*result)[0].GetUInt32() : 0;
 }
 
-bool normalizeString(std::string& utf8String)
+bool AccountMgr::normalizeString(std::string& utf8String)
 {
-    wchar_t buffer[MAX_ACCOUNT_STR+1];
+    wchar_t buffer[MAX_ACCOUNT_STR + 1];
 
     size_t maxLength = MAX_ACCOUNT_STR;
     if (!Utf8toWStr(utf8String, buffer, maxLength))
         return false;
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
-    std::transform(&buffer[0], buffer+maxLength, &buffer[0], wcharToUpperOnlyLatin);
-#ifdef _MSC_VER
-#pragma warning(default: 4996)
-#endif
+
+    #ifdef _MSC_VER
+    #pragma warning(disable: 4996)
+    #endif
+
+    std::transform(&buffer[0], buffer + maxLength, &buffer[0], wcharToUpperOnlyLatin);
+
+    #ifdef _MSC_VER
+    #pragma warning(default: 4996)
+    #endif
 
     return WStrToUtf8(buffer, maxLength, utf8String);
 }
 
-std::string CalculateShaPassHash(std::string& name, std::string& password)
+std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& password)
 {
     SHA1Hash sha;
     sha.Initialize();
@@ -232,29 +221,3 @@ std::string CalculateShaPassHash(std::string& name, std::string& password)
 
     return encoded;
 }
-
-bool IsPlayerAccount(uint32 gmlevel)
-{
-    return gmlevel == SEC_PLAYER;
-}
-
-bool IsModeratorAccount(uint32 gmlevel)
-{
-    return gmlevel >= SEC_MODERATOR && gmlevel <= SEC_CONSOLE;
-}
-
-bool IsGMAccount(uint32 gmlevel)
-{
-    return gmlevel >= SEC_GAMEMASTER && gmlevel <= SEC_CONSOLE;
-}
-
-bool IsAdminAccount(uint32 gmlevel)
-{
-    return gmlevel >= SEC_ADMINISTRATOR && gmlevel <= SEC_CONSOLE;
-}
-
-bool IsConsoleAccount(uint32 gmlevel)
-{
-    return gmlevel == SEC_CONSOLE;
-}
-} // Namespace AccountMgr

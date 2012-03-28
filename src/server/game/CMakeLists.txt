@@ -1,5 +1,8 @@
-# Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
-# Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+#
+# Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+#
+# Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -18,7 +21,6 @@ file(GLOB_RECURSE sources_Achievements Achievements/*.cpp Achievements/*.h)
 file(GLOB_RECURSE sources_Addons Addons/*.cpp Addons/*.h)
 file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h)
 file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
-file(GLOB_RECURSE sources_Battlefields Battlefields/*.cpp Battlefields/*.h)
 file(GLOB_RECURSE sources_Battlegrounds Battlegrounds/*.cpp Battlegrounds/*.h)
 file(GLOB_RECURSE sources_Calendar Calendar/*.cpp Calendar/*.h)
 file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h)
@@ -32,7 +34,6 @@ file(GLOB_RECURSE sources_Globals Globals/*.cpp Globals/*.h)
 file(GLOB_RECURSE sources_Grids Grids/*.cpp Grids/*.h)
 file(GLOB_RECURSE sources_Groups Groups/*.cpp Groups/*.h)
 file(GLOB_RECURSE sources_Guilds Guilds/*.cpp Guilds/*.h)
-file(GLOB_RECURSE sources_Handlers Handlers/*.cpp Handlers/*.h)
 file(GLOB_RECURSE sources_Instances Instances/*.cpp Instances/*.h)
 file(GLOB_RECURSE sources_Loot Loot/*.cpp Loot/*.h)
 file(GLOB_RECURSE sources_Mails Mails/*.cpp Mails/*.h)
@@ -60,7 +61,7 @@ source_group(Addons FILES ${sources_Addons})
 source_group(AI FILES ${sources_AI})
 source_group(AI\\ScriptedAI FILES ${sources_AI})
 source_group(AuctionHouse FILES ${sources_AuctionHouse})
-source_group(Battlefields FILES ${sources_Battlefields})
+source_group(AuctionHouseBot FILES ${sources_AuctionHouseBot})
 source_group(Battlegrounds FILES ${sources_Battlegrounds})
 source_group(Calendar FILES ${sources_Calendar})
 source_group(Chat FILES ${sources_Chat})
@@ -75,7 +76,6 @@ source_group(Globals FILES ${sources_Globals})
 source_group(Grids FILES ${sources_Grids})
 source_group(Groups FILES ${sources_Groups})
 source_group(Guilds FILES ${sources_Guilds})
-source_group(Handlers FILES ${sources_Handlers})
 source_group(Instances FILES ${sources_Instances})
 source_group(Loot FILES ${sources_Loot})
 source_group(Mails FILES ${sources_Mails})
@@ -101,18 +101,17 @@ source_group(World FILES ${sources_World})
 if( USE_COREPCH AND MSVC )
   set(game_STAT_SRCS
     PrecompiledHeaders/gamePCH.cpp
-    PrecompiledHeaders/gamePCH.h
   )
 endif()
 
 set(game_STAT_SRCS
   ${game_STAT_SRCS}
+  PrecompiledHeaders/gamePCH.h
   ${sources_Accounts}
   ${sources_Achievements}
   ${sources_Addons}
   ${sources_AI}
   ${sources_AuctionHouse}
-  ${sources_Battlefields}  
   ${sources_Battlegrounds}
   ${sources_Calendar}
   ${sources_Chat}
@@ -126,7 +125,6 @@ set(game_STAT_SRCS
   ${sources_Grids}
   ${sources_Groups}
   ${sources_Guilds}
-  ${sources_Handlers}
   ${sources_Instances}
   ${sources_Loot}
   ${sources_Mails}
@@ -150,7 +148,6 @@ set(game_STAT_SRCS
 
 include_directories(
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
   ${CMAKE_SOURCE_DIR}/dep/mersennetwister
   ${CMAKE_SOURCE_DIR}/dep/SFMT
   ${CMAKE_SOURCE_DIR}/dep/zlib
@@ -162,13 +159,13 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography/Authentication
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database
   ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
-  ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores/DBC
-  ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores/DB2
   ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic/CountedReference
   ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic/LinkedReference
   ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic
   ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
   ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Policies
   ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -181,8 +178,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/AI/ScriptedAI
   ${CMAKE_CURRENT_SOURCE_DIR}/AI/SmartScripts
   ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouse
-  ${CMAKE_CURRENT_SOURCE_DIR}/Battlefields
-  ${CMAKE_CURRENT_SOURCE_DIR}/Battlefields/Zones 
   ${CMAKE_CURRENT_SOURCE_DIR}/Battlegrounds
   ${CMAKE_CURRENT_SOURCE_DIR}/Battlegrounds/Zones
   ${CMAKE_CURRENT_SOURCE_DIR}/Calendar
@@ -192,8 +187,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Combat
   ${CMAKE_CURRENT_SOURCE_DIR}/Conditions
   ${CMAKE_CURRENT_SOURCE_DIR}/DataStores
-  ${CMAKE_CURRENT_SOURCE_DIR}/DataStores/DBC
-  ${CMAKE_CURRENT_SOURCE_DIR}/DataStores/DB2  
   ${CMAKE_CURRENT_SOURCE_DIR}/DungeonFinding
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Creature
@@ -206,6 +199,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Object/Updates
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Pet
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Player
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Player/ClassPlayer
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Totem
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Unit
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Vehicle
@@ -217,23 +211,23 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Grids
   ${CMAKE_CURRENT_SOURCE_DIR}/Groups
   ${CMAKE_CURRENT_SOURCE_DIR}/Guilds
-  ${CMAKE_CURRENT_SOURCE_DIR}/Handlers
   ${CMAKE_CURRENT_SOURCE_DIR}/Instances
   ${CMAKE_CURRENT_SOURCE_DIR}/Loot
   ${CMAKE_CURRENT_SOURCE_DIR}/Mails
   ${CMAKE_CURRENT_SOURCE_DIR}/Maps
   ${CMAKE_CURRENT_SOURCE_DIR}/Miscellaneous
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement
-  ${CMAKE_CURRENT_SOURCE_DIR}/Movement/Spline
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement/MovementGenerators
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement/Waypoints
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
+  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP/Zones
   ${CMAKE_CURRENT_SOURCE_DIR}/Pools
   ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${CMAKE_CURRENT_SOURCE_DIR}/Quests
   ${CMAKE_CURRENT_SOURCE_DIR}/Reputation
-  ${CMAKE_CURRENT_SOURCE_DIR}/Scripting 
+  ${CMAKE_CURRENT_SOURCE_DIR}/Scripting
   ${CMAKE_CURRENT_SOURCE_DIR}/Server/Protocol
+  ${CMAKE_CURRENT_SOURCE_DIR}/Server/Protocol/Handlers
   ${CMAKE_CURRENT_SOURCE_DIR}/Server
   ${CMAKE_CURRENT_SOURCE_DIR}/Skills
   ${CMAKE_CURRENT_SOURCE_DIR}/Spells
@@ -244,6 +238,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Weather
   ${CMAKE_CURRENT_SOURCE_DIR}/World
   ${CMAKE_SOURCE_DIR}/src/server/scripts/PrecompiledHeaders
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/OutdoorPvP
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
@@ -258,6 +253,6 @@ if( USE_COREPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH.h)
   elseif(MSVC)
-    add_native_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH)
+    add_native_precompiled_header(game ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/gamePCH 0)
   endif()
 endif()

@@ -1,10 +1,14 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -60,53 +64,60 @@ Position const RiftLocation[6] =
     { 651.72f, -297.44f, -9.37f, 0.0f }
 };
 
-#define DATA_CHAOS_THEORY                         1
+#define ACTION_RIFT_DEAD                          1
+#define DATA_CHAOS_THEORY                         2
 
 class boss_anomalus : public CreatureScript
 {
-    public:
-        boss_anomalus() : CreatureScript("boss_anomalus") { }
+public:
+    boss_anomalus() : CreatureScript("boss_anomalus") { }
 
-        struct boss_anomalusAI : public ScriptedAI
-        {
+    struct boss_anomalusAI : public ScriptedAI
+    {
             boss_anomalusAI(Creature* creature) : ScriptedAI(creature)
-            {
+        {
                 instance = me->GetInstanceScript();
-            }
+        }
 
             InstanceScript* instance;
 
             uint8 Phase;
-            uint32 uiSparkTimer;
-            uint32 uiCreateRiftTimer;
-            uint64 uiChaoticRiftGUID;
+        uint32 uiSparkTimer;
+        uint32 uiCreateRiftTimer;
+        uint64 uiChaoticRiftGUID;
             bool chaosTheory;
 
-            void Reset()
-            {
+        void Reset()
+        {
                 Phase = 0;
                 uiSparkTimer = 5000;
-                uiChaoticRiftGUID = 0;
+            uiChaoticRiftGUID = 0;
                 chaosTheory = true;
 
                 if (instance)
                     instance->SetData(DATA_ANOMALUS_EVENT, NOT_STARTED);
-            }
+    }
 
-            void EnterCombat(Unit* /*who*/)
-            {
-                DoScriptText(SAY_AGGRO, me);
+        void EnterCombat(Unit* /*who*/)
+        {
+            DoScriptText(SAY_AGGRO, me);
 
                 if (instance)
                     instance->SetData(DATA_ANOMALUS_EVENT, IN_PROGRESS);
-            }
+        }
 
             void JustDied(Unit* /*who*/)
-            {
-                DoScriptText(SAY_DEATH, me);
+        {
+            DoScriptText(SAY_DEATH, me);
 
                 if (instance)
                     instance->SetData(DATA_ANOMALUS_EVENT, DONE);
+            }
+
+            void DoAction(int32 const action)
+            {
+                if (action == ACTION_RIFT_DEAD)
+                    chaosTheory = false;
             }
 
             uint32 GetData(uint32 type)
@@ -117,57 +128,57 @@ class boss_anomalus : public CreatureScript
                 return 0;
             }
 
-            void SummonedCreatureDies(Creature* summoned, Unit* /*who*/)
+            void SetData(uint32 id, uint32 data)
             {
-                if (summoned->GetEntry() == MOB_CHAOTIC_RIFT)
-                    chaosTheory = false;
+                if (id == DATA_CHAOS_THEORY)
+                    chaosTheory = data ? true : false;
             }
 
             void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim())
-                    return;
+        {
+            if (!UpdateVictim())
+                return;
 
-                if (me->GetDistance(me->GetHomePosition()) > 60.0f)
+            if (me->GetDistance(me->GetHomePosition()) > 60.0f)
+            {
+                //Not blizzlike, hack to avoid an exploit
+                EnterEvadeMode();
+                return;
+            }
+
+            if (me->HasAura(SPELL_RIFT_SHIELD))
+            {
+                if (uiChaoticRiftGUID)
                 {
-                    // Not blizzlike, hack to avoid an exploit
-                    EnterEvadeMode();
+                        Creature* Rift = ObjectAccessor::GetCreature(*me, uiChaoticRiftGUID);
+                    if (Rift && Rift->isDead())
+                    {
+                        me->RemoveAurasDueToSpell(SPELL_RIFT_SHIELD);
+                        uiChaoticRiftGUID = 0;
+                    }
                     return;
                 }
-
-                if (me->HasAura(SPELL_RIFT_SHIELD))
-                {
-                    if (uiChaoticRiftGUID)
-                    {
-                        Creature* Rift = ObjectAccessor::GetCreature(*me, uiChaoticRiftGUID);
-                        if (Rift && Rift->isDead())
-                        {
-                            me->RemoveAurasDueToSpell(SPELL_RIFT_SHIELD);
-                            uiChaoticRiftGUID = 0;
-                        }
-                        return;
-                    }
                 }
                 else
-                    uiChaoticRiftGUID = 0;
+                uiChaoticRiftGUID = 0;
 
                 if ((Phase == 0) && HealthBelowPct(50))
-                {
+            {
                     Phase = 1;
-                    DoScriptText(SAY_SHIELD, me);
-                    DoCast(me, SPELL_RIFT_SHIELD);
+                DoScriptText(SAY_SHIELD, me);
+                DoCast(me, SPELL_RIFT_SHIELD);
                     if (Creature* Rift = me->SummonCreature(MOB_CHAOTIC_RIFT, RiftLocation[urand(0, 5)], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000))
-                    {
+                {
                         //DoCast(Rift, SPELL_CHARGE_RIFT);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             Rift->AI()->AttackStart(target);
-                        uiChaoticRiftGUID = Rift->GetGUID();
-                        DoScriptText(SAY_RIFT , me);
-                    }
+                    uiChaoticRiftGUID = Rift->GetGUID();
+                    DoScriptText(SAY_RIFT , me);
                 }
+            }
 
-                if (uiSparkTimer <= diff)
-                {
+            if (uiSparkTimer <= diff)
+            {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_SPARK);
                     uiSparkTimer = 5000;
@@ -175,53 +186,59 @@ class boss_anomalus : public CreatureScript
                 else
                     uiSparkTimer -= diff;
 
-                DoMeleeAttackIfReady();
-            }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 
         CreatureAI* GetAI(Creature* creature) const
-        {
+{
             return new boss_anomalusAI(creature);
         }
 };
 
 class mob_chaotic_rift : public CreatureScript
 {
-    public:
-        mob_chaotic_rift() : CreatureScript("mob_chaotic_rift") { }
+public:
+    mob_chaotic_rift() : CreatureScript("mob_chaotic_rift") { }
 
-        struct mob_chaotic_riftAI : public Scripted_NoMovementAI
-        {
+    struct mob_chaotic_riftAI : public Scripted_NoMovementAI
+    {
             mob_chaotic_riftAI(Creature* creature) : Scripted_NoMovementAI(creature)
-            {
+        {
                 instance = me->GetInstanceScript();
-            }
+        }
 
             InstanceScript* instance;
 
-            uint32 uiChaoticEnergyBurstTimer;
-            uint32 uiSummonCrazedManaWraithTimer;
+        uint32 uiChaoticEnergyBurstTimer;
+        uint32 uiSummonCrazedManaWraithTimer;
 
-            void Reset()
-            {
+        void Reset()
+        {
                 uiChaoticEnergyBurstTimer = 1000;
                 uiSummonCrazedManaWraithTimer = 5000;
-                //me->SetDisplayId(25206); //For some reason in DB models for ally and horde are different.
-                                                 //Model for ally (1126) does not show auras. Horde model works perfect.
-                                                 //Set model to horde number
-                DoCast(me, SPELL_ARCANEFORM, false);
-            }
+            //me->SetDisplayId(25206); //For some reason in DB models for ally and horde are different.
+                                             //Model for ally (1126) does not show auras. Horde model works perfect.
+                                             //Set model to horde number
+            DoCast(me, SPELL_ARCANEFORM, false);
+        }
+
+            void JustDied(Unit* /*who*/)
+        {
+                if (Creature* Anomalus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ANOMALUS)))
+                    Anomalus->AI()->DoAction(ACTION_RIFT_DEAD);
+        }
 
             void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim())
-                    return;
+        {
+            if (!UpdateVictim())
+                return;
 
-                if (uiChaoticEnergyBurstTimer <= diff)
-                {
+            if (uiChaoticEnergyBurstTimer <= diff)
+            {
                     Creature* Anomalus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ANOMALUS));
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    {
+                {
                         if (Anomalus && Anomalus->HasAura(SPELL_RIFT_SHIELD))
                             DoCast(target, SPELL_CHARGED_CHAOTIC_ENERGY_BURST);
                         else
@@ -232,21 +249,21 @@ class mob_chaotic_rift : public CreatureScript
                 else
                     uiChaoticEnergyBurstTimer -= diff;
 
-                if (uiSummonCrazedManaWraithTimer <= diff)
-                {
+            if (uiSummonCrazedManaWraithTimer <= diff)
+            {
                     if (Creature* Wraith = me->SummonCreature(MOB_CRAZED_MANA_WRAITH, me->GetPositionX() + 1, me->GetPositionY() + 1, me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000))
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            Wraith->AI()->AttackStart(target);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        Wraith->AI()->AttackStart(target);
                     Creature* Anomalus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ANOMALUS));
-                    if (Anomalus && Anomalus->HasAura(SPELL_RIFT_SHIELD))
+                if (Anomalus && Anomalus->HasAura(SPELL_RIFT_SHIELD))
                         uiSummonCrazedManaWraithTimer = 5000;
-                    else
+                else
                         uiSummonCrazedManaWraithTimer = 10000;
                 }
                 else
                     uiSummonCrazedManaWraithTimer -= diff;
-            }
-        };
+        }
+    };
 
         CreatureAI* GetAI(Creature* creature) const
         {

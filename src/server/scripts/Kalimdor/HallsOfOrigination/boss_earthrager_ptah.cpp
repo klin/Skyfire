@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2011-2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -17,10 +20,13 @@
  */
 
  /*
- SFName: boss_isiset
- SF%Complete: 0%
- SFComment: Needs Testing
- SFCategory: Halls Of Origination
+ Made By: Jenova
+ Project: Atlantiss Core
+
+ Known Bugs:
+
+ TODO:
+ 1. Needs Testing
  */
 
 #include "ScriptPCH.h"
@@ -82,10 +88,10 @@ class boss_ptah : public CreatureScript
         {
             boss_ptahAI(Creature* creature) : ScriptedAI(creature), Summons(me)
             {
-                instance = creature->GetInstanceScript();
+                pInstance = creature->GetInstanceScript();
             }
 
-            InstanceScript* instance;
+            InstanceScript* pInstance;
             EventMap events;
             SummonList Summons;
 
@@ -100,15 +106,15 @@ class boss_ptah : public CreatureScript
                 me->MonsterYell(SAY_DIED, 0, 0);
             }
 
-            void JustSummoned(Creature *summoned)
+            void JustSummoned(Creature *pSummoned)
             {
-                summoned->SetInCombatWithZone();
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    summoned->AI()->AttackStart(target);
-                Summons.Summon(summoned);
+                pSummoned->SetInCombatWithZone();
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
+                    pSummoned->AI()->AttackStart(pTarget);
+                Summons.Summon(pSummoned);
             }
 
-            void SummonedCreatureDespawn(Creature* summon)
+            void SummonedCreatureDespawn(Creature *summon)
             {
                 Summons.Despawn(summon);
             }
@@ -132,7 +138,7 @@ class boss_ptah : public CreatureScript
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    switch(eventId)
                     {
                     case EVENT_FLAME_BOLT:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
@@ -145,7 +151,7 @@ class boss_ptah : public CreatureScript
                         return;
                     case EVENT_EARTH_POINT:
                         me->MonsterYell(SAY_SPELL, LANG_UNIVERSAL, NULL);
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM,1,100,true))
                             DoCast(target, SPELL_EARTH_POINT);
                         events.ScheduleEvent(EVENT_EARTH_POINT, 8000);
                         return;
@@ -174,7 +180,7 @@ class boss_ptah : public CreatureScript
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_ptahAI(creature);
+                return new boss_ptahAI(creature);
     }
 };
 

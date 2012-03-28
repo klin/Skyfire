@@ -1,27 +1,31 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef TRINITY_DISABLEMGR_H
-#define TRINITY_DISABLEMGR_H
+#ifndef ARKCORE_DISABLEMGR_H
+#define ARKCORE_DISABLEMGR_H
 
-#include "Define.h"
-
+#include <ace/Singleton.h>
 class Unit;
 
 enum DisableType
@@ -32,7 +36,6 @@ enum DisableType
     DISABLE_TYPE_BATTLEGROUND           = 3,
     DISABLE_TYPE_ACHIEVEMENT_CRITERIA   = 4,
     DISABLE_TYPE_OUTDOORPVP             = 5,
-    DISABLE_TYPE_VMAP                   = 6,
 };
 
 enum SpellDisableTypes
@@ -47,19 +50,34 @@ enum SpellDisableTypes
                                 SPELL_DISABLE_DEPRECATED_SPELL | SPELL_DISABLE_MAP | SPELL_DISABLE_AREA),
 };
 
-enum VmapDisableTypes
+#define MAX_DISABLE_TYPES 6
+
+struct DisableData
 {
-    VMAP_DISABLE_AREAFLAG       = 0x1,
-    VMAP_DISABLE_HEIGHT         = 0x2,
-    VMAP_DISABLE_LOS            = 0x4,
-    VMAP_DISABLE_LIQUIDSTATUS   = 0x8,
+    uint8 flags;
+    std::set<uint32> params[2];                             // params0, params1
 };
 
-namespace DisableMgr
-{
-    void LoadDisables();
-    bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags = 0);
-    void CheckQuestDisables();
-}
+typedef std::map<uint32, DisableData> DisableTypeMap;       // single disables here with optional data
+typedef std::map<DisableType, DisableTypeMap> DisableMap;   // global disable map by source
 
-#endif //TRINITY_DISABLEMGR_H
+class DisableMgr
+{
+    friend class ACE_Singleton<DisableMgr, ACE_Null_Mutex>;
+    DisableMgr();
+    ~DisableMgr();
+
+    public:
+
+        void LoadDisables();
+        bool IsDisabledFor(DisableType type, uint32 entry, Unit const* pUnit);
+        void CheckQuestDisables();
+
+    protected:
+
+        DisableMap m_DisableMap;
+};
+
+#define sDisableMgr ACE_Singleton<DisableMgr, ACE_Null_Mutex>::instance()
+
+#endif //ARKCORE_DISABLEMGR_H

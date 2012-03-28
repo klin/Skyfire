@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,25 +24,25 @@
 
 enum Yells
 {
-    SAY_AGGRO           = -1658001,
-    SAY_SLAY_1          = -1658002,
-    SAY_SLAY_2          = -1658003,
-    SAY_DEATH           = -1658004,
-    SAY_PHASE2          = -1658005,
-    SAY_PHASE3          = -1658006,
+    SAY_AGGRO                                   = -1658001,
+    SAY_SLAY_1                                  = -1658002,
+    SAY_SLAY_2                                  = -1658003,
+    SAY_DEATH                                   = -1658004,
+    SAY_PHASE2                                  = -1658005,
+    SAY_PHASE3                                  = -1658006,
 
-    SAY_TYRANNUS_DEATH  = -1658007,
+    SAY_TYRANNUS_DEATH                          = -1659007,
 };
 
 enum Spells
 {
-    SPELL_PERMAFROST        = 70326,
-    SPELL_THROW_SARONITE    = 68788,
-    SPELL_THUNDERING_STOMP  = 68771,
-    SPELL_CHILLING_WAVE     = 68778,
-    SPELL_DEEP_FREEZE       = 70381,
-    SPELL_FORGE_MACE        = 68785,
-    SPELL_FORGE_BLADE       = 68774,
+    SPELL_PERMAFROST                            = 70326,
+    SPELL_THROW_SARONITE                        = 68788,
+    SPELL_THUNDERING_STOMP                      = 68771,
+    SPELL_CHILLING_WAVE                         = 68778,
+    SPELL_DEEP_FREEZE                           = 70381,
+    SPELL_FORGE_MACE                            = 68785,
+    SPELL_FORGE_BLADE                           = 68774,
 };
 
 #define SPELL_PERMAFROST_HELPER RAID_MODE<uint32>(68786, 70336)
@@ -67,9 +71,9 @@ enum Phases
 
 enum MiscData
 {
-    EQUIP_ID_SWORD              = 49345,
-    EQUIP_ID_MACE               = 49344,
-    ACHIEV_DOESNT_GO_TO_ELEVEN  = 0,
+    EQUIP_ID_SWORD                              = 49345,
+    EQUIP_ID_MACE                               = 49344,
+    ACHIEV_DOESNT_GO_TO_ELEVEN                  = 4524,
     POINT_FORGE                 = 0,
 };
 
@@ -78,8 +82,8 @@ Position const southForgePos = {639.257f, -210.1198f, 529.015f, 0.523599f};
 
 class boss_garfrost : public CreatureScript
 {
-    public:
-        boss_garfrost() : CreatureScript("boss_garfrost") { }
+public:
+    boss_garfrost() : CreatureScript("boss_garfrost") { }
 
         struct boss_garfrostAI : public BossAI
         {
@@ -95,34 +99,34 @@ class boss_garfrost : public CreatureScript
                     Reset();
             }
 
-            void Reset()
-            {
-                events.Reset();
+        void Reset()
+        {
+            events.Reset();
                 events.SetPhase(PHASE_ONE);
                 SetEquipmentSlots(true);
                 _permafrostStack = 0;
 
                 instance->SetBossState(DATA_GARFROST, NOT_STARTED);
-            }
+        }
 
-            void EnterCombat(Unit* /*who*/)
-            {
-                DoScriptText(SAY_AGGRO, me);
-                DoCast(me, SPELL_PERMAFROST);
+        void EnterCombat(Unit* /*who*/)
+        {
+            DoScriptText(SAY_AGGRO, me);
+            DoCast(me, SPELL_PERMAFROST);
                 events.ScheduleEvent(EVENT_THROW_SARONITE, 7000);
 
                 instance->SetBossState(DATA_GARFROST, IN_PROGRESS);
-            }
+        }
 
-            void KilledUnit(Unit* victim)
-            {
+        void KilledUnit(Unit * victim)
+        {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
-                    DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2), me);
-            }
+            DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2), me);
+        }
 
-            void JustDied(Unit* /*killer*/)
-            {
-                DoScriptText(SAY_DEATH, me);
+        void JustDied(Unit* /*killer*/)
+        {
+            DoScriptText(SAY_DEATH, me);
                 if (Creature* tyrannus = me->GetCreature(*me, instance->GetData64(DATA_TYRANNUS)))
                     DoScriptText(SAY_TYRANNUS_DEATH, tyrannus);
 
@@ -165,7 +169,7 @@ class boss_garfrost : public CreatureScript
                 events.ScheduleEvent(EVENT_RESUME_ATTACK, 5000);
             }
 
-            void SpellHitTarget(Unit* target, const SpellInfo* spell)
+            void SpellHitTarget(Unit* target, const SpellEntry* spell)
             {
                 if (spell->Id == SPELL_PERMAFROST_HELPER)
                 {
@@ -181,23 +185,23 @@ class boss_garfrost : public CreatureScript
             uint32 GetData(uint32 /*type*/)
             {
                 return _permafrostStack;
-            }
+        }
 
-            void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STAT_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch(eventId)
                 {
-                    switch (eventId)
-                    {
-                        case EVENT_THROW_SARONITE:
+                    case EVENT_THROW_SARONITE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_THROW_SARONITE);
                             events.ScheduleEvent(EVENT_THROW_SARONITE, urand(12500, 20000));
@@ -227,15 +231,15 @@ class boss_garfrost : public CreatureScript
                             break;
                         default:
                             break;
-                    }
                 }
-
-                DoMeleeAttackIfReady();
             }
+
+            DoMeleeAttackIfReady();
+        }
 
         private:
             uint32 _permafrostStack;
-        };
+    };
 
         CreatureAI* GetAI(Creature* creature) const
         {

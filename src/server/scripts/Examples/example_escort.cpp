@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -28,23 +36,23 @@ EndScriptData */
 
 enum eEnums
 {
-    NPC_FELBOAR                 = 21878, 
+    NPC_FELBOAR                 = 21878,
 
-    SPELL_DEATH_COIL            = 33130, 
-    SPELL_ELIXIR_OF_FORTITUDE   = 3593, 
-    SPELL_BLUE_FIREWORK         = 11540, 
+    SPELL_DEATH_COIL            = 33130,
+    SPELL_ELIXIR_OF_FORTITUDE   = 3593,
+    SPELL_BLUE_FIREWORK         = 11540,
 
-    SAY_AGGRO1                  = -1999910, 
-    SAY_AGGRO2                  = -1999911, 
-    SAY_WP_1                    = -1999912, 
-    SAY_WP_2                    = -1999913, 
-    SAY_WP_3                    = -1999914, 
-    SAY_WP_4                    = -1999915, 
-    SAY_DEATH_1                 = -1999916, 
-    SAY_DEATH_2                 = -1999917, 
-    SAY_DEATH_3                 = -1999918, 
-    SAY_SPELL                   = -1999919, 
-    SAY_RAND_1                  = -1999920, 
+    SAY_AGGRO1                  = -1999910,
+    SAY_AGGRO2                  = -1999911,
+    SAY_WP_1                    = -1999912,
+    SAY_WP_2                    = -1999913,
+    SAY_WP_3                    = -1999914,
+    SAY_WP_4                    = -1999915,
+    SAY_DEATH_1                 = -1999916,
+    SAY_DEATH_2                 = -1999917,
+    SAY_DEATH_3                 = -1999918,
+    SAY_SPELL                   = -1999919,
+    SAY_RAND_1                  = -1999920,
     SAY_RAND_2                  = -1999921
 };
 
@@ -64,14 +72,14 @@ class example_escort : public CreatureScript
         struct example_escortAI : public npc_escortAI
         {
             // CreatureAI functions
-            example_escortAI(Creature* creature) : npc_escortAI(creature) { }
+            example_escortAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 
             uint32 m_uiDeathCoilTimer;
             uint32 m_uiChatTimer;
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* pSummoned)
             {
-                summoned->AI()->AttackStart(me);
+                pSummoned->AI()->AttackStart(me);
             }
 
             // Pure Virtual Functions (Have to be implemented)
@@ -87,23 +95,23 @@ class example_escort : public CreatureScript
                         me->SummonCreature(NPC_FELBOAR, me->GetPositionX()+5.0f, me->GetPositionY()+7.0f, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
                         break;
                     case 4:
-                        if (Player* player = GetPlayerForEscort())
+                        if (Player* pPlayer = GetPlayerForEscort())
                         {
                             //pTmpPlayer is the target of the text
-                            DoScriptText(SAY_WP_3, me, player);
+                            DoScriptText(SAY_WP_3, me, pPlayer);
                             //pTmpPlayer is the source of the text
-                            DoScriptText(SAY_WP_4, player);
+                            DoScriptText(SAY_WP_4, pPlayer);
                         }
                         break;
                 }
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*pWho*/)
             {
                 if (HasEscortState(STATE_ESCORT_ESCORTING))
                 {
-                    if (Player* player = GetPlayerForEscort())
-                        DoScriptText(SAY_AGGRO1, me, player);
+                    if (Player* pPlayer = GetPlayerForEscort())
+                        DoScriptText(SAY_AGGRO1, me, pPlayer);
                 }
                 else
                     DoScriptText(SAY_AGGRO2, me);
@@ -115,19 +123,19 @@ class example_escort : public CreatureScript
                 m_uiChatTimer = 4000;
             }
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* pKiller)
             {
                 if (HasEscortState(STATE_ESCORT_ESCORTING))
                 {
-                    if (Player* player = GetPlayerForEscort())
+                    if (Player* pPlayer = GetPlayerForEscort())
                     {
                         // not a likely case, code here for the sake of example
-                        if (killer == me)
+                        if (pKiller == me)
                         {
-                            DoScriptText(SAY_DEATH_1, me, player);
+                            DoScriptText(SAY_DEATH_1, me, pPlayer);
                         }
                         else
-                            DoScriptText(SAY_DEATH_2, me, player);
+                            DoScriptText(SAY_DEATH_2, me, pPlayer);
                     }
                 }
                 else
@@ -178,49 +186,49 @@ class example_escort : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* pCreature) const
         {
-            return new example_escortAI(creature);
+            return new example_escortAI(pCreature);
         }
 
-        bool OnGossipHello(Player* player, Creature* creature)
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
-            player->TalkedToCreature(creature->GetEntry(), creature->GetGUID());
-            player->PrepareGossipMenu(creature, 0);
+            pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetGUID());
+            pPlayer->PrepareGossipMenu(pCreature, 0);
 
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
 
-            player->SendPreparedGossip(creature);
+            pPlayer->SendPreparedGossip(pCreature);
 
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 action)
+        bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
         {
-            player->PlayerTalkClass->ClearMenus();
-            npc_escortAI* pEscortAI = CAST_AI(example_escort::example_escortAI, creature->AI());
+            pPlayer->PlayerTalkClass->ClearMenus();
+            npc_escortAI* pEscortAI = CAST_AI(example_escort::example_escortAI, pCreature->AI());
 
-            switch (action)
+            switch(uiAction)
             {
                 case GOSSIP_ACTION_INFO_DEF+1:
-                    player->CLOSE_GOSSIP_MENU();
+                    pPlayer->CLOSE_GOSSIP_MENU();
 
                     if (pEscortAI)
-                        pEscortAI->Start(true, true, player->GetGUID());
+                        pEscortAI->Start(true, true, pPlayer->GetGUID());
                     break;
                 case GOSSIP_ACTION_INFO_DEF+2:
-                    player->CLOSE_GOSSIP_MENU();
+                    pPlayer->CLOSE_GOSSIP_MENU();
 
                     if (pEscortAI)
-                        pEscortAI->Start(false, false, player->GetGUID());
+                        pEscortAI->Start(false, false, pPlayer->GetGUID());
                     break;
                 case GOSSIP_ACTION_INFO_DEF+3:
-                    player->CLOSE_GOSSIP_MENU();
+                    pPlayer->CLOSE_GOSSIP_MENU();
 
                     if (pEscortAI)
-                        pEscortAI->Start(false, true, player->GetGUID());
+                        pEscortAI->Start(false, true, pPlayer->GetGUID());
                     break;
                 default:
                     return false;                                   // nothing defined      -> trinity core handling

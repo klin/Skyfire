@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -31,11 +31,11 @@ enum Spells
 {
     // General Zarithrian
     SPELL_INTIMIDATING_ROAR     = 74384,
-    SPELL_CLEAVE_ARMOR          = 74367,
+    SPELL_CLEAVE_ARMOR               = 74367,
     // Zarithrian Spawn Stalker
     SPELL_SUMMON_FLAMECALLER    = 74398,
     // Onyx Flamecaller
-    SPELL_BLAST_NOVA            = 74392,
+    SPELL_BLAST_NOVA                 = 74392,
     SPELL_LAVA_GOUT             = 74394,
 };
 
@@ -43,7 +43,7 @@ enum Events
 {
     // General Zarithrian
     EVENT_CLEAVE                    = 1,
-    EVENT_INTIDMDATING_ROAR         = 2,
+    EVENT_INTIMIDATING_ROAR         = 2,
     EVENT_SUMMON_ADDS               = 3,
     // Onyx Flamecaller
     EVENT_BLAST_NOVA                = 4,
@@ -52,7 +52,7 @@ enum Events
 
 uint32 const MAX_PATH_FLAMECALLER_WAYPOINTS = 12;
 
-Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS*2] =
+Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS * 2] =
 {
     // East
     {3042.971f, 419.8809f, 86.94320f, 0.0f},
@@ -84,8 +84,8 @@ Position const FlamecallerWaypoints[MAX_PATH_FLAMECALLER_WAYPOINTS*2] =
 
 class boss_general_zarithrian : public CreatureScript
 {
-    public:
-        boss_general_zarithrian() : CreatureScript("boss_general_zarithrian") { }
+public:
+    boss_general_zarithrian() : CreatureScript("boss_general_zarithrian") { }
 
         struct boss_general_zarithrianAI : public BossAI
         {
@@ -93,11 +93,11 @@ class boss_general_zarithrian : public CreatureScript
             {
             }
 
-            void Reset()
-            {
+        void Reset()
+        {
                 _Reset();
                 if (instance->GetBossState(DATA_SAVIANA_RAGEFIRE) == DONE && instance->GetBossState(DATA_BALTHARUS_THE_WARBORN) == DONE)
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -106,12 +106,12 @@ class boss_general_zarithrian : public CreatureScript
                 Talk(SAY_AGGRO);
                 events.Reset();
                 events.ScheduleEvent(EVENT_CLEAVE, 15000);
-                events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
+                events.ScheduleEvent(EVENT_INTIMIDATING_ROAR, 42000);
                 events.ScheduleEvent(EVENT_SUMMON_ADDS, 40000);
-            }
+        }
 
-            void JustReachedHome()
-            {
+        void JustReachedHome()
+        {
                 _JustReachedHome();
                 instance->SetBossState(DATA_GENERAL_ZARITHRIAN, FAIL);
             }
@@ -135,9 +135,9 @@ class boss_general_zarithrian : public CreatureScript
             }
 
             void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim())
-                    return;
+        {
+            if (!UpdateVictim())
+                return;
 
                 // Can't use room boundary here, the gameobject is spawned at the same position as the boss. This is just as good anyway.
                 if (me->GetPositionX() > 3060.0f)
@@ -148,7 +148,7 @@ class boss_general_zarithrian : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+                if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -165,9 +165,9 @@ class boss_general_zarithrian : public CreatureScript
                             events.ScheduleEvent(EVENT_SUMMON_ADDS, 42000);
                             break;
                         }
-                        case EVENT_INTIDMDATING_ROAR:
+                        case EVENT_INTIMIDATING_ROAR:
                             DoCast(me, SPELL_INTIMIDATING_ROAR, true);
-                            events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
+                            events.ScheduleEvent(EVENT_INTIMIDATING_ROAR, 42000);
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE_ARMOR);
                             events.ScheduleEvent(EVENT_CLEAVE, 15000);
@@ -177,9 +177,9 @@ class boss_general_zarithrian : public CreatureScript
                     }
                 }
 
-                DoMeleeAttackIfReady();
-            }
-        };
+            DoMeleeAttackIfReady();
+        }
+    };
 
         CreatureAI* GetAI(Creature* creature) const
         {
@@ -189,7 +189,7 @@ class boss_general_zarithrian : public CreatureScript
 
 class npc_onyx_flamecaller : public CreatureScript
 {
-    public:
+public:
         npc_onyx_flamecaller() : CreatureScript("npc_onyx_flamecaller") { }
 
         struct npc_onyx_flamecallerAI : public npc_escortAI
@@ -200,8 +200,8 @@ class npc_onyx_flamecaller : public CreatureScript
                 npc_escortAI::SetDespawnAtEnd(false);
             }
 
-            void Reset()
-            {
+        void Reset()
+        {
                 _lavaGoutCount = 0;
                 me->setActive(true);
                 AddWaypoints();
@@ -245,19 +245,19 @@ class npc_onyx_flamecaller : public CreatureScript
                 }
                 else
                 {
-                    for (uint8 i = 0, j = MAX_PATH_FLAMECALLER_WAYPOINTS; j < MAX_PATH_FLAMECALLER_WAYPOINTS*2; j++, i++)
+                    for (uint8 i = 0, j = MAX_PATH_FLAMECALLER_WAYPOINTS; j < MAX_PATH_FLAMECALLER_WAYPOINTS * 2; j++, i++)
                         AddWaypoint(i, FlamecallerWaypoints[j].GetPositionX(), FlamecallerWaypoints[j].GetPositionY(), FlamecallerWaypoints[j].GetPositionZ());
                 }
             }
 
             void UpdateEscortAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
+            if (!UpdateVictim())
+                return;
 
                 _events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+                if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
                 while (uint32 eventId = _events.ExecuteEvent())
@@ -284,14 +284,14 @@ class npc_onyx_flamecaller : public CreatureScript
                     }
                 }
 
-                DoMeleeAttackIfReady();
-            }
+            DoMeleeAttackIfReady();
+        }
         private:
             EventMap _events;
             bool _movementComplete;
             InstanceScript* _instance;
             uint8 _lavaGoutCount;
-        };
+    };
 
         CreatureAI* GetAI(Creature* creature) const
         {

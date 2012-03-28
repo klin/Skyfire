@@ -48,7 +48,7 @@ static int CheckIfAllFilesKnown(TMPQArchive * ha, const char * szListFile, LPDWO
     if (nError == ERROR_SUCCESS)
     {
         pFileTableEnd = ha->pFileTable + ha->dwFileTableSize;
-        for (pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++, dwBlockIndex++)
+        for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++, dwBlockIndex++)
         {
             if (pFileEntry->dwFlags & MPQ_FILE_EXISTS)
             {
@@ -93,7 +93,7 @@ static int CopyNonMpqData(
     int nError = ERROR_SUCCESS;
 
     // Copy the data
-    while (DataSize > 0)
+    while(DataSize > 0)
     {
         // Get the proper size of data
         dwToRead = sizeof(DataBuffer);
@@ -212,7 +212,7 @@ static int CopyMpqFileSectors(
     // recompression, because recompression is not necessary in this case
     if (nError == ERROR_SUCCESS)
     {
-        for (DWORD dwSector = 0; dwSector < hf->dwDataSectors; dwSector++)
+        for(DWORD dwSector = 0; dwSector < hf->dwDataSectors; dwSector++)
         {
             DWORD dwRawDataInSector = hf->dwSectorSize;
             DWORD dwRawByteOffset = dwSector * hf->dwSectorSize;
@@ -332,7 +332,7 @@ static int CopyMpqFiles(TMPQArchive * ha, LPDWORD pFileKeys, TFileStream * pNewS
     int nError = ERROR_SUCCESS;
 
     // Walk through all files and write them to the destination MPQ archive
-    for (pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
+    for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
     {
         // Copy all the file sectors
         // Only do that when the file has nonzero size
@@ -603,7 +603,7 @@ bool WINAPI SFileSetHashTableSize(HANDLE hMpq, DWORD dwNewTableSize)
         ha->pHeader->dwHashTableSize = dwNewTableSize;
 
         // Make new hash table entry for each file
-        for (pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
+        for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
         {
             if (pFileEntry->dwFlags & MPQ_FILE_EXISTS)
             {

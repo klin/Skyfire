@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -41,14 +49,14 @@ class boss_murmur : public CreatureScript
 public:
     boss_murmur() : CreatureScript("boss_murmur") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_murmurAI (creature);
+        return new boss_murmurAI (pCreature);
     }
 
     struct boss_murmurAI : public ScriptedAI
     {
-        boss_murmurAI(Creature* c) : ScriptedAI(c)
+        boss_murmurAI(Creature *c) : ScriptedAI(c)
         {
             SetCombatMovement(false);
         }
@@ -64,9 +72,9 @@ public:
         void Reset()
         {
             SonicBoom_Timer = 30000;
-            MurmursTouch_Timer = urand(8000, 20000);
+            MurmursTouch_Timer = 8000 + rand()%12000;
             Resonance_Timer = 5000;
-            MagneticPull_Timer = urand(15000, 30000);
+            MagneticPull_Timer = 15000 + rand()%15000;
             ThunderingStorm_Timer = 15000;
             SonicShock_Timer = 10000;
             SonicBoom = false;
@@ -79,29 +87,29 @@ public:
 
         void SonicBoomEffect()
         {
-            std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
-            for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+            std::list<HostileReference *> t_list = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference *>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
             {
-               Unit* target = Unit::GetUnit(*me, (*itr)->getUnitGuid());
-               if (target && target->GetTypeId() == TYPEID_PLAYER)
+               Unit *pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+               if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
                {
                    //Not do anything without aura, spell can be resisted!
-                   if (target->HasAura(SPELL_SONIC_BOOM_CAST) && me->IsWithinDistInMap(target, 34.0f))
+                   if (pTarget->HasAura(SPELL_SONIC_BOOM_CAST) && me->IsWithinDistInMap(pTarget, 34.0f))
                    {
                        //This will be wrong calculation. Also, comments suggest it must deal damage
-                       target->SetHealth(target->CountPctFromMaxHealth(20));
+                       pTarget->SetHealth(pTarget->CountPctFromMaxHealth(20));
                    }
                }
             }
         }
 
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat(Unit * /*who*/) { }
 
         // Sonic Boom instant damage (needs core fix instead of this)
-        void SpellHitTarget(Unit* target, const SpellInfo* spell)
+        void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
         {
-            if (target && target->isAlive() && spell && spell->Id == uint32(SPELL_SONIC_BOOM_EFFECT))
-                me->DealDamage(target, (target->GetHealth()*90)/100, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NATURE, spell);
+            if (pTarget && pTarget->isAlive() && spell && spell->Id == uint32(SPELL_SONIC_BOOM_EFFECT))
+                me->DealDamage(pTarget, (pTarget->GetHealth()*90)/100, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NATURE, spell);
         }
 
         void UpdateAI(const uint32 diff)
@@ -131,9 +139,9 @@ public:
             // Murmur's Touch
             if (MurmursTouch_Timer <= diff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80, true))
-                    DoCast(target, SPELL_MURMURS_TOUCH);
-                MurmursTouch_Timer = urand(25000, 35000);
+                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 80, true))
+                    DoCast(pTarget, SPELL_MURMURS_TOUCH);
+                MurmursTouch_Timer = 25000 + rand()%10000;
             } else MurmursTouch_Timer -= diff;
 
             // Resonance
@@ -149,10 +157,10 @@ public:
             // Magnetic Pull
             if (MagneticPull_Timer <= diff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    if (target->GetTypeId() == TYPEID_PLAYER && target->isAlive())
+                if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive())
                     {
-                        DoCast(target, SPELL_MAGNETIC_PULL);
+                        DoCast(pTarget, SPELL_MAGNETIC_PULL);
                         MagneticPull_Timer = 15000+rand()%15000;
                         return;
                     }
@@ -166,18 +174,18 @@ public:
                 {
                     std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
                     for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
-                        if (Unit* target = Unit::GetUnit((*me), (*i)->getUnitGuid()))
-                            if (target->isAlive() && !me->IsWithinDist(target, 35, false))
-                                DoCast(target, SPELL_THUNDERING_STORM, true);
+                        if (Unit *pTarget = Unit::GetUnit((*me), (*i)->getUnitGuid()))
+                            if (pTarget->isAlive() && !me->IsWithinDist(pTarget, 35, false))
+                                DoCast(pTarget, SPELL_THUNDERING_STORM, true);
                     ThunderingStorm_Timer = 15000;
                 } else ThunderingStorm_Timer -= diff;
 
                 // Sonic Shock
                 if (SonicShock_Timer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20, false))
-                        if (target->isAlive())
-                            DoCast(target, SPELL_SONIC_SHOCK);
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 20, false))
+                        if (pTarget->isAlive())
+                            DoCast(pTarget, SPELL_SONIC_SHOCK);
                     SonicShock_Timer = 10000+rand()%10000;
                 } else SonicShock_Timer -= diff;
             }
@@ -189,10 +197,10 @@ public:
             {
                 std::list<HostileReference*>& m_threatlist = me->getThreatManager().getThreatList();
                 for (std::list<HostileReference*>::const_iterator i = m_threatlist.begin(); i != m_threatlist.end(); ++i)
-                    if (Unit* target = Unit::GetUnit((*me), (*i)->getUnitGuid()))
-                        if (target->isAlive() && me->IsWithinMeleeRange(target))
+                    if (Unit *pTarget = Unit::GetUnit((*me), (*i)->getUnitGuid()))
+                        if (pTarget->isAlive() && me->IsWithinMeleeRange(pTarget))
                         {
-                            me->TauntApply(target);
+                            me->TauntApply(pTarget);
                             break;
                         }
             }

@@ -1,28 +1,35 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
-SDName: Boss_Baron_Rivendare
-SD%Complete: 70
-SDComment: aura applied/defined in database
-SDCategory: Stratholme
-EndScriptData */
+ SDName: Boss_Baron_Rivendare
+ SD%Complete: 70
+ SDComment: aura applied/defined in database
+ SDCategory: Stratholme
+ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "stratholme.h"
@@ -70,7 +77,6 @@ EndScriptData */
 
 #define SPELL_UNHOLY_AURA   17467
 #define SPELL_RAISEDEAD     17473                           //triggers death pact (17471)
-
 #define SPELL_RAISE_DEAD1   17475
 #define SPELL_RAISE_DEAD2   17476
 #define SPELL_RAISE_DEAD3   17477
@@ -78,117 +84,116 @@ EndScriptData */
 #define SPELL_RAISE_DEAD5   17479
 #define SPELL_RAISE_DEAD6   17480
 
-class boss_baron_rivendare : public CreatureScript
-{
+class boss_baron_rivendare: public CreatureScript {
 public:
-    boss_baron_rivendare() : CreatureScript("boss_baron_rivendare") { }
+	boss_baron_rivendare() :
+			CreatureScript("boss_baron_rivendare") {
+	}
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_baron_rivendareAI (creature);
-    }
+	CreatureAI* GetAI(Creature* pCreature) const {
+		return new boss_baron_rivendareAI(pCreature);
+	}
 
-    struct boss_baron_rivendareAI : public ScriptedAI
-    {
-        boss_baron_rivendareAI(Creature* creature) : ScriptedAI(creature)
-        {
-            instance = me->GetInstanceScript();
-        }
+	struct boss_baron_rivendareAI: public ScriptedAI {
+		boss_baron_rivendareAI(Creature *c) :
+				ScriptedAI(c) {
+			pInstance = me->GetInstanceScript();
+		}
 
-        InstanceScript* instance;
+		InstanceScript* pInstance;
 
-        uint32 ShadowBolt_Timer;
-        uint32 Cleave_Timer;
-        uint32 MortalStrike_Timer;
-        //    uint32 RaiseDead_Timer;
-        uint32 SummonSkeletons_Timer;
+		uint32 ShadowBolt_Timer;
+		uint32 Cleave_Timer;
+		uint32 MortalStrike_Timer;
+		//    uint32 RaiseDead_Timer;
+		uint32 SummonSkeletons_Timer;
 
-        void Reset()
-        {
-            ShadowBolt_Timer = 5000;
-            Cleave_Timer = 8000;
-            MortalStrike_Timer = 12000;
-            //        RaiseDead_Timer = 30000;
-            SummonSkeletons_Timer = 34000;
-            if (instance && instance->GetData(TYPE_RAMSTEIN) == DONE)
-                instance->SetData(TYPE_BARON, NOT_STARTED);
-        }
+		void Reset() {
+			ShadowBolt_Timer = 5000;
+			Cleave_Timer = 8000;
+			MortalStrike_Timer = 12000;
+			//        RaiseDead_Timer = 30000;
+			SummonSkeletons_Timer = 34000;
+			if (pInstance && pInstance->GetData(TYPE_RAMSTEIN) == DONE)
+				pInstance->SetData(TYPE_BARON, NOT_STARTED);
+		}
 
-        void AttackStart(Unit* who)
-        {
-            if (instance)//can't use entercombat(), boss' dmg aura sets near players in combat, before entering the room's door
-                instance->SetData(TYPE_BARON, IN_PROGRESS);
-            ScriptedAI::AttackStart(who);
-        }
+		void AttackStart(Unit* who) {
+			if (pInstance) //can't use entercombat(), boss' dmg aura sets near players in combat, before entering the room's door
+				pInstance->SetData(TYPE_BARON, IN_PROGRESS);
+			ScriptedAI::AttackStart(who);
+		}
 
-        void JustSummoned(Creature* summoned)
-        {
-            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                summoned->AI()->AttackStart(target);
-        }
+		void JustSummoned(Creature* summoned) {
+			if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+				summoned->AI()->AttackStart(pTarget);
+		}
 
-         void JustDied(Unit* /*Killer*/)
-         {
-             if (instance)
-                 instance->SetData(TYPE_BARON, DONE);
-         }
+		void JustDied(Unit* /*Killer*/) {
+			if (pInstance)
+				pInstance->SetData(TYPE_BARON, DONE);
+		}
 
-        void UpdateAI(const uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
+		void UpdateAI(const uint32 diff) {
+			if (!UpdateVictim())
+				return;
 
-            //ShadowBolt
-            if (ShadowBolt_Timer <= diff)
-            {
-                if (SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(me->getVictim(), SPELL_SHADOWBOLT);
+			//ShadowBolt
+			if (ShadowBolt_Timer <= diff) {
+				if (SelectUnit(SELECT_TARGET_RANDOM, 0))
+					DoCast(me->getVictim(), SPELL_SHADOWBOLT);
 
-                ShadowBolt_Timer = 10000;
-            } else ShadowBolt_Timer -= diff;
+				ShadowBolt_Timer = 10000;
+			} else
+				ShadowBolt_Timer -= diff;
 
-            //Cleave
-            if (Cleave_Timer <= diff)
-            {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
-                //13 seconds until we should cast this again
-                Cleave_Timer = 7000 + (rand()%10000);
-            } else Cleave_Timer -= diff;
+			//Cleave
+			if (Cleave_Timer <= diff) {
+				DoCast(me->getVictim(), SPELL_CLEAVE);
+				//13 seconds until we should cast this again
+				Cleave_Timer = 7000 + (rand() % 10000);
+			} else
+				Cleave_Timer -= diff;
 
-            //MortalStrike
-            if (MortalStrike_Timer <= diff)
-            {
-                DoCast(me->getVictim(), SPELL_MORTALSTRIKE);
-                MortalStrike_Timer = 10000 + (rand()%15000);
-            } else MortalStrike_Timer -= diff;
+			//MortalStrike
+			if (MortalStrike_Timer <= diff) {
+				DoCast(me->getVictim(), SPELL_MORTALSTRIKE);
+				MortalStrike_Timer = 10000 + (rand() % 15000);
+			} else
+				MortalStrike_Timer -= diff;
 
-            //RaiseDead
-            //            if (RaiseDead_Timer <= diff)
-            //          {
-            //      DoCast(me, SPELL_RAISEDEAD);
-            //                RaiseDead_Timer = 45000;
-            //            } else RaiseDead_Timer -= diff;
+			//RaiseDead
+			//            if (RaiseDead_Timer <= diff)
+			//          {
+			//      DoCast(me, SPELL_RAISEDEAD);
+			//                RaiseDead_Timer = 45000;
+			//            } else RaiseDead_Timer -= diff;
 
-            //SummonSkeletons
-            if (SummonSkeletons_Timer <= diff)
-            {
-                me->SummonCreature(11197, ADD_1X, ADD_1Y, ADD_1Z, ADD_1O, TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_2X, ADD_2Y, ADD_2Z, ADD_2O, TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_3X, ADD_3Y, ADD_3Z, ADD_3O, TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_4X, ADD_4Y, ADD_4Z, ADD_4O, TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_5X, ADD_5Y, ADD_5Z, ADD_5O, TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_6X, ADD_6Y, ADD_6Z, ADD_6O, TEMPSUMMON_TIMED_DESPAWN, 29000);
+			//SummonSkeletons
+			if (SummonSkeletons_Timer <= diff) {
+				me->SummonCreature(11197, ADD_1X, ADD_1Y, ADD_1Z, ADD_1O,
+						TEMPSUMMON_TIMED_DESPAWN, 29000);
+				me->SummonCreature(11197, ADD_2X, ADD_2Y, ADD_2Z, ADD_2O,
+						TEMPSUMMON_TIMED_DESPAWN, 29000);
+				me->SummonCreature(11197, ADD_3X, ADD_3Y, ADD_3Z, ADD_3O,
+						TEMPSUMMON_TIMED_DESPAWN, 29000);
+				me->SummonCreature(11197, ADD_4X, ADD_4Y, ADD_4Z, ADD_4O,
+						TEMPSUMMON_TIMED_DESPAWN, 29000);
+				me->SummonCreature(11197, ADD_5X, ADD_5Y, ADD_5Z, ADD_5O,
+						TEMPSUMMON_TIMED_DESPAWN, 29000);
+				me->SummonCreature(11197, ADD_6X, ADD_6Y, ADD_6Z, ADD_6O,
+						TEMPSUMMON_TIMED_DESPAWN, 29000);
 
-                //34 seconds until we should cast this again
-                SummonSkeletons_Timer = 40000;
-            } else SummonSkeletons_Timer -= diff;
+				//34 seconds until we should cast this again
+				SummonSkeletons_Timer = 40000;
+			} else
+				SummonSkeletons_Timer -= diff;
 
-            DoMeleeAttackIfReady();
-        }
-    };
+			DoMeleeAttackIfReady();
+		}
+	};
 };
 
-void AddSC_boss_baron_rivendare()
-{
-    new boss_baron_rivendare();
+void AddSC_boss_baron_rivendare() {
+	new boss_baron_rivendare();
 }

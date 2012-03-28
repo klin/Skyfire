@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -67,11 +71,11 @@ enum Events
 
 const Position PortalLocation[] =
 {
-    {1877.51f, 850.104f, 44.6599f, 4.7822f },    // WP 1
-    {1918.37f, 853.437f, 47.1624f, 4.12294f},    // WP 2
-    {1936.07f, 803.198f, 53.3749f, 3.12414f},    // WP 3
-    {1927.61f, 758.436f, 51.4533f, 2.20891f},    // WP 4
-    {1890.64f, 753.471f, 48.7224f, 1.71042f},    // WP 5
+    {1877.51f, 850.104f, 44.6599f, 4.7822f },     // WP 1
+    {1918.37f, 853.437f, 47.1624f, 4.12294f},     // WP 2
+    {1936.07f, 803.198f, 53.3749f, 3.12414f},     // WP 3
+    {1927.61f, 758.436f, 51.4533f, 2.20891f},     // WP 4
+    {1890.64f, 753.471f, 48.7224f, 1.71042f},     // WP 5
     {1908.31f, 809.657f, 38.7037f, 3.08701f}      // WP 6
 };
 
@@ -204,6 +208,7 @@ public:
             uiCountErekemGuards = 0;
             uiCountActivationCrystals = 0;
             uiCyanigosaEventPhase = 1;
+            uiMainEventPhase = NOT_STARTED;
 
             uiActivationTimer = 5000;
             uiDoorSpellTimer = 2000;
@@ -249,7 +254,7 @@ public:
                     if (uiCountErekemGuards < 2)
                     {
                         uiErekemGuard[uiCountErekemGuards++] = creature->GetGUID();
-                        creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                        creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                     }
                     break;
                 case CREATURE_MORAGG:
@@ -257,7 +262,7 @@ public:
                     break;
                 case CREATURE_CYANIGOSA:
                     uiCyanigosa = creature->GetGUID();
-                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                     break;
                 case CREATURE_SINCLARI:
                     uiSinclari = creature->GetGUID();
@@ -314,16 +319,20 @@ public:
             switch (type)
             {
                 case DATA_1ST_BOSS_EVENT:
-                    UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, CREATURE_EREKEM, NULL);
+                    if(m_auiEncounter[0] != DONE)
+                    {
                     m_auiEncounter[0] = data;
                     if (data == DONE)
                         SaveToDB();
+                    }
                     break;
                 case DATA_2ND_BOSS_EVENT:
-                    UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, CREATURE_MORAGG, NULL);
+                    if(m_auiEncounter[1] != DONE)
+                    {
                     m_auiEncounter[1] = data;
                     if (data == DONE)
                         SaveToDB();
+                    }
                     break;
                 case DATA_CYANIGOSA_EVENT:
                     m_auiEncounter[2] = data;
@@ -333,6 +342,8 @@ public:
                         uiMainEventPhase = DONE;
                         if (GameObject* pMainDoor = instance->GetGameObject(uiMainDoor))
                             pMainDoor->SetGoState(GO_STATE_ACTIVE);
+                        //if (!bCrystalActivated && uiDoorIntegrity == 100)
+                        //    DoCompleteAchievement(ACHIEV_DEFENSELESS);
                     }
                     break;
                 case DATA_WAVE_COUNT:
@@ -499,18 +510,18 @@ public:
                     if (Creature* pGuard1 = instance->GetCreature(uiErekemGuard[0]))
                     {
                         if (bForceRespawn)
-                            pGuard1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                            pGuard1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                         else
-                            pGuard1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                            pGuard1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                         pGuard1->GetMotionMaster()->MovePoint(0, BossStartMove21);
                     }
 
                     if (Creature* pGuard2 = instance->GetCreature(uiErekemGuard[1]))
                     {
                         if (bForceRespawn)
-                            pGuard2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                            pGuard2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                         else
-                            pGuard2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                            pGuard2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                         pGuard2->GetMotionMaster()->MovePoint(0, BossStartMove22);
                     }
                     break;
@@ -543,7 +554,7 @@ public:
             // generic boss state changes
             if (pBoss)
             {
-                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                 pBoss->SetReactState(REACT_AGGRESSIVE);
 
                 if (!bForceRespawn)
@@ -554,7 +565,7 @@ public:
                         pBoss->Respawn();
                         pBoss->RemoveLootMode(1);
                     }
-                    pBoss->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                    pBoss->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                     uiWaveCount = 0;
                 }
             }
@@ -750,7 +761,7 @@ public:
                         case 3:
                             pCyanigosa->RemoveAurasDueToSpell(CYANIGOSA_BLUE_AURA);
                             pCyanigosa->CastSpell(pCyanigosa, CYANIGOSA_SPELL_TRANSFORM, 0);
-                            pCyanigosa->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_NON_ATTACKABLE);
+                            pCyanigosa->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE|UNIT_FLAG_NON_ATTACKABLE);
                             pCyanigosa->SetReactState(REACT_AGGRESSIVE);
                             uiCyanigosaEventTimer = 2*IN_MILLISECONDS;
                             ++uiCyanigosaEventPhase;

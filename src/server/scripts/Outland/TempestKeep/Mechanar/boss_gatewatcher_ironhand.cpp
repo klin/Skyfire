@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -58,7 +66,7 @@ class boss_gatewatcher_iron_hand : public CreatureScript
             // Gatewatcher Iron-Hand AI
             struct boss_gatewatcher_iron_handAI : public ScriptedAI
             {
-                boss_gatewatcher_iron_handAI(Creature* creature) : ScriptedAI(creature)
+                boss_gatewatcher_iron_handAI(Creature* pCreature) : ScriptedAI(pCreature)
                 {
                 }
 
@@ -72,7 +80,7 @@ class boss_gatewatcher_iron_hand : public CreatureScript
                     Jackhammer_Timer = 45000;
                     Stream_of_Machine_Fluid_Timer = 55000;
                 }
-                void EnterCombat(Unit* /*who*/)
+                void EnterCombat(Unit * /*who*/)
                 {
                     DoScriptText(SAY_AGGRO_1, me);
                 }
@@ -101,7 +109,7 @@ class boss_gatewatcher_iron_hand : public CreatureScript
                     if (Shadow_Power_Timer <= diff)
                     {
                         DoCast(me, SPELL_SHADOW_POWER);
-                        Shadow_Power_Timer = urand(20000, 28000);
+                        Shadow_Power_Timer = 20000 + rand()%8000;
                     }
                     else
                         Shadow_Power_Timer -= diff;
@@ -127,7 +135,7 @@ class boss_gatewatcher_iron_hand : public CreatureScript
                     if (Stream_of_Machine_Fluid_Timer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_STREAM_OF_MACHINE_FLUID);
-                        Stream_of_Machine_Fluid_Timer = urand(35000, 50000);
+                        Stream_of_Machine_Fluid_Timer = 35000 + rand()%15000;
                     }
                     else
                         Stream_of_Machine_Fluid_Timer -= diff;

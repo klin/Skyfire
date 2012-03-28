@@ -1,23 +1,3 @@
-/*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
-
 #include "dbcfile.h"
 #include "mpq_libmpq04.h"
 #undef min
@@ -40,9 +20,9 @@ bool DBCFile::open()
         return false;
 
     unsigned char header[4];
-    unsigned int na, nb, es, ss;
+    unsigned int na,nb,es,ss;
 
-    f.read(header, 4); // File Header
+    f.read(header,4); // File Header
 
     if (header[0]!='W' || header[1]!='D' || header[2]!='B' || header[3] != 'C')
     {
@@ -54,10 +34,10 @@ bool DBCFile::open()
 
     //assert(header[0]=='W' && header[1]=='D' && header[2]=='B' && header[3] == 'C');
 
-    f.read(&na, 4); // Number of records
-    f.read(&nb, 4); // Number of fields
-    f.read(&es, 4); // Size of a record
-    f.read(&ss, 4); // String size
+    f.read(&na,4); // Number of records
+    f.read(&nb,4); // Number of fields
+    f.read(&es,4); // Size of a record
+    f.read(&ss,4); // String size
 
     recordSize = es;
     recordCount = na;
@@ -68,7 +48,7 @@ bool DBCFile::open()
 
     data = new unsigned char[recordSize*recordCount+stringSize];
     stringTable = data + recordSize*recordCount;
-    f.read(data, recordSize*recordCount+stringSize);
+    f.read(data,recordSize*recordCount+stringSize);
     f.close();
     return true;
 }

@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -48,16 +55,20 @@ EndScriptData */
 class boss_hakkar : public CreatureScript
 {
     public:
-        boss_hakkar() : CreatureScript("boss_hakkar") {}
+
+        boss_hakkar()
+            : CreatureScript("boss_hakkar")
+        {
+        }
 
         struct boss_hakkarAI : public ScriptedAI
         {
-            boss_hakkarAI(Creature* creature) : ScriptedAI(creature)
+            boss_hakkarAI(Creature *c) : ScriptedAI(c)
             {
-                instance = creature->GetInstanceScript();
+                m_pInstance = c->GetInstanceScript();
             }
 
-            InstanceScript* instance;
+            InstanceScript *m_pInstance;
 
             uint32 BloodSiphon_Timer;
             uint32 CorruptedBlood_Timer;
@@ -81,28 +92,28 @@ class boss_hakkar : public CreatureScript
 
             void Reset()
             {
-                BloodSiphon_Timer           = 90000;
-                CorruptedBlood_Timer        = 25000;
-                CauseInsanity_Timer         = 17000;
-                WillOfHakkar_Timer          = 17000;
-                Enrage_Timer                = 600000;
+                BloodSiphon_Timer = 90000;
+                CorruptedBlood_Timer = 25000;
+                CauseInsanity_Timer = 17000;
+                WillOfHakkar_Timer = 17000;
+                Enrage_Timer = 600000;
 
-                CheckJeklik_Timer           = 1000;
-                CheckVenoxis_Timer          = 2000;
-                CheckMarli_Timer            = 3000;
-                CheckThekal_Timer           = 4000;
-                CheckArlokk_Timer           = 5000;
+                CheckJeklik_Timer = 1000;
+                CheckVenoxis_Timer = 2000;
+                CheckMarli_Timer = 3000;
+                CheckThekal_Timer = 4000;
+                CheckArlokk_Timer = 5000;
 
-                AspectOfJeklik_Timer        = 4000;
-                AspectOfVenoxis_Timer       = 7000;
-                AspectOfMarli_Timer         = 12000;
-                AspectOfThekal_Timer        = 8000;
-                AspectOfArlokk_Timer        = 18000;
+                AspectOfJeklik_Timer = 4000;
+                AspectOfVenoxis_Timer = 7000;
+                AspectOfMarli_Timer = 12000;
+                AspectOfThekal_Timer = 8000;
+                AspectOfArlokk_Timer = 18000;
 
                 Enraged = false;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 DoScriptText(SAY_AGGRO, me);
             }
@@ -123,25 +134,25 @@ class boss_hakkar : public CreatureScript
                 if (CorruptedBlood_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_CORRUPTEDBLOOD);
-                    CorruptedBlood_Timer = urand(30000, 45000);
+                    CorruptedBlood_Timer = 30000 + rand()%15000;
                 } else CorruptedBlood_Timer -= diff;
 
                 //CauseInsanity_Timer
                 /*if (CauseInsanity_Timer <= diff)
                 {
-                if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                DoCast(target, SPELL_CAUSEINSANITY);
+                if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                DoCast(pTarget, SPELL_CAUSEINSANITY);
 
-                CauseInsanity_Timer = urand(35000, 43000);
+                CauseInsanity_Timer = 35000 + rand()%8000;
                 } else CauseInsanity_Timer -= diff;*/
 
                 //WillOfHakkar_Timer
                 if (WillOfHakkar_Timer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(target, SPELL_WILLOFHAKKAR);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        DoCast(pTarget, SPELL_WILLOFHAKKAR);
 
-                    WillOfHakkar_Timer = urand(25000, 35000);
+                    WillOfHakkar_Timer = 25000 + rand()%10000;
                 } else WillOfHakkar_Timer -= diff;
 
                 if (!Enraged && Enrage_Timer <= diff)
@@ -153,14 +164,14 @@ class boss_hakkar : public CreatureScript
                 //Checking if Jeklik is dead. If not we cast her Aspect
                 if (CheckJeklik_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        if (instance->GetData(DATA_JEKLIK) != DONE)
+                        if (m_pInstance->GetData(TYPE_JEKLIK) != DONE)
                         {
                             if (AspectOfJeklik_Timer <= diff)
                             {
                                 DoCast(me->getVictim(), SPELL_ASPECT_OF_JEKLIK);
-                                AspectOfJeklik_Timer = urand(10000, 14000);
+                                AspectOfJeklik_Timer = 10000 + rand()%4000;
                             } else AspectOfJeklik_Timer -= diff;
                         }
                     }
@@ -170,9 +181,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Venoxis is dead. If not we cast his Aspect
                 if (CheckVenoxis_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        if (instance->GetData(DATA_VENOXIS) != DONE)
+                        if (m_pInstance->GetData(TYPE_VENOXIS) != DONE)
                         {
                             if (AspectOfVenoxis_Timer <= diff)
                             {
@@ -187,9 +198,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Marli is dead. If not we cast her Aspect
                 if (CheckMarli_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        if (instance->GetData(DATA_MARLI) != DONE)
+                        if (m_pInstance->GetData(TYPE_MARLI) != DONE)
                         {
                             if (AspectOfMarli_Timer <= diff)
                             {
@@ -204,9 +215,9 @@ class boss_hakkar : public CreatureScript
                 //Checking if Thekal is dead. If not we cast his Aspect
                 if (CheckThekal_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        if (instance->GetData(DATA_THEKAL) != DONE)
+                        if (m_pInstance->GetData(TYPE_THEKAL) != DONE)
                         {
                             if (AspectOfThekal_Timer <= diff)
                             {
@@ -221,16 +232,16 @@ class boss_hakkar : public CreatureScript
                 //Checking if Arlokk is dead. If yes we cast her Aspect
                 if (CheckArlokk_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        if (instance->GetData(DATA_ARLOKK) != DONE)
+                        if (m_pInstance->GetData(TYPE_ARLOKK) != DONE)
                         {
                             if (AspectOfArlokk_Timer <= diff)
                             {
                                 DoCast(me, SPELL_ASPECT_OF_ARLOKK);
                                 DoResetThreat();
 
-                                AspectOfArlokk_Timer = urand(10000, 15000);
+                                AspectOfArlokk_Timer = 10000 + rand()%5000;
                             } else AspectOfArlokk_Timer -= diff;
                         }
                     }

@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -201,9 +205,9 @@ Position DeceiverLocations[3]=
 // Locations, where Shield Orbs will spawn
 float ShieldOrbLocations[4][2]=
 {
-    {1698.900f, 627.870f},   // middle pont of Sunwell
-    {12, 3.14f},            // First one spawns northeast of KJ
-    {12, 3.14f/0.7f},        // Second one spawns southeast
+    {1698.900f, 627.870f},    // middle pont of Sunwell
+    {12, 3.14f},             // First one spawns northeast of KJ
+    {12, 3.14f/0.7f},         // Second one spawns southeast
     {12, 3.14f*3.8f}          // Third one spawns (?)
 };
 
@@ -423,7 +427,7 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->AddUnitState(UNIT_STATE_STUNNED);
+            me->AddUnitState(UNIT_STAT_STUNNED);
 
             ScriptedAI::InitializeAI();
         }
@@ -657,9 +661,15 @@ public:
             DoScriptText(RAND(SAY_KJ_REFLECTION1, SAY_KJ_REFLECTION2), me);
             for (uint8 i = 0; i < 4; ++i)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true, -SPELL_VENGEANCE_OF_THE_BLUE_FLIGHT))
+                float x, y, z;
+                Unit* target = NULL;
+                for (uint8 z = 0; z < 6; ++z)
                 {
-                    float x, y, z;
+                    target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
+                    if (!target || !target->HasAura(SPELL_VENGEANCE_OF_THE_BLUE_FLIGHT, 0))break;
+                }
+                if (target)
+                {
                     target->GetPosition(x, y, z);
                     if (Creature* pSinisterReflection = me->SummonCreature(CREATURE_SINISTER_REFLECTION, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0))
                     {
@@ -1180,7 +1190,7 @@ public:
 
         void Reset()
         {
-            me->SetLevitate(true);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
             bPointReached = true;
             uiTimer = urand(500, 1000);
             uiCheckTimer = 1000;

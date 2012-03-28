@@ -338,7 +338,7 @@ static void Compress_BZIP2(
         strm.avail_out = *pcbOutBuffer;
 
         // Perform the compression
-        for (;;)
+        for(;;)
         {
             bzError = BZ2_bzCompress(&strm, (strm.avail_in != 0) ? BZ_RUN : BZ_FINISH);
             if (bzError == BZ_STREAM_END || bzError < 0)
@@ -369,7 +369,7 @@ static int Decompress_BZIP2(char * pbOutBuffer, int * pcbOutBuffer, char * pbInB
         strm.avail_out = *pcbOutBuffer;
 
         // Perform the decompression
-        while (nResult != BZ_STREAM_END)
+        while(nResult != BZ_STREAM_END)
         {
             nResult = BZ2_bzDecompress(&strm);
 
@@ -779,7 +779,7 @@ int WINAPI SCompCompress(
     else
     {
         // Fill the compressions array
-        for (size_t i = 0; i < (sizeof(cmp_table) / sizeof(TCompressTable)); i++)
+        for(size_t i = 0; i < (sizeof(cmp_table) / sizeof(TCompressTable)); i++)
         {
             // If the mask agrees, insert the compression function to the array
             if (uCompressionMask & cmp_table[i].uMask)
@@ -817,7 +817,7 @@ int WINAPI SCompCompress(
         nCompressIndex = nCompressCount - 1;
 
         // Perform all compressions in the array
-        for (int i = 0; i < nCompressCount; i++)
+        for(int i = 0; i < nCompressCount; i++)
         {
             // Choose the proper output buffer
             pbOutput = (nCompressIndex & 1) ? pbWorkBuffer : pbOutBuffer;
@@ -949,7 +949,7 @@ int WINAPI SCompDecompress(
     else
     {
         // Fill the compressions array
-        for (size_t i = 0; i < (sizeof(dcmp_table) / sizeof(TDecompressTable)); i++)
+        for(size_t i = 0; i < (sizeof(dcmp_table) / sizeof(TDecompressTable)); i++)
         {
             // If the mask agrees, insert the compression function to the array
             if (uCompressionMask & dcmp_table[i].uMask)
@@ -986,7 +986,7 @@ int WINAPI SCompDecompress(
         nCompressIndex = nCompressCount - 1;
 
         // Apply all decompressions
-        for (int i = 0; i < nCompressCount; i++)
+        for(int i = 0; i < nCompressCount; i++)
         {
             // Get the correct output buffer
             pbOutput = (nCompressIndex & 1) ? pbWorkBuffer : pbOutBuffer;

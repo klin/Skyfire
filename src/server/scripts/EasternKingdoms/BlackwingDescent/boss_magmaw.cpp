@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,8 +24,8 @@
 
 enum eSpells
 {
-    SPELL_LAVA_SPEW     = 77690,
-    SPELL_MAGMA_SPIT    = 77690,
+    SPELL_LAVA_SPEW = 77690,
+    SPELL_MAGMA_SPIT = 77690,
 };
 
 class boss_magmaw : public CreatureScript
@@ -38,40 +42,40 @@ public:
     {
         boss_magmawAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = creature->GetInstanceScript();
+            pInstance = creature->GetInstanceScript();
         }
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
-        uint32 LavaSpewTimer;
-        uint32 MagmaSpitTimer;
-        uint32 LavaParasiteSummonTimer;
+        uint32 uiLavaSpewTimer;
+        uint32 uiMagmaSpitTimer;
+        uint32 uiLavaParasiteSummonTimer;
 
         void Reset()
         {
-            instance->SetData(DATA_MAGMAW, NOT_STARTED);
+            pInstance->SetData(DATA_MAGMAW, NOT_STARTED);
 
-            LavaSpewTimer = 10*IN_MILLISECONDS;
-            MagmaSpitTimer = 14*IN_MILLISECONDS;
-            LavaParasiteSummonTimer = 30*IN_MILLISECONDS;
+            uiLavaSpewTimer = 10*IN_MILLISECONDS;
+            uiMagmaSpitTimer = 14*IN_MILLISECONDS;
+            uiLavaParasiteSummonTimer = 30*IN_MILLISECONDS;
 
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*pWho*/)
         {
-            instance->SetData(DATA_MAGMAW, IN_PROGRESS);
+            pInstance->SetData(DATA_MAGMAW, IN_PROGRESS);
         }
 
         void JustReachedHome()
         {
-            instance->SetData(DATA_MAGMAW, FAIL);
+            pInstance->SetData(DATA_MAGMAW, FAIL);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
-            instance->SetData(DATA_MAGMAW, DONE);
+            pInstance->SetData(DATA_MAGMAW, DONE);
         }
 
         void SummonCreatureWithRandomTarget(uint32 creatureId)
@@ -90,29 +94,29 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (LavaSpewTimer <= Diff)
+            if (uiLavaSpewTimer <= Diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     me->CastSpell(target, SPELL_LAVA_SPEW, true);
 
-                LavaSpewTimer = urand(10*IN_MILLISECONDS, 12*IN_MILLISECONDS);
-            } else LavaSpewTimer -= Diff;
+                uiLavaSpewTimer = urand(10*IN_MILLISECONDS, 12*IN_MILLISECONDS);
+            } else uiLavaSpewTimer -= Diff;
 
-            if (MagmaSpitTimer <= Diff)
+            if (uiMagmaSpitTimer <= Diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     me->CastSpell(target, SPELL_MAGMA_SPIT , true);
 
-                MagmaSpitTimer = urand(12*IN_MILLISECONDS, 14*IN_MILLISECONDS);
-            } else MagmaSpitTimer -= Diff;
+                uiMagmaSpitTimer = urand(12*IN_MILLISECONDS, 14*IN_MILLISECONDS);
+            } else uiMagmaSpitTimer -= Diff;
 
-            if (LavaParasiteSummonTimer <= Diff)
+            if (uiLavaParasiteSummonTimer <= Diff)
             {
                 for (int i = 0; i < 2; ++i)
                     SummonCreatureWithRandomTarget(42321);
 
-                LavaParasiteSummonTimer = 30*IN_MILLISECONDS;
-            } else LavaParasiteSummonTimer -= Diff;
+                uiLavaParasiteSummonTimer = 30*IN_MILLISECONDS;
+            } else uiLavaParasiteSummonTimer -= Diff;
 
             DoMeleeAttackIfReady();
         }
@@ -133,14 +137,14 @@ public:
     {
         mobs_lava_parasiteAI(Creature* creature) : ScriptedAI(creature) { }
 
-        uint32 CheckDistanceTimer;
+        uint32 uiCheckDistanceTimer;
 
         void Reset()
         {
-            CheckDistanceTimer = 2*IN_MILLISECONDS;
+            uiCheckDistanceTimer = 2*IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/) { }
+        void EnterCombat(Unit* /*pWho*/) { }
 
         void JustDied(Unit* /*Killer*/) {}
 
@@ -151,12 +155,12 @@ public:
 
             if (me->IsWithinDistInMap(me->getVictim(), 2.0f))
             {
-                if (CheckDistanceTimer <= Diff)
+                if (uiCheckDistanceTimer <= Diff)
                 {
                     me->CastSpell(me->getVictim(), 94679 , true);
 
-                    CheckDistanceTimer = 86400*IN_MILLISECONDS;
-                } else CheckDistanceTimer -= Diff;
+                    uiCheckDistanceTimer = 86400*IN_MILLISECONDS;
+                } else uiCheckDistanceTimer -= Diff;
             }
 
             DoMeleeAttackIfReady();
@@ -180,11 +184,11 @@ class spell_parasitic_infection : public SpellScriptLoader
                 {
                     Unit* Summoned = caster->SummonCreature(42321, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 240000);
                     /*if (Summoned)
-                    {
-                        Unit *target = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                        if (target)
-                            Summoned->AddThreat(target, 1.0f);
-                    }*/
+{
+Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
+if (pTarget)
+Summoned->AddThreat(pTarget, 1.0f);
+}*/
                 }
             }
 

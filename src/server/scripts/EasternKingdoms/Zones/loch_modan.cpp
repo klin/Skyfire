@@ -1,11 +1,10 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -18,21 +17,21 @@
  */
 
 /* ScriptData
-SDName: Loch_Modan
-SD%Complete: 100
-SDComment: Quest support: 3181
-SDCategory: Loch Modan
-EndScriptData */
+ SDName: Loch_Modan
+ SD%Complete: 100
+ SDComment: Quest support: 3181
+ SDCategory: Loch Modan
+ EndScriptData */
 
 /* ContentData
-npc_mountaineer_pebblebitty
-EndContentData */
+ npc_mountaineer_pebblebitty
+ EndContentData */
 
 #include "ScriptPCH.h"
 
 /*######
-## npc_mountaineer_pebblebitty
-######*/
+ ## npc_mountaineer_pebblebitty
+ ######*/
 
 #define GOSSIP_MP "Open the gate please, i need to get to Searing Gorge"
 
@@ -43,62 +42,60 @@ EndContentData */
 #define GOSSIP_MP5 "Ok, i'll try to remember that."
 #define GOSSIP_MP6 "A key? Ok!"
 
-class npc_mountaineer_pebblebitty : public CreatureScript
-{
+class npc_mountaineer_pebblebitty: public CreatureScript {
 public:
-    npc_mountaineer_pebblebitty() : CreatureScript("npc_mountaineer_pebblebitty") { }
+	npc_mountaineer_pebblebitty() :
+			CreatureScript("npc_mountaineer_pebblebitty") {
+	}
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 Action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-        switch (Action)
-        {
-            case GOSSIP_ACTION_INFO_DEF+1:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-                player->SEND_GOSSIP_MENU(1833, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+2:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-                player->SEND_GOSSIP_MENU(1834, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+3:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-                player->SEND_GOSSIP_MENU(1835, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+4:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-                player->SEND_GOSSIP_MENU(1836, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+5:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-                player->SEND_GOSSIP_MENU(1837, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+6:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
-                player->SEND_GOSSIP_MENU(1838, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+7:
-                player->CLOSE_GOSSIP_MENU();
-                break;
-        }
-        return true;
-    }
+	bool OnGossipSelect(Player* pPlayer, Creature* pCreature,
+			uint32 /*uiSender*/, uint32 uiAction) {
+		pPlayer->PlayerTalkClass->ClearMenus();
+		switch (uiAction) {
+		case GOSSIP_ACTION_INFO_DEF + 1:
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+			pPlayer->SEND_GOSSIP_MENU(1833, pCreature->GetGUID());
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 2:
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+			pPlayer->SEND_GOSSIP_MENU(1834, pCreature->GetGUID());
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 3:
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+			pPlayer->SEND_GOSSIP_MENU(1835, pCreature->GetGUID());
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 4:
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+			pPlayer->SEND_GOSSIP_MENU(1836, pCreature->GetGUID());
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 5:
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP5, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+			pPlayer->SEND_GOSSIP_MENU(1837, pCreature->GetGUID());
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 6:
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+			pPlayer->SEND_GOSSIP_MENU(1838, pCreature->GetGUID());
+			break;
+		case GOSSIP_ACTION_INFO_DEF + 7:
+			pPlayer->CLOSE_GOSSIP_MENU();
+			break;
+		}
+		return true;
+	}
 
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
+	bool OnGossipHello(Player* pPlayer, Creature* pCreature) {
+		if (pCreature->isQuestGiver())
+			pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-        if (!player->GetQuestRewardStatus(3181) == 1)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+		if (!pPlayer->GetQuestRewardStatus(3181) == 1)
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_MP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+		pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
 
-        return true;
-    }
+		return true;
+	}
 };
 
-void AddSC_loch_modan()
-{
-    new npc_mountaineer_pebblebitty();
+void AddSC_loch_modan() {
+	new npc_mountaineer_pebblebitty();
 }

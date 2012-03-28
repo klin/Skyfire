@@ -1,5 +1,5 @@
 ###############################################
-# SkyFireEMU Auth Server configuration file   #
+# ArkCORE Auth Server configuration file   #
 ###############################################
 [authserver]
 
@@ -92,7 +92,7 @@ LogFile = "Auth.log"
 #                     will be logged.
 #        Possible flags:
 #
-#                  64 - Anything related to network input/output, 
+#                  64 - Anything related to network input/output,
 #                        such as packet handlers and netcode logs
 #
 #                       Simply add the values together to create a bitmask.
@@ -233,9 +233,9 @@ WrongPass.BanType = 0
 #                                                                 section my.ini)
 #                     ".;/path/to/unix_socket;username;password;database" - (use Unix sockets on
 #                                                                           Unix/Linux)
-#        Default:     "127.0.0.1;3306;skyfire;skyfire;auth"
+#        Default:     "127.0.0.1;3306;arkcore;arkania;auth"
 
-LoginDatabaseInfo = "127.0.0.1;3306;skyfire;skyfire;auth"
+LoginDatabaseInfo = "127.0.0.1;3306;arkcore;arkania;auth"
 
 #
 #    LoginDatabase.WorkerThreads

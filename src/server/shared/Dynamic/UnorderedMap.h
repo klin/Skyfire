@@ -1,23 +1,29 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef TRINITY_UNORDERED_MAP_H
-#define TRINITY_UNORDERED_MAP_H
+#ifndef ARKCORE_UNORDERED_MAP_H
+#define ARKCORE_UNORDERED_MAP_H
 
 #include "CompilerDefs.h"
 #include "Define.h"
@@ -42,28 +48,31 @@ using std::hash_map;
 #elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1300
 #define UNORDERED_MAP stdext::hash_map
 using stdext::hash_map;
+#elif COMPILER == COMPILER_INTEL
+#define UNORDERED_MAP std::hash_map
+using std::hash_map;
 #elif COMPILER == COMPILER_GNU && (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 3)
 #define UNORDERED_MAP std::tr1::unordered_map
-#elif (COMPILER == COMPILER_GNU && __GNUC__ >= 3) || COMPILER == COMPILER_INTEL
+#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
 #define UNORDERED_MAP __gnu_cxx::hash_map
 
 namespace __gnu_cxx
 {
-    template<> struct hash<unsigned long long>
-    {
-        size_t operator()(const unsigned long long &__x) const { return (size_t)__x; }
-    };
-    template<typename T> struct hash<T *>
-    {
-        size_t operator()(T * const &__x) const { return (size_t)__x; }
-    };
-    template<> struct hash<std::string>
-    {
-        size_t operator()(const std::string &__x) const
-        {
-            return hash<const char *>()(__x.c_str());
-        }
-    };
+	template<> struct hash<unsigned long long>
+	{
+		size_t operator()(const unsigned long long &__x) const {return (size_t)__x;}
+	};
+	template<typename T> struct hash<T *>
+	{
+		size_t operator()(T * const &__x) const {return (size_t)__x;}
+	};
+	template<> struct hash<std::string>
+	{
+		size_t operator()(const std::string &__x) const
+		{
+			return hash<const char *>()(__x.c_str());
+		}
+	};
 };
 
 #else

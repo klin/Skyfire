@@ -1,9 +1,11 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -146,7 +148,7 @@ public:
                     if (m_auiEncounter[2] == DONE)
                         go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
                     break;
-                case 191527:
+                case GO_TRIBUNAL_SKYROOM_FLOOR:
                     uiTribunalSkyFloor = go->GetGUID();
                     break;
             }
@@ -156,28 +158,28 @@ public:
         {
             switch (type)
             {
+                case DATA_KRYSTALLUS_EVENT:
+                    m_auiEncounter[0] = data;
+                    if (m_auiEncounter[0] == DONE)
+                        HandleGameObject(uiMaidenOfGriefDoor,true);
+                    break;
                 case DATA_MAIDEN_OF_GRIEF_EVENT:
                     m_auiEncounter[1] = data;
                     if (m_auiEncounter[1] == DONE)
                         HandleGameObject(uiBrannDoor, true);
                     break;
-                case DATA_KRYSTALLUS_EVENT:
-                    m_auiEncounter[0] = data;
-                    if (m_auiEncounter[0] == DONE)
-                        HandleGameObject(uiMaidenOfGriefDoor, true);
-                    break;
-                case DATA_SJONNIR_EVENT:
-                    m_auiEncounter[3] = data;
-                    break;
                 case DATA_BRANN_EVENT:
                     m_auiEncounter[2] = data;
                     if (m_auiEncounter[2] == DONE)
                     {
-                        HandleGameObject(uiSjonnirDoor, true);
-                        GameObject* go = instance->GetGameObject(uiTribunalChest);
+                        HandleGameObject(uiSjonnirDoor,true);
+                        GameObject *go = instance->GetGameObject(uiTribunalChest);
                         if (go)
-                            go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                            go->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_INTERACT_COND);
                     }
+                    break;
+                case DATA_SJONNIR_EVENT:
+                    m_auiEncounter[3] = data;
                     break;
             }
 
@@ -191,8 +193,8 @@ public:
             {
                 case DATA_KRYSTALLUS_EVENT:                return m_auiEncounter[0];
                 case DATA_MAIDEN_OF_GRIEF_EVENT:           return m_auiEncounter[1];
-                case DATA_SJONNIR_EVENT:                   return m_auiEncounter[2];
-                case DATA_BRANN_EVENT:                     return m_auiEncounter[3];
+                case DATA_BRANN_EVENT:                     return m_auiEncounter[2];
+                case DATA_SJONNIR_EVENT:                   return m_auiEncounter[3];
             }
 
             return 0;

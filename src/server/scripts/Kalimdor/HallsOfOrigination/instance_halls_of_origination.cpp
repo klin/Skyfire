@@ -1,20 +1,19 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2011-2012 ArkCORE <http://www.arkania.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2010 - 2012 SkyFire <http://www.projectskyfire.org/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include"ScriptPCH.h"
 #include"halls_of_origination.h"
@@ -45,40 +44,40 @@ public:
     {
         instance_halls_of_origination_InstanceMapScript(InstanceMap *map) : InstanceScript(map) { }
 
-        uint32 Encounter[ENCOUNTERS];
+        uint32 uiEncounter[ENCOUNTERS];
 
-        uint64 TempleGuardianAnhuur;
-        uint64 EarthragerPtah;
-        uint64 Anraphet;
-        uint64 Isiset;
-        uint64 Ammunae;
-        uint64 Setesh;
-        uint64 Rajh;
+        uint64 uiTempleGuardianAnhuur;
+        uint64 uiEarthragerPtah;
+        uint64 uiAnraphet;
+        uint64 uiIsiset;
+        uint64 uiAmmunae;
+        uint64 uiSetesh;
+        uint64 uiRajh;
         uint64 OriginationElevatorGUID;
-        uint64 TeamInInstance;
-        uint64 AnhuurBridgeGUID;
+        uint64 uiTeamInInstance;
+        uint64 uiAnhuurBridgeGUID;
 
         void Initialize()
         {
-            TempleGuardianAnhuur = 0;
-            EarthragerPtah = 0;
-            Anraphet = 0;
-            Isiset = 0;
-            Ammunae = 0;
-            Setesh = 0;
-            Rajh = 0;
-            AnhuurBridgeGUID = 0;
+            uiTempleGuardianAnhuur = 0;
+            uiEarthragerPtah = 0;
+            uiAnraphet = 0;
+            uiIsiset = 0;
+            uiAmmunae = 0;
+            uiSetesh = 0;
+            uiRajh = 0;
+            uiAnhuurBridgeGUID = 0;
             uint64 OriginationElevatorGUID = 0;
 
-            for (uint8 i=0; i<ENCOUNTERS; ++i)
-                Encounter[i] = NOT_STARTED;
+            for(uint8 i=0; i<ENCOUNTERS; ++i)
+                uiEncounter[i] = NOT_STARTED;
         }
 
         bool IsEncounterInProgress() const
         {
-            for (uint8 i=0; i<ENCOUNTERS; ++i)
+            for(uint8 i=0; i<ENCOUNTERS; ++i)
             {
-                if (Encounter[i] == IN_PROGRESS)
+                if (uiEncounter[i] == IN_PROGRESS)
                     return true;
             }
 
@@ -87,27 +86,27 @@ public:
 
         void OnCreatureCreate(Creature* creature, bool)
         {
-            switch (creature->GetEntry())
+            switch(creature->GetEntry())
             {
                 case BOSS_TEMPLE_GUARDIAN_ANHUUR:
-                    TempleGuardianAnhuur = creature->GetGUID();
+                    uiTempleGuardianAnhuur = creature->GetGUID();
                     break;
                 case BOSS_EARTHRAGER_PTAH:
-                    EarthragerPtah = creature->GetGUID();
+                    uiEarthragerPtah = creature->GetGUID();
                     break;
                 case BOSS_ANRAPHET:
-                    Anraphet = creature->GetGUID();
+                    uiAnraphet = creature->GetGUID();
                     break;
                 case BOSS_ISISET:
-                    Isiset = creature->GetGUID();
+                    uiIsiset = creature->GetGUID();
                     break;
                 case BOSS_AMMUNAE:
-                    Ammunae = creature->GetGUID();
+                    uiAmmunae = creature->GetGUID();
                     break;
                 case BOSS_SETESH:
-                    Setesh = creature->GetGUID();
+                    uiSetesh = creature->GetGUID();
                 case BOSS_RAJH:
-                    Rajh = creature->GetGUID();
+                    uiRajh = creature->GetGUID();
             }
         }
 
@@ -124,59 +123,59 @@ public:
                         }
                     break;
                 case GO_ANHUUR_BRIDGE:
-                    AnhuurBridgeGUID = go->GetGUID();
+                    uiAnhuurBridgeGUID = go->GetGUID();
                     if (GetData(DATA_TEMPLE_GUARDIAN_ANHUUR) == DONE)
-                            HandleGameObject(AnhuurBridgeGUID, true, go);
+                            HandleGameObject(uiAnhuurBridgeGUID, true, go);
                     break;
             }
         }
 
         uint64 GetData64(uint32 identifier)
         {
-            switch (identifier)
+            switch(identifier)
             {
                 case DATA_TEMPLE_GUARDIAN_ANHUUR:
-                    return TempleGuardianAnhuur;
+                    return uiTempleGuardianAnhuur;
                 case DATA_EARTHRAGER_PTAH:
-                    return EarthragerPtah;
+                    return uiEarthragerPtah;
                 case DATA_ANRAPHET:
-                    return Anraphet;
+                    return uiAnraphet;
                 case DATA_ISISET:
-                    return Isiset;
+                    return uiIsiset;
                 case DATA_AMMUNAE:
-                    return Ammunae;
+                    return uiAmmunae;
                 case DATA_SETESH:
-                    return Setesh;
+                    return uiSetesh;
                 case DATA_RAJH:
-                    return Rajh;
+                    return uiRajh;
             }
             return 0;
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 type,uint32 data)
         {
-            switch (type)
+            switch(type)
             {
                 case DATA_TEMPLE_GUARDIAN_ANHUUR:
-                    Encounter[0] = data;
+                    uiEncounter[0] = data;
                     break;
                 case DATA_EARTHRAGER_PTAH:
-                    Encounter[1] = data;
+                    uiEncounter[1] = data;
                     break;
                 case DATA_ANRAPHET:
-                    Encounter[2] = data;
+                    uiEncounter[2] = data;
                     break;
                 case DATA_ISISET:
-                    Encounter[3] = data;
+                    uiEncounter[3] = data;
                     break;
                 case DATA_AMMUNAE:
-                    Encounter[4] = data;
+                    uiEncounter[4] = data;
                     break;
                 case DATA_SETESH:
-                    Encounter[5] = data;
+                    uiEncounter[5] = data;
                     break;
                 case DATA_RAJH:
-                    Encounter[6] = data;
+                    uiEncounter[6] = data;
                     break;
             }
 
@@ -186,22 +185,22 @@ public:
 
         uint32 GetData(uint32 type)
         {
-            switch (type)
+            switch(type)
             {
                 case DATA_TEMPLE_GUARDIAN_ANHUUR:
-                    return Encounter[0];
+                    return uiEncounter[0];
                 case DATA_EARTHRAGER_PTAH:
-                    return Encounter[1];
+                    return uiEncounter[1];
                 case DATA_ANRAPHET:
-                    return Encounter[2];
+                    return uiEncounter[2];
                 case DATA_ISISET:
-                    return Encounter[3];
+                    return uiEncounter[3];
                 case DATA_AMMUNAE:
-                    return Encounter[4];
+                    return uiEncounter[4];
                 case DATA_SETESH:
-                    return Encounter[5];
+                    return uiEncounter[5];
                 case DATA_RAJH:
-                    return Encounter[6];
+                    return uiEncounter[6];
             }
             return 0;
         }
@@ -212,7 +211,7 @@ public:
 
             std::string str_data;
             std::ostringstream saveStream;
-            saveStream << "H O" << Encounter[0] << " " << Encounter[1]  << " " << Encounter[2]  << " " << Encounter[3] << " " << Encounter[4] << " " << Encounter[5] << " " << Encounter[6];
+            saveStream << "H O" << uiEncounter[0] << " " << uiEncounter[1]  << " " << uiEncounter[2]  << " " << uiEncounter[3] << " " << uiEncounter[4] << " " << uiEncounter[5] << " " << uiEncounter[6];
             str_data = saveStream.str();
 
             OUT_SAVE_INST_DATA_COMPLETE;
@@ -237,17 +236,17 @@ public:
 
             if (dataHead1 == 'H' && dataHead2 == 'O')
             {
-                Encounter[0] = data0;
-                Encounter[1] = data1;
-                Encounter[2] = data2;
-                Encounter[3] = data3;
-                Encounter[4] = data4;
-                Encounter[5] = data5;
-                Encounter[6] = data6;
+                uiEncounter[0] = data0;
+                uiEncounter[1] = data1;
+                uiEncounter[2] = data2;
+                uiEncounter[3] = data3;
+                uiEncounter[4] = data4;
+                uiEncounter[5] = data5;
+                uiEncounter[6] = data6;
 
-                for (uint8 i=0; i<ENCOUNTERS; ++i)
-                    if (Encounter[i] == IN_PROGRESS)
-                        Encounter[i] = NOT_STARTED;
+                for(uint8 i=0; i<ENCOUNTERS; ++i)
+                    if (uiEncounter[i] == IN_PROGRESS)
+                        uiEncounter[i] = NOT_STARTED;
             }
             else OUT_LOAD_INST_DATA_FAIL;
 

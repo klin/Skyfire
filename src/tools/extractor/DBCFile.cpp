@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2010 - 2012 Arkania <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,21 +29,21 @@ bool DBCFile::open()
 {
     MPQFile f(filename.c_str(), localeMPQ[0]);
     char header[4];
-    unsigned int na, nb, es, ss;
+    unsigned int na,nb,es,ss;
 
-    if (f.read(header, 4)!=4)                                 // Number of records
+    if (f.read(header,4)!=4)                                 // Number of records
         return false;
 
     if (header[0]!='W' || header[1]!='D' || header[2]!='B' || header[3]!='C')
         return false;
 
-    if (f.read(&na, 4)!=4)                                    // Number of records
+    if (f.read(&na,4)!=4)                                    // Number of records
         return false;
-    if (f.read(&nb, 4)!=4)                                    // Number of fields
+    if (f.read(&nb,4)!=4)                                    // Number of fields
         return false;
-    if (f.read(&es, 4)!=4)                                    // Size of a record
+    if (f.read(&es,4)!=4)                                    // Size of a record
         return false;
-    if (f.read(&ss, 4)!=4)                                    // String size
+    if (f.read(&ss,4)!=4)                                    // String size
         return false;
 
     recordSize = es;
@@ -59,7 +57,7 @@ bool DBCFile::open()
     stringTable = data + recordSize*recordCount;
 
     size_t data_size = recordSize*recordCount+stringSize;
-    if (f.read(data, data_size)!=data_size)
+    if (f.read(data,data_size)!=data_size)
         return false;
     f.close();
     return true;
@@ -81,7 +79,7 @@ size_t DBCFile::getMaxId()
     assert(data);
 
     size_t maxId = 0;
-    for (size_t i = 0; i < getRecordCount(); ++i)
+    for(size_t i = 0; i < getRecordCount(); ++i)
     {
         if (maxId < getRecord(i).getUInt(0))
             maxId = getRecord(i).getUInt(0);

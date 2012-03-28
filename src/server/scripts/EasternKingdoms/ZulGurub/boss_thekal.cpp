@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -33,25 +40,25 @@ EndScriptData */
 enum eSpells
 {
     SPELL_MORTALCLEAVE        = 22859,
-    SPELL_SILENCE             = 22666,
-    SPELL_FRENZY              = 8269,
+    SPELL_SILENCE             = 23207,
+    SPELL_FRENZY              = 23342,
     SPELL_FORCEPUNCH          = 24189,
-    SPELL_CHARGE              = 24193,
-    SPELL_ENRAGE              = 8269,
+    SPELL_CHARGE              = 24408,
+    SPELL_ENRAGE              = 23537,
     SPELL_SUMMONTIGERS        = 24183,
     SPELL_TIGER_FORM          = 24169,
     SPELL_RESURRECT           = 24173,                    //We will not use this spell.
 
 //Zealot Lor'Khan Spells
-    SPELL_SHIELD              = 20545,
+    SPELL_SHIELD              = 25020,
     SPELL_BLOODLUST           = 24185,
     SPELL_GREATERHEAL         = 24208,
-    SPELL_DISARM              = 6713,
+    SPELL_DISARM              = 22691,
 
-//Zealot Zath Spells
+//Zealot Lor'Khan Spells
     SPELL_SWEEPINGSTRIKES     = 18765,
-    SPELL_SINISTERSTRIKE      = 15581,
-    SPELL_GOUGE               = 12540,
+    SPELL_SINISTERSTRIKE      = 15667,
+    SPELL_GOUGE               = 24698,
     SPELL_KICK                = 15614,
     SPELL_BLIND               = 21060,
 };
@@ -61,13 +68,15 @@ class boss_thekal : public CreatureScript
     public:
 
         boss_thekal()
-            : CreatureScript("boss_thekal") {}
+            : CreatureScript("boss_thekal")
+        {
+        }
 
         struct boss_thekalAI : public ScriptedAI
         {
-            boss_thekalAI(Creature* creature) : ScriptedAI(creature)
+            boss_thekalAI(Creature *c) : ScriptedAI(c)
             {
-                instance = creature->GetInstanceScript();
+                m_pInstance = c->GetInstanceScript();
             }
 
             uint32 MortalCleave_Timer;
@@ -80,29 +89,29 @@ class boss_thekal : public CreatureScript
             uint32 Check_Timer;
             uint32 Resurrect_Timer;
 
-            InstanceScript *instance;
+            InstanceScript *m_pInstance;
             bool Enraged;
             bool PhaseTwo;
             bool WasDead;
 
             void Reset()
             {
-                MortalCleave_Timer     = 4000;
-                Silence_Timer          = 9000;
-                Frenzy_Timer           = 30000;
-                ForcePunch_Timer       = 4000;
-                Charge_Timer           = 12000;
-                Enrage_Timer           = 32000;
-                SummonTigers_Timer     = 25000;
-                Check_Timer            = 10000;
-                Resurrect_Timer        = 10000;
+                MortalCleave_Timer = 4000;
+                Silence_Timer = 9000;
+                Frenzy_Timer = 30000;
+                ForcePunch_Timer = 4000;
+                Charge_Timer = 12000;
+                Enrage_Timer = 32000;
+                SummonTigers_Timer = 25000;
+                Check_Timer = 10000;
+                Resurrect_Timer = 10000;
 
-                Enraged                = false;
-                PhaseTwo               = false;
-                WasDead                = false;
+                Enraged = false;
+                PhaseTwo = false;
+                WasDead = false;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 DoScriptText(SAY_AGGRO, me);
             }
@@ -110,14 +119,14 @@ class boss_thekal : public CreatureScript
             void JustDied(Unit* /*Killer*/)
             {
                 DoScriptText(SAY_DEATH, me);
-                if (instance)
-                    instance->SetData(DATA_THEKAL, DONE);
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_THEKAL, DONE);
             }
 
             void JustReachedHome()
             {
-                if (instance)
-                    instance->SetData(DATA_THEKAL, NOT_STARTED);
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_THEKAL, NOT_STARTED);
             }
 
             void UpdateAI(const uint32 diff)
@@ -128,34 +137,34 @@ class boss_thekal : public CreatureScript
                     //Check_Timer for the death of LorKhan and Zath.
                     if (!WasDead && Check_Timer <= diff)
                     {
-                        if (instance)
+                        if (m_pInstance)
                         {
-                            if (instance->GetData(DATA_LORKHAN) == SPECIAL)
+                            if (m_pInstance->GetData(TYPE_LORKHAN) == SPECIAL)
                             {
                                 //Resurrect LorKhan
-                                if (Unit* LorKhan = Unit::GetUnit((*me), instance->GetData64(DATA_LORKHAN)))
+                                if (Unit *pLorKhan = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_LORKHAN)))
                                 {
-                                    LorKhan->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                                    LorKhan->setFaction(14);
-                                    LorKhan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                    LorKhan->SetFullHealth();
+                                    pLorKhan->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                                    pLorKhan->setFaction(14);
+                                    pLorKhan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                    pLorKhan->SetFullHealth();
 
-                                    instance->SetData(DATA_LORKHAN, DONE);
+                                    m_pInstance->SetData(TYPE_LORKHAN, DONE);
                                 }
                             }
 
-                            if (instance->GetData(DATA_ZATH) == SPECIAL)
+                            if (m_pInstance->GetData(TYPE_ZATH) == SPECIAL)
                             {
                                 //Resurrect Zath
-                                Unit* zath = Unit::GetUnit((*me), instance->GetData64(DATA_ZATH));
-                                if (zath)
+                                Unit *pZath = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_ZATH));
+                                if (pZath)
                                 {
-                                    zath->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                                    zath->setFaction(14);
-                                    zath->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                    zath->SetFullHealth();
+                                    pZath->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                                    pZath->setFaction(14);
+                                    pZath->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                    pZath->SetFullHealth();
 
-                                    instance->SetData(DATA_ZATH, DONE);
+                                    m_pInstance->SetData(TYPE_ZATH, DONE);
                                 }
                             }
                         }
@@ -166,26 +175,25 @@ class boss_thekal : public CreatureScript
                     if (!PhaseTwo && MortalCleave_Timer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_MORTALCLEAVE);
-                        MortalCleave_Timer = urand(15000, 20000);
+                        MortalCleave_Timer = 15000 + rand()%5000;
                     } else MortalCleave_Timer -= diff;
 
                     if (!PhaseTwo && Silence_Timer <= diff)
                     {
                         DoCast(me->getVictim(), SPELL_SILENCE);
-                        Silence_Timer = urand(20000, 25000);
+                        Silence_Timer = 20000 + rand()%5000;
                     } else Silence_Timer -= diff;
 
                     if (!PhaseTwo && !WasDead && !HealthAbovePct(5))
                     {
                         me->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                         me->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                        me->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         me->SetStandState(UNIT_STAND_STATE_SLEEP);
                         me->AttackStop();
 
-                        if (instance)
-                            instance->SetData(DATA_THEKAL, SPECIAL);
+                        if (m_pInstance)
+                            m_pInstance->SetData(TYPE_THEKAL, SPECIAL);
 
                         WasDead=true;
                     }
@@ -200,7 +208,7 @@ class boss_thekal : public CreatureScript
                             me->SetStandState(UNIT_STAND_STATE_STAND);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             me->SetFullHealth();
-                            const CreatureTemplate *cinfo = me->GetCreatureTemplate();
+                            const CreatureInfo *cinfo = me->GetCreatureInfo();
                             me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (cinfo->mindmg +((cinfo->mindmg/100) * 40)));
                             me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (cinfo->maxdmg +((cinfo->maxdmg/100) * 40)));
                             me->UpdateDamagePhysical(BASE_ATTACK);
@@ -218,11 +226,11 @@ class boss_thekal : public CreatureScript
                     {
                         if (Charge_Timer <= diff)
                         {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
                             {
-                                DoCast(target, SPELL_CHARGE);
+                                DoCast(pTarget, SPELL_CHARGE);
                                 DoResetThreat();
-                                AttackStart(target);
+                                AttackStart(pTarget);
                             }
 
                             Charge_Timer = 15000 + rand()%7000;
@@ -237,13 +245,13 @@ class boss_thekal : public CreatureScript
                         if (ForcePunch_Timer <= diff)
                         {
                             DoCast(me->getVictim(), SPELL_SILENCE);
-                            ForcePunch_Timer = urand(16000, 21000);
+                            ForcePunch_Timer = 16000 + rand()%5000;
                         } else ForcePunch_Timer -= diff;
 
                         if (SummonTigers_Timer <= diff)
                         {
                             DoCast(me->getVictim(), SPELL_SUMMONTIGERS);
-                            SummonTigers_Timer = urand(10000, 14000);
+                            SummonTigers_Timer = 10000 + rand()%4000;
                         } else SummonTigers_Timer -= diff;
 
                         if (HealthBelowPct(11) && !Enraged)
@@ -269,13 +277,15 @@ class mob_zealot_lorkhan : public CreatureScript
     public:
 
         mob_zealot_lorkhan()
-            : CreatureScript("mob_zealot_lorkhan") {}
+            : CreatureScript("mob_zealot_lorkhan")
+        {
+        }
 
         struct mob_zealot_lorkhanAI : public ScriptedAI
         {
-            mob_zealot_lorkhanAI(Creature* creature) : ScriptedAI(creature)
+            mob_zealot_lorkhanAI(Creature *c) : ScriptedAI(c)
             {
-                instance = creature->GetInstanceScript();
+                m_pInstance = c->GetInstanceScript();
             }
 
             uint32 Shield_Timer;
@@ -286,26 +296,28 @@ class mob_zealot_lorkhan : public CreatureScript
 
             bool FakeDeath;
 
-            InstanceScript *instance;
+            InstanceScript *m_pInstance;
 
             void Reset()
             {
-                Shield_Timer      = 1000;
-                BloodLust_Timer   = 16000;
+                Shield_Timer = 1000;
+                BloodLust_Timer = 16000;
                 GreaterHeal_Timer = 32000;
-                Disarm_Timer      = 6000;
-                Check_Timer       = 10000;
+                Disarm_Timer = 6000;
+                Check_Timer = 10000;
 
                 FakeDeath = false;
 
-                if (instance)
-                    instance->SetData(DATA_LORKHAN, NOT_STARTED);
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_LORKHAN, NOT_STARTED);
 
                 me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 
-            void EnterCombat(Unit* /*who*/) {}
+            void EnterCombat(Unit * /*who*/)
+            {
+            }
 
             void UpdateAI (const uint32 diff)
             {
@@ -329,23 +341,23 @@ class mob_zealot_lorkhan : public CreatureScript
                 //Casting Greaterheal to Thekal or Zath if they are in meele range.
                 if (GreaterHeal_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        Unit* thekal = Unit::GetUnit((*me), instance->GetData64(DATA_THEKAL));
-                        Unit* zath = Unit::GetUnit((*me), instance->GetData64(DATA_ZATH));
+                        Unit *pThekal = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_THEKAL));
+                        Unit *pZath = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_ZATH));
 
-                        if (!thekal || !zath)
+                        if (!pThekal || !pZath)
                             return;
 
                         switch (urand(0, 1))
                         {
                             case 0:
-                                if (me->IsWithinMeleeRange(thekal))
-                                    DoCast(thekal, SPELL_GREATERHEAL);
+                                if (me->IsWithinMeleeRange(pThekal))
+                                    DoCast(pThekal, SPELL_GREATERHEAL);
                                 break;
                             case 1:
-                                if (me->IsWithinMeleeRange(zath))
-                                    DoCast(zath, SPELL_GREATERHEAL);
+                                if (me->IsWithinMeleeRange(pZath))
+                                    DoCast(pZath, SPELL_GREATERHEAL);
                                 break;
                         }
                     }
@@ -363,29 +375,29 @@ class mob_zealot_lorkhan : public CreatureScript
                 //Check_Timer for the death of LorKhan and Zath.
                 if (!FakeDeath && Check_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        if (instance->GetData(DATA_THEKAL) == SPECIAL)
+                        if (m_pInstance->GetData(TYPE_THEKAL) == SPECIAL)
                         {
                             //Resurrect Thekal
-                            if (Unit* thekal = Unit::GetUnit((*me), instance->GetData64(DATA_THEKAL)))
+                            if (Unit *pThekal = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_THEKAL)))
                             {
-                                thekal->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                                thekal->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                thekal->setFaction(14);
-                                thekal->SetFullHealth();
+                                pThekal->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                                pThekal->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pThekal->setFaction(14);
+                                pThekal->SetFullHealth();
                             }
                         }
 
-                        if (instance->GetData(DATA_ZATH) == SPECIAL)
+                        if (m_pInstance->GetData(TYPE_ZATH) == SPECIAL)
                         {
                             //Resurrect Zath
-                            if (Unit* zath = Unit::GetUnit((*me), instance->GetData64(DATA_ZATH)))
+                            if (Unit *pZath = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_ZATH)))
                             {
-                                zath->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                                zath->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                zath->setFaction(14);
-                                zath->SetFullHealth();
+                                pZath->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                                pZath->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pZath->setFaction(14);
+                                pZath->SetFullHealth();
                             }
                         }
                     }
@@ -397,14 +409,13 @@ class mob_zealot_lorkhan : public CreatureScript
                 {
                     me->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                     me->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    me->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->SetStandState(UNIT_STAND_STATE_SLEEP);
                     me->setFaction(35);
                     me->AttackStop();
 
-                    if (instance)
-                        instance->SetData(DATA_LORKHAN, SPECIAL);
+                    if (m_pInstance)
+                        m_pInstance->SetData(TYPE_LORKHAN, SPECIAL);
 
                     FakeDeath = true;
                 }
@@ -425,13 +436,15 @@ class mob_zealot_zath : public CreatureScript
     public:
 
         mob_zealot_zath()
-            : CreatureScript("mob_zealot_zath") {}
+            : CreatureScript("mob_zealot_zath")
+        {
+        }
 
         struct mob_zealot_zathAI : public ScriptedAI
         {
-            mob_zealot_zathAI(Creature* creature) : ScriptedAI(creature)
+            mob_zealot_zathAI(Creature *c) : ScriptedAI(c)
             {
-                instance = creature->GetInstanceScript();
+                m_pInstance = c->GetInstanceScript();
             }
 
             uint32 SweepingStrikes_Timer;
@@ -443,27 +456,29 @@ class mob_zealot_zath : public CreatureScript
 
             bool FakeDeath;
 
-            InstanceScript *instance;
+            InstanceScript *m_pInstance;
 
             void Reset()
             {
-                SweepingStrikes_Timer    = 13000;
-                SinisterStrike_Timer     = 8000;
-                Gouge_Timer              = 25000;
-                Kick_Timer               = 18000;
-                Blind_Timer              = 5000;
-                Check_Timer              = 10000;
+                SweepingStrikes_Timer = 13000;
+                SinisterStrike_Timer = 8000;
+                Gouge_Timer = 25000;
+                Kick_Timer = 18000;
+                Blind_Timer = 5000;
+                Check_Timer = 10000;
 
-                FakeDeath                = false;
+                FakeDeath = false;
 
-                if (instance)
-                    instance->SetData(DATA_ZATH, NOT_STARTED);
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_ZATH, NOT_STARTED);
 
                 me->SetStandState(UNIT_STAND_STATE_STAND);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 
-            void EnterCombat(Unit* /*who*/) {}
+            void EnterCombat(Unit * /*who*/)
+            {
+            }
 
             void UpdateAI (const uint32 diff)
             {
@@ -512,29 +527,29 @@ class mob_zealot_zath : public CreatureScript
                 //Check_Timer for the death of LorKhan and Zath.
                 if (!FakeDeath && Check_Timer <= diff)
                 {
-                    if (instance)
+                    if (m_pInstance)
                     {
-                        if (instance->GetData(DATA_LORKHAN) == SPECIAL)
+                        if (m_pInstance->GetData(TYPE_LORKHAN) == SPECIAL)
                         {
                             //Resurrect LorKhan
-                            if (Unit* LorKhan = Unit::GetUnit((*me), instance->GetData64(DATA_LORKHAN)))
+                            if (Unit *pLorKhan = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_LORKHAN)))
                             {
-                                LorKhan->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                                LorKhan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                LorKhan->setFaction(14);
-                                LorKhan->SetFullHealth();
+                                pLorKhan->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                                pLorKhan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pLorKhan->setFaction(14);
+                                pLorKhan->SetFullHealth();
                             }
                         }
 
-                        if (instance->GetData(DATA_THEKAL) == SPECIAL)
+                        if (m_pInstance->GetData(TYPE_THEKAL) == SPECIAL)
                         {
                             //Resurrect Thekal
-                            if (Unit* thekal = Unit::GetUnit((*me), instance->GetData64(DATA_THEKAL)))
+                            if (Unit *pThekal = Unit::GetUnit((*me), m_pInstance->GetData64(DATA_THEKAL)))
                             {
-                                thekal->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-                                thekal->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                thekal->setFaction(14);
-                                thekal->SetFullHealth();
+                                pThekal->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                                pThekal->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pThekal->setFaction(14);
+                                pThekal->SetFullHealth();
                             }
                         }
                     }
@@ -546,14 +561,13 @@ class mob_zealot_zath : public CreatureScript
                 {
                     me->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                     me->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    me->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->SetStandState(UNIT_STAND_STATE_SLEEP);
                     me->setFaction(35);
                     me->AttackStop();
 
-                    if (instance)
-                        instance->SetData(DATA_ZATH, SPECIAL);
+                    if (m_pInstance)
+                        m_pInstance->SetData(TYPE_ZATH, SPECIAL);
 
                     FakeDeath = true;
                 }

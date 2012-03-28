@@ -1,20 +1,25 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _ADDONMGR_H
@@ -29,32 +34,32 @@ class WorldSession;
 
 struct AddonInfo
 {
-    AddonInfo(const std::string& name, uint8 enabled, uint32 crc, uint8 state, bool crcOrPubKey)
-    {
-        Name = name;
-        Enabled = enabled;
-        CRC = crc;
-        State = state;
-        UsePublicKeyOrCRC = crcOrPubKey;
-    }
+	AddonInfo(const std::string& name, uint8 enabled, uint32 crc, uint8 state, bool crcOrPubKey)
+	{
+		Name = name;
+		Enabled = enabled;
+		CRC = crc;
+		State = state;
+		UsePublicKeyOrCRC = crcOrPubKey;
+	}
 
-    std::string Name;
-    uint8 Enabled;
-    uint32 CRC;
-    uint8 State;
-    bool UsePublicKeyOrCRC;
+	std::string Name;
+	uint8 Enabled;
+	uint32 CRC;
+	uint8 State;
+	bool UsePublicKeyOrCRC;
 };
 
 struct SavedAddon
 {
-    SavedAddon(const std::string& name, uint32 crc)
-    {
-        Name = name;
-        CRC = crc;
-    }
+	SavedAddon(const std::string& name, uint32 crc)
+	{
+		Name = name;
+		CRC = crc;
+	}
 
-    std::string Name;
-    uint32 CRC;
+	std::string Name;
+	uint32 CRC;
 };
 
 // List of client addons (for WorldSession).
@@ -67,22 +72,21 @@ typedef std::list<SavedAddon> SavedAddonsList;
 
 class AddonMgr
 {
-    friend class ACE_Singleton<AddonMgr, ACE_Null_Mutex>;
-    AddonMgr();
-    ~AddonMgr();
+	friend class ACE_Singleton<AddonMgr, ACE_Null_Mutex>;
 
-public:
+	AddonMgr();
+	~AddonMgr();
 
-    void LoadFromDB();
-    void SaveAddon(AddonInfo const& addon);
+	public:
+		void LoadFromDB();
+		void SaveAddon(AddonInfo const& addon);
 
-    SavedAddon const* GetAddonInfo(const std::string& name) const;
+	SavedAddon const* GetAddonInfo(const std::string& name) const;
 
-private:
+	private:
 
-    SavedAddonsList m_knownAddons;                           // Known addons.
+	SavedAddonsList m_knownAddons; // Known addons.
 };
 
 #define sAddonMgr ACE_Singleton<AddonMgr, ACE_Null_Mutex>::instance()
-
 #endif

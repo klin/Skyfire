@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -59,7 +67,7 @@ class instance_arcatraz : public InstanceMapScript
         }
         struct instance_arcatraz_InstanceMapScript : public InstanceScript
         {
-            instance_arcatraz_InstanceMapScript(Map* map) : InstanceScript(map) {}
+            instance_arcatraz_InstanceMapScript(Map* pMap) : InstanceScript(pMap) { Initialize(); };
 
             uint32 m_auiEncounter[MAX_ENCOUNTER];
 
@@ -98,31 +106,31 @@ class instance_arcatraz : public InstanceMapScript
                 return false;
             }
 
-            void OnGameObjectCreate(GameObject* go)
+            void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
             {
-                switch (go->GetEntry())
+                switch(pGo->GetEntry())
                 {
-                case CONTAINMENT_CORE_SECURITY_FIELD_ALPHA: Containment_Core_Security_Field_AlphaGUID = go->GetGUID(); break;
-                case CONTAINMENT_CORE_SECURITY_FIELD_BETA:  Containment_Core_Security_Field_BetaGUID =  go->GetGUID(); break;
-                case POD_ALPHA:                             Pod_AlphaGUID = go->GetGUID();                             break;
-                case POD_GAMMA:                             Pod_GammaGUID = go->GetGUID();                             break;
-                case POD_BETA:                              Pod_BetaGUID =  go->GetGUID();                             break;
-                case POD_DELTA:                             Pod_DeltaGUID = go->GetGUID();                             break;
-                case POD_OMEGA:                             Pod_OmegaGUID = go->GetGUID();                             break;
-                case SEAL_SPHERE:                           GoSphereGUID = go->GetGUID();                              break;
-                //case WARDENS_SHIELD:                        Wardens_ShieldGUID = go->GetGUID();                        break;
+                case CONTAINMENT_CORE_SECURITY_FIELD_ALPHA: Containment_Core_Security_Field_AlphaGUID = pGo->GetGUID(); break;
+                case CONTAINMENT_CORE_SECURITY_FIELD_BETA:  Containment_Core_Security_Field_BetaGUID =  pGo->GetGUID(); break;
+                case POD_ALPHA:                             Pod_AlphaGUID = pGo->GetGUID();                             break;
+                case POD_GAMMA:                             Pod_GammaGUID = pGo->GetGUID();                             break;
+                case POD_BETA:                              Pod_BetaGUID =  pGo->GetGUID();                             break;
+                case POD_DELTA:                             Pod_DeltaGUID = pGo->GetGUID();                             break;
+                case POD_OMEGA:                             Pod_OmegaGUID = pGo->GetGUID();                             break;
+                case SEAL_SPHERE:                           GoSphereGUID = pGo->GetGUID();                              break;
+                //case WARDENS_SHIELD:                        Wardens_ShieldGUID = pGo->GetGUID();                        break;
                 }
             }
 
-            void OnCreatureCreate(Creature* creature)
+            void OnCreatureCreate(Creature* pCreature, bool /*add*/)
             {
-                if (creature->GetEntry() == MELLICHAR)
-                    MellicharGUID = creature->GetGUID();
+                if (pCreature->GetEntry() == MELLICHAR)
+                    MellicharGUID = pCreature->GetGUID();
             }
 
             void SetData(uint32 type, uint32 data)
             {
-                switch (type)
+                switch(type)
                 {
                 case TYPE_ZEREKETH:
                     m_auiEncounter[0] = data;
@@ -130,16 +138,16 @@ class instance_arcatraz : public InstanceMapScript
                 case TYPE_DALLIAH:
                     if (data == DONE)
                     {
-                        if (GameObject* go = instance->GetGameObject(Containment_Core_Security_Field_BetaGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Containment_Core_Security_Field_BetaGUID))
+                            pGo->UseDoorOrButton();
                     }
                     m_auiEncounter[1] = data;
                     break;
                 case TYPE_SOCCOTHRATES:
                     if (data == DONE)
                     {
-                        if (GameObject* go = instance->GetGameObject(Containment_Core_Security_Field_AlphaGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Containment_Core_Security_Field_AlphaGUID))
+                            pGo->UseDoorOrButton();
                     }
                     m_auiEncounter[2] = data;
                     break;
@@ -156,47 +164,47 @@ class instance_arcatraz : public InstanceMapScript
                     break;
                 case TYPE_WARDEN_1:
                     if (data == IN_PROGRESS)
-                        if (GameObject* go = instance->GetGameObject(Pod_AlphaGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Pod_AlphaGUID))
+                            pGo->UseDoorOrButton();
                     m_auiEncounter[4] = data;
                     break;
                 case TYPE_WARDEN_2:
                     if (data == IN_PROGRESS)
                     {
-                        if (GameObject* go = instance->GetGameObject(Pod_BetaGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Pod_BetaGUID))
+                            pGo->UseDoorOrButton();
                     }
                     m_auiEncounter[5] = data;
                     break;
                 case TYPE_WARDEN_3:
                     if (data == IN_PROGRESS)
                     {
-                        if (GameObject* go = instance->GetGameObject(Pod_DeltaGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Pod_DeltaGUID))
+                            pGo->UseDoorOrButton();
                     }
                     m_auiEncounter[6] = data;
                     break;
                 case TYPE_WARDEN_4:
                     if (data == IN_PROGRESS)
                     {
-                        if (GameObject* go = instance->GetGameObject(Pod_GammaGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Pod_GammaGUID))
+                            pGo->UseDoorOrButton();
                     }
                     m_auiEncounter[7] = data;
                     break;
                 case TYPE_WARDEN_5:
                     if (data == IN_PROGRESS)
                     {
-                        if (GameObject* go = instance->GetGameObject(Pod_OmegaGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Pod_OmegaGUID))
+                            pGo->UseDoorOrButton();
                     }
                     m_auiEncounter[8] = data;
                     break;
                 case TYPE_SHIELD_OPEN:
                     if (data == IN_PROGRESS)
                     {
-                        if (GameObject* go = instance->GetGameObject(Wardens_ShieldGUID))
-                            go->UseDoorOrButton();
+                        if (GameObject *pGo = instance->GetGameObject(Wardens_ShieldGUID))
+                            pGo->UseDoorOrButton();
                     }
                     break;
                 }
@@ -204,7 +212,7 @@ class instance_arcatraz : public InstanceMapScript
 
             uint32 GetData(uint32 type)
             {
-                switch (type)
+                switch(type)
                 {
                 case TYPE_HARBINGERSKYRISS: return m_auiEncounter[3];
                 case TYPE_WARDEN_1:         return m_auiEncounter[4];
@@ -218,7 +226,7 @@ class instance_arcatraz : public InstanceMapScript
 
             uint64 GetData64(uint32 data)
             {
-                switch (data)
+                switch(data)
                 {
                 case DATA_MELLICHAR:        return MellicharGUID;
                 case DATA_SPHERE_SHIELD:    return GoSphereGUID;
@@ -227,9 +235,9 @@ class instance_arcatraz : public InstanceMapScript
             }
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
+        InstanceScript* GetInstanceScript(InstanceMap* pMap) const
         {
-            return new instance_arcatraz_InstanceMapScript(map);
+            return new instance_arcatraz_InstanceMapScript(pMap);
         }
 };
 

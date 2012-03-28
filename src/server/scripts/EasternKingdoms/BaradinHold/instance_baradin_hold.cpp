@@ -1,19 +1,23 @@
 /*
-* Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 3 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include"ScriptPCH.h"
 #include"baradin_hold.h"
@@ -36,25 +40,25 @@ public:
         }
 
         /*
-        void Initialize()
-        {
-            memset(&guid, 0, sizeof(guid));
-        }
+void Initialize()
+{
+memset(&guid, 0, sizeof(guid));
+}
 
-        void OnCreatureCreate(Creature* creature)
-        {
-            switch (creature->GetEntry())
-            {
-            case CREATURE_ARGALOTH: guid[DATA_ARGALOTH] = creature->GetGUID(); break;
-            case CREATURE_OCCUTHAR: guid[DATA_OCCUTHAR] = creature->GetGUID(); break;
-            }
-        }
+void OnCreatureCreate(Creature* creature)
+{
+switch (creature->GetEntry())
+{
+case CREATURE_ARGALOTH: guid[DATA_ARGALOTH] = creature->GetGUID(); break;
+case CREATURE_OCCUTHAR: guid[DATA_OCCUTHAR] = creature->GetGUID(); break;
+}
+}
 
-        uint64 GetData64(uint32 identifier) { return guid[identifier]; }
+uint64 GetData64(uint32 identifier) { return guid[identifier]; }
 
-    private:
-        uint64 guid[MAX_ENCOUNTER];
-    */
+private:
+uint64 guid[MAX_ENCOUNTER];
+*/
     };
 };
 

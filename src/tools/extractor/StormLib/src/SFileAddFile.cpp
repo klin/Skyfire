@@ -64,7 +64,7 @@ static int WriteDataToMpqFile(
         DWORD dwBytesToCopy;
 
         // Process all data.
-        while (dwDataSize != 0)
+        while(dwDataSize != 0)
         {
             dwBytesToCopy = dwDataSize;
 
@@ -249,7 +249,7 @@ static int RecryptFileData(
     // recompression, because recompression is not necessary in this case
     if (nError == ERROR_SUCCESS)
     {
-        for (DWORD dwSector = 0; dwSector < hf->dwDataSectors; dwSector++)
+        for(DWORD dwSector = 0; dwSector < hf->dwDataSectors; dwSector++)
         {
             DWORD dwRawDataInSector = hf->dwSectorSize;
             DWORD dwRawByteOffset = dwSector * hf->dwSectorSize;
@@ -824,7 +824,7 @@ bool WINAPI SFileAddFileEx(
     }
 
     // Write the file data to the MPQ
-    while (nError == ERROR_SUCCESS && dwBytesRemaining != 0)
+    while(nError == ERROR_SUCCESS && dwBytesRemaining != 0)
     {
         // Get the number of bytes remaining in the source file
         dwBytesToRead = dwBytesRemaining;
@@ -896,7 +896,7 @@ bool WINAPI SFileAddWave(HANDLE hMpq, const char * szFileName, const char * szAr
     //
 
     // Convert quality to data compression
-    switch (dwQuality)
+    switch(dwQuality)
     {
         case MPQ_WAVE_QUALITY_HIGH:
 //          WaveCompressionLevel = -1;

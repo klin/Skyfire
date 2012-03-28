@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -15,6 +18,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+/* ScriptData
+SDName: Instance_Onyxias_Lair
+SD%Complete: 100
+SDComment:
+SDCategory: Onyxia's Lair
+EndScriptData */
 
 #include "ScriptPCH.h"
 #include "onyxias_lair.h"
@@ -38,27 +48,27 @@ public:
         std::map<uint64, uint32> FloorEruptionGUID[2];
         std::queue<uint64> FloorEruptionGUIDQueue;
 
-        uint64 OnyxiasGUID;
-        uint32 OnyxiaLiftoffTimer;
-        uint32 ManyWhelpsCounter;
-        uint32 EruptTimer;
+        uint64 m_uiOnyxiasGUID;
+        uint32 m_uiOnyxiaLiftoffTimer;
+        uint32 m_uiManyWhelpsCounter;
+        uint32 m_uiEruptTimer;
 
-        uint8  Encounter[MAX_ENCOUNTER];
+        uint8  m_auiEncounter[MAX_ENCOUNTER];
 
-        bool   _bAchievManyWhelpsHandleIt;
-        bool   _bAchievSheDeepBreathMore;
+        bool   m_bAchievManyWhelpsHandleIt;
+        bool   m_bAchievSheDeepBreathMore;
 
         void Initialize()
         {
-            memset(&Encounter, 0, sizeof(Encounter));
+            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-            OnyxiasGUID = 0;
-            OnyxiaLiftoffTimer = 0;
-            ManyWhelpsCounter = 0;
-            _bAchievManyWhelpsHandleIt = false;
-            _bAchievSheDeepBreathMore = true;
+            m_uiOnyxiasGUID = 0;
+            m_uiOnyxiaLiftoffTimer = 0;
+            m_uiManyWhelpsCounter = 0;
+            m_bAchievManyWhelpsHandleIt = false;
+            m_bAchievSheDeepBreathMore = true;
 
-            EruptTimer = 0;
+            m_uiEruptTimer = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -66,7 +76,7 @@ public:
             switch (creature->GetEntry())
             {
                 case NPC_ONYXIA:
-                    OnyxiasGUID = creature->GetGUID();
+                    m_uiOnyxiasGUID = creature->GetGUID();
                     break;
             }
         }
@@ -87,7 +97,7 @@ public:
                     if (Creature* temp = go->SummonCreature(NPC_WHELP, goPos, TEMPSUMMON_CORPSE_DESPAWN))
                     {
                         temp->SetInCombatWithZone();
-                        ++ManyWhelpsCounter;
+                        ++m_uiManyWhelpsCounter;
                     }
                     break;
             }
@@ -104,19 +114,19 @@ public:
 
         void FloorEruption(uint64 floorEruptedGUID)
         {
-            if (GameObject* floorEruption = instance->GetGameObject(floorEruptedGUID))
+            if (GameObject* pFloorEruption = instance->GetGameObject(floorEruptedGUID))
             {
-                // THIS GOB IS A TRAP - What shall i do? =(
-                // Cast it spell? Copyed Heigan method
-                floorEruption->SendCustomAnim(floorEruption->GetGoAnimProgress());
-                floorEruption->CastSpell(NULL, Difficulty(instance->GetSpawnMode()) == RAID_DIFFICULTY_10MAN_NORMAL ? 17731 : 69294);                                  // floorEruption->GetGOInfo()->trap.spellId
+                //THIS GOB IS A TRAP - What shall i do? =(
+                //Cast it spell? Copyed Heigan method
+                pFloorEruption->SendCustomAnim(pFloorEruption->GetGoAnimProgress());
+                pFloorEruption->CastSpell(NULL, Difficulty(instance->GetSpawnMode()) == RAID_DIFFICULTY_10MAN_NORMAL ? 17731 : 69294); //pFloorEruption->GetGOInfo()->trap.spellId
 
-                // Get all immediatly nearby floors
+                //Get all immediatly nearby floors
                 std::list<GameObject*> nearFloorList;
-                Trinity::GameObjectInRangeCheck check(floorEruption->GetPositionX(), floorEruption->GetPositionY(), floorEruption->GetPositionZ(), 15);
-                Trinity::GameObjectListSearcher<Trinity::GameObjectInRangeCheck> searcher(floorEruption, nearFloorList, check);
-                floorEruption->VisitNearbyGridObject(999, searcher);
-                // remove all that are not present on FloorEruptionGUID[1] and update treeLen on each GUID
+                Trinity::GameObjectInRangeCheck check(pFloorEruption->GetPositionX(), pFloorEruption->GetPositionY(), pFloorEruption->GetPositionZ(), 15);
+                Trinity::GameObjectListSearcher<Trinity::GameObjectInRangeCheck> searcher(pFloorEruption, nearFloorList, check);
+                pFloorEruption->VisitNearbyGridObject(999, searcher);
+                //remove all that are not present on FloorEruptionGUID[1] and update treeLen on each GUID
                 for (std::list<GameObject*>::const_iterator itr = nearFloorList.begin(); itr != nearFloorList.end(); ++itr)
                 {
                     if (((*itr)->GetGOInfo()->displayId == 4392 || (*itr)->GetGOInfo()->displayId == 4472) && (*itr)->GetGOInfo()->trap.spellId == 17731)
@@ -133,88 +143,88 @@ public:
             FloorEruptionGUID[1].erase(floorEruptedGUID);
         }
 
-        void SetData(uint32 type, uint32 data)
+        void SetData(uint32 uiType, uint32 uiData)
         {
-            switch (type)
+            switch (uiType)
             {
                 case DATA_ONYXIA:
-                    Encounter[0] = data;
-                    if (data == IN_PROGRESS)
+                    m_auiEncounter[0] = uiData;
+                    if (uiData == IN_PROGRESS)
                         SetData(DATA_SHE_DEEP_BREATH_MORE, IN_PROGRESS);
                     break;
                 case DATA_ONYXIA_PHASE:
-                    if (data == PHASE_BREATH) //Used to mark the liftoff phase
+                    if (uiData == PHASE_BREATH) //Used to mark the liftoff phase
                     {
-                        _bAchievManyWhelpsHandleIt = false;
-                        ManyWhelpsCounter = 0;
-                        OnyxiaLiftoffTimer = 10 * IN_MILLISECONDS;
+                        m_bAchievManyWhelpsHandleIt = false;
+                        m_uiManyWhelpsCounter = 0;
+                        m_uiOnyxiaLiftoffTimer = 10*IN_MILLISECONDS;
                     }
                     break;
                 case DATA_SHE_DEEP_BREATH_MORE:
-                    if (data == IN_PROGRESS)
+                    if (uiData == IN_PROGRESS)
                     {
-                        _bAchievSheDeepBreathMore = true;
+                        m_bAchievSheDeepBreathMore = true;
                     }
-                    else if (data == FAIL)
+                    else if (uiData == FAIL)
                     {
-                        _bAchievSheDeepBreathMore = false;
+                        m_bAchievSheDeepBreathMore = false;
                     }
                     break;
             }
 
-            if (type < MAX_ENCOUNTER && data == DONE)
+            if (uiType < MAX_ENCOUNTER && uiData == DONE)
                 SaveToDB();
         }
 
-        void SetData64(uint32 type, uint64 data)
+        void SetData64(uint32 uiType, uint64 uiData)
         {
-            switch (type)
+            switch (uiType)
             {
                 case DATA_FLOOR_ERUPTION_GUID:
                     FloorEruptionGUID[1] = FloorEruptionGUID[0];
-                    FloorEruptionGUIDQueue.push(data);
-                    EruptTimer = 2500;
+                    FloorEruptionGUIDQueue.push(uiData);
+                    m_uiEruptTimer = 2500;
                     break;
             }
         }
 
-        uint32 GetData(uint32 type)
+        uint32 GetData(uint32 uiType)
         {
-            switch (type)
+            switch (uiType)
             {
                 case DATA_ONYXIA:
-                    return Encounter[0];
+                    return m_auiEncounter[0];
             }
 
             return 0;
         }
 
-        uint64 GetData64(uint32 data)
+        uint64 GetData64(uint32 uiData)
         {
-            switch (data)
+            switch (uiData)
             {
                 case DATA_ONYXIA_GUID:
-                    return OnyxiasGUID;
+                    return m_uiOnyxiasGUID;
             }
 
             return 0;
         }
 
-        void Update(uint32 diff)
+        void Update(uint32 uiDiff)
         {
             if (GetData(DATA_ONYXIA) == IN_PROGRESS)
             {
-                if (OnyxiaLiftoffTimer && OnyxiaLiftoffTimer <= diff)
+                if (m_uiOnyxiaLiftoffTimer && m_uiOnyxiaLiftoffTimer <= uiDiff)
                 {
-                    OnyxiaLiftoffTimer = 0;
-                    if (ManyWhelpsCounter >= 50)
-                        _bAchievManyWhelpsHandleIt = true;
-                } else OnyxiaLiftoffTimer -= diff;
+                    m_uiOnyxiaLiftoffTimer = 0;
+                    if (m_uiManyWhelpsCounter >= 50)
+                        m_bAchievManyWhelpsHandleIt = true;
+                } else m_uiOnyxiaLiftoffTimer -= uiDiff;
             }
 
             if (!FloorEruptionGUIDQueue.empty())
             {
-                if (EruptTimer <= diff)
+                if (m_uiEruptTimer <= uiDiff)
                 {
                     uint32 treeHeight = 0;
                     do
@@ -223,10 +233,10 @@ public:
                         FloorEruption(FloorEruptionGUIDQueue.front());
                         FloorEruptionGUIDQueue.pop();
                     } while (!FloorEruptionGUIDQueue.empty() && (*FloorEruptionGUID[1].find(FloorEruptionGUIDQueue.front())).second == treeHeight);
-                    EruptTimer = 1000;
+                    m_uiEruptTimer = 1000;
                 }
                 else
-                    EruptTimer -= diff;
+                    m_uiEruptTimer -= uiDiff;
             }
         }
 
@@ -236,10 +246,10 @@ public:
             {
                 case ACHIEV_CRITERIA_MANY_WHELPS_10_PLAYER:  // Criteria for achievement 4403: Many Whelps! Handle It! (10 player) Hatch 50 eggs in 10s
                 case ACHIEV_CRITERIA_MANY_WHELPS_25_PLAYER:  // Criteria for achievement 4406: Many Whelps! Handle It! (25 player) Hatch 50 eggs in 10s
-                    return _bAchievManyWhelpsHandleIt;
+                    return m_bAchievManyWhelpsHandleIt;
                 case ACHIEV_CRITERIA_DEEP_BREATH_10_PLAYER:  // Criteria for achievement 4404: She Deep Breaths More (10 player) Everybody evade Deep Breath
                 case ACHIEV_CRITERIA_DEEP_BREATH_25_PLAYER:  // Criteria for achievement 4407: She Deep Breaths More (25 player) Everybody evade Deep Breath
-                    return _bAchievSheDeepBreathMore;
+                    return m_bAchievSheDeepBreathMore;
             }
             return false;
         }

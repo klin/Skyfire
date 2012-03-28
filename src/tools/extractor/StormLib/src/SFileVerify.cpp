@@ -126,7 +126,7 @@ static bool is_valid_md5(void * pvMd5)
     unsigned char ByteSum = 0;
     int i;
 
-    for (i = 0; i < 0x10; i++)
+    for(i = 0; i < 0x10; i++)
         ByteSum |= pbMd5[i];
 
     return (ByteSum != 0) ? true : false;
@@ -287,7 +287,7 @@ static bool CalculateMpqHashMd5(
     BeginBuffer = pSI->BeginMpqData;
 
     // Create the digest
-    for (;;)
+    for(;;)
     {
         ULONGLONG BytesRemaining;
         LPBYTE pbSigBegin = NULL;
@@ -350,7 +350,7 @@ static void AddTailToSha1(
 
     // Convert the tail to uppercase
     // Note that we don't need to terminate the string with zero
-    while (*szTail != 0)
+    while(*szTail != 0)
     {
         szUpperCase[nLength++] = (unsigned char)toupper(*szTail++);
     }
@@ -383,7 +383,7 @@ static bool CalculateMpqHashSha1(
     BeginBuffer = pSI->BeginMpqData;
 
     // Create the digest
-    for (;;)
+    for(;;)
     {
         ULONGLONG BytesRemaining;
         DWORD dwToRead = MPQ_DIGEST_UNIT_SIZE;
@@ -470,7 +470,7 @@ static int VerifyRawMpqData(
     // Now verify every data chunk
     if (nError == ERROR_SUCCESS)
     {
-        for (DWORD i = 0; i < dwChunkCount; i++)
+        for(DWORD i = 0; i < dwChunkCount; i++)
         {
             // Get the number of bytes in the chunk
             dwBytesInChunk = STORMLIB_MIN(dwChunkSize, dwDataSize);
@@ -661,7 +661,7 @@ DWORD WINAPI SFileVerifyFile(HANDLE hMpq, const char * szFileName, DWORD dwFlags
         hf->bCheckSectorCRCs = true;
 
         // Go through entire file and update both CRC32 and MD5
-        for (;;)
+        for(;;)
         {
             // Read data from file
             SFileReadFile(hFile, Buffer, sizeof(Buffer), &dwBytesRead, NULL);
@@ -761,7 +761,7 @@ int WINAPI SFileVerifyRawData(HANDLE hMpq, DWORD dwWhatToVerify, const char * sz
         return ERROR_SUCCESS;
 
     // If we have to verify MPQ header, do it
-    switch (dwWhatToVerify)
+    switch(dwWhatToVerify)
     {
         case SFILE_VERIFY_MPQ_HEADER:
 
@@ -832,7 +832,7 @@ DWORD WINAPI SFileVerifyArchive(HANDLE hMpq)
         return ERROR_VERIFY_FAILED;
 
     // Verify the signature
-    switch (si.nSignatureType)
+    switch(si.nSignatureType)
     {
         case SIGNATURE_TYPE_NONE:
             return ERROR_NO_SIGNATURE;

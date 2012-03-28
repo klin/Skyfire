@@ -1,19 +1,23 @@
 /*
-* Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 3 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ScriptPCH.h"
 #include "grim_batol.h"
@@ -21,11 +25,11 @@
 #define ENCOUNTERS 4
 
 /* Boss Encounters
-   General Umbriss
-   Forgemaster Throngus
-   Drahga Shadowburner
-   Erudax
- */
+General Umbriss
+Forgemaster Throngus
+Drahga Shadowburner
+Erudax
+*/
 
 class instance_grim_batol : public InstanceMapScript
 {
@@ -51,10 +55,10 @@ public:
 
         void Initialize()
         {
-            GeneralUmbriss        = 0;
-            ForgemasterThrongus   = 0;
-            DrahgaShadowburner    = 0;
-            Erudax                = 0;
+            GeneralUmbriss = 0;
+            ForgemasterThrongus = 0;
+            DrahgaShadowburner = 0;
+            Erudax = 0;
 
             for (uint8 i = 0 ; i<ENCOUNTERS; ++i)
                 Encounter[i] = NOT_STARTED;
@@ -149,7 +153,7 @@ public:
 
             std::string str_data;
             std::ostringstream saveStream;
-            saveStream << "G B" << Encounter[0] << " " << Encounter[1]  << " " << Encounter[2]  << " " << Encounter[3];
+            saveStream << "G B" << Encounter[0] << " " << Encounter[1] << " " << Encounter[2] << " " << Encounter[3];
             str_data = saveStream.str();
 
             OUT_SAVE_INST_DATA_COMPLETE;

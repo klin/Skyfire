@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -59,6 +63,11 @@ class boss_trollgore : public CreatureScript
 public:
     boss_trollgore() : CreatureScript("boss_trollgore") { }
 
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_trollgoreAI (creature);
+    }
+
     struct boss_trollgoreAI : public ScriptedAI
     {
         boss_trollgoreAI(Creature* c) : ScriptedAI(c), lSummons(me)
@@ -83,16 +92,16 @@ public:
         {
             uiConsumeTimer = 15*IN_MILLISECONDS;
             uiAuraCountTimer = 15500;
-            uiCrushTimer = urand(1*IN_MILLISECONDS, 5*IN_MILLISECONDS);
-            uiInfectedWoundTimer = urand(60*IN_MILLISECONDS, 10*IN_MILLISECONDS);
+            uiCrushTimer = urand(1*IN_MILLISECONDS,5*IN_MILLISECONDS);
+            uiInfectedWoundTimer = urand(6*IN_MILLISECONDS,10*IN_MILLISECONDS);
             uiExplodeCorpseTimer = 3*IN_MILLISECONDS;
-            uiSpawnTimer = urand(30*IN_MILLISECONDS, 40*IN_MILLISECONDS);
+            uiSpawnTimer = urand(30*IN_MILLISECONDS,40*IN_MILLISECONDS);
 
             consumptionJunction = true;
 
             lSummons.DespawnAll();
 
-            me->RemoveAura(DUNGEON_MODE(SPELL_CONSUME_AURA, H_SPELL_CONSUME_AURA));
+            me->RemoveAura(DUNGEON_MODE(SPELL_CONSUME_AURA,H_SPELL_CONSUME_AURA));
 
             if (instance)
                 instance->SetData(DATA_TROLLGORE_EVENT, NOT_STARTED);
@@ -188,11 +197,6 @@ public:
                 summon->AI()->AttackStart(me);
         }
     };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_trollgoreAI(creature);
-    }
 };
 
 class achievement_consumption_junction : public AchievementCriteriaScript

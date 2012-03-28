@@ -1,28 +1,26 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008 - 2011 ArkCORE <http://www.arkania.net./>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2011 Patch supported by ChaosUA & TCRU community http://trinity-core.ru/
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "ScriptPCH.h"
-#include "BattlefieldMgr.h"
-#include "BattlefieldWG.h"
-#include "Battlefield.h"
-#include "ScriptSystem.h"
-#include "WorldSession.h"
-#include "ObjectMgr.h"
+#include "OutdoorPvPWG.h"
+#include "OutdoorPvPMgr.h"
 #include "Vehicle.h"
 
 #define GOSSIP_HELLO_DEMO1  "Build catapult."
@@ -30,392 +28,403 @@
 #define GOSSIP_HELLO_DEMO3  "Build siege engine."
 #define GOSSIP_HELLO_DEMO4  "I cannot build more!"
 
-enum eWGqueuenpctext
+class npc_demolisher_engineerer : public CreatureScript
 {
-    WG_NPCQUEUE_TEXT_H_NOWAR            = 14775,
-    WG_NPCQUEUE_TEXT_H_QUEUE            = 14790,
-    WG_NPCQUEUE_TEXT_H_WAR              = 14777,
-    WG_NPCQUEUE_TEXT_A_NOWAR            = 14782,
-    WG_NPCQUEUE_TEXT_A_QUEUE            = 14791,
-    WG_NPCQUEUE_TEXT_A_WAR              = 14781,
-    WG_NPCQUEUE_TEXTOPTION_JOIN         = -1850507,
+public:
+    npc_demolisher_engineerer() : CreatureScript("npc_demolisher_engineerer") { }
+
+bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+{
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+    if(pPlayer->isGameMaster() || pCreature->GetZoneScript() && pCreature->GetZoneScript()->GetData(pCreature->GetDBTableGUIDLow()))
+    {
+        if (pPlayer->HasAura(SPELL_CORPORAL))
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO1, GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF);
+        else if (pPlayer->HasAura(SPELL_LIEUTENANT))
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO1, GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO2, GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO3, GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+2);
+        }
+    }
+    else
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO4, GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+9);
+
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    return true;
+}
+
+bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+{
+    pPlayer->CLOSE_GOSSIP_MENU();
+    if(pPlayer->isGameMaster() || pCreature->GetZoneScript() && pCreature->GetZoneScript()->GetData(pCreature->GetDBTableGUIDLow()))
+    {
+        switch(uiAction - GOSSIP_ACTION_INFO_DEF)
+        {
+            case 0: pPlayer->CastSpell(pPlayer, 56663, false, NULL, NULL, pCreature->GetGUID()); break;
+            case 1: pPlayer->CastSpell(pPlayer, 56575, false, NULL, NULL, pCreature->GetGUID()); break;
+            case 2: pPlayer->CastSpell(pPlayer, pPlayer->GetTeamId() ? 61408 : 56661, false, NULL, NULL, pCreature->GetGUID()); break;
+        }
+    }
+
+    return true;
+}
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_demolisher_engineererAI(pCreature);
+    }
+
+    struct npc_demolisher_engineererAI : public ScriptedAI
+    {
+        npc_demolisher_engineererAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+    };
 };
 
-enum eWGdata
+enum eWintergraspBattleMage
 {
-    // engineer spells
-    SPELL_BUILD_CATAPULT                = 56663,
-    SPELL_BUILD_DEMOLISHER              = 56575,
-    SPELL_BUILD_SIEGE_ENGINE            = 61408,
-    SPELL_BUILD_SIEGE_ENGINE2           = 56661, // does it's really needed here?
-    SPELL_ACTIVATE_ROBOTIC_ARMS         = 49899,
-
-    // teleporter spells
-    SPELL_VEHICLE_TELEPORT              = 49759,
+    SPELL_PORTAL_VISUAL        = 60223,
+    GO_WINTERGRASP_PORTAL    = 193772
 };
 
-class npc_wg_demolisher_engineer : public CreatureScript
+class npc_wg_ally_battle_mage : public CreatureScript
 {
-  public:
-    npc_wg_demolisher_engineer() : CreatureScript("npc_wg_demolisher_engineer")
+public:
+    npc_wg_ally_battle_mage() : CreatureScript("npc_wg_ally_battle_mage") { }
+
+    CreatureAI *GetAI(Creature *creature) const
     {
+        return new npc_wg_ally_battle_mageAI(creature);
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
+        if (!sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+            return false;
 
-        BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(1);
-
-        if (!BfWG)
-            return true;
-
-        if (BfWG->GetData(creature->GetEntry() == 30400 ? BATTLEFIELD_WG_DATA_MAX_VEHICLE_H : BATTLEFIELD_WG_DATA_MAX_VEHICLE_A) >
-            BfWG->GetData(creature->GetEntry() == 30400 ? BATTLEFIELD_WG_DATA_VEHICLE_H : BATTLEFIELD_WG_DATA_VEHICLE_A))
+        if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
         {
-            if (player->HasAura(SPELL_CORPORAL))
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-            else if (player->HasAura(SPELL_LIEUTENANT))
+            if (pvpWG->isWarTime())
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            }
-        }
-        else
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_DEMO4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9);
-
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender */ , uint32 action)
-    {
-        player->CLOSE_GOSSIP_MENU();
-
-        BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(1);
-
-        if (!BfWG)
-            return true;
-
-        if (BfWG->GetData(creature->GetEntry() == 30400 ? BATTLEFIELD_WG_DATA_MAX_VEHICLE_H : BATTLEFIELD_WG_DATA_MAX_VEHICLE_A) >
-            BfWG->GetData(creature->GetEntry() == 30400 ? BATTLEFIELD_WG_DATA_VEHICLE_H : BATTLEFIELD_WG_DATA_VEHICLE_A))
-        {
-            switch (action - GOSSIP_ACTION_INFO_DEF)
-            {
-                case 0:
-                    player->CastSpell(player, SPELL_BUILD_CATAPULT, false, NULL, NULL, creature->GetGUID());
-                    break;
-                case 1:
-                    player->CastSpell(player, SPELL_BUILD_DEMOLISHER, false, NULL, NULL, creature->GetGUID());
-                    break;
-                case 2:
-                    player->CastSpell(player, player->GetTeamId() ? SPELL_BUILD_SIEGE_ENGINE : SPELL_BUILD_SIEGE_ENGINE2, false, NULL, NULL, creature->GetGUID());
-                    break;
-            }
-            //spell 49899 Emote : 406 from sniff
-            //INSERT INTO `spell_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES ('49899', '0', '1', '406', '0', '0', '0', '0', '0', '0');
-            if (creature = creature->FindNearestCreature(27852, 30.0f, true))
-                creature->CastSpell(creature, SPELL_ACTIVATE_ROBOTIC_ARMS, true);
-        }
-        return true;
-    }
-};
-
-class npc_wg_spirit_guide : public CreatureScript
-{
-  public:
-    npc_wg_spirit_guide() : CreatureScript("npc_wg_spirit_guide")
-    {
-    }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
-        if (BfWG)
-        {
-            GraveYardVect gy = BfWG->GetGraveYardVect();
-            for (uint8 i = 0; i < gy.size(); i++)
-            {
-                if (gy[i]->GetControlTeamId() == player->GetTeamId())
-                {
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, sObjectMgr->GetSkyFireStringForDBCLocale(((BfGraveYardWG *) gy[i])->GetTextId()), GOSSIP_SENDER_MAIN,
-                                             GOSSIP_ACTION_INFO_DEF + i);
-                }
-            }
-        }
-
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* /*creature */ , uint32 /*Sender */ , uint32 action)
-    {
-        player->CLOSE_GOSSIP_MENU();
-
-        BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
-        if (BfWG)
-        {
-            GraveYardVect gy = BfWG->GetGraveYardVect();
-            for (uint8 i = 0; i < gy.size(); i++)
-            {
-                if (action - GOSSIP_ACTION_INFO_DEF == i && gy[i]->GetControlTeamId() == player->GetTeamId())
-                {
-                    WorldSafeLocsEntry const* ws = sWorldSafeLocsStore.LookupEntry(gy[i]->GetGraveYardId());
-                    player->TeleportTo(ws->map_id, ws->x, ws->y, ws->z, 0);
-                }
-            }
-        }
-        return true;
-    }
-};
-
-class npc_wg_queue : public CreatureScript
-{
-  public:
-    npc_wg_queue() : CreatureScript("npc_wg_queue")
-    {
-    }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
-        if (BfWG)
-        {
-            if (BfWG->IsWarTime())
-            {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, sObjectMgr->GetSkyFireStringForDBCLocale(WG_NPCQUEUE_TEXTOPTION_JOIN), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-                player->SEND_GOSSIP_MENU(BfWG->GetDefenderTeam()? WG_NPCQUEUE_TEXT_H_WAR : WG_NPCQUEUE_TEXT_A_WAR, creature->GetGUID());
-            }
-            else
-            {
-                uint32 uiTime = BfWG->GetTimer() / 1000;
-                player->SendUpdateWorldState(4354, time(NULL) + uiTime);
-                if (uiTime < 15 * MINUTE)
-                {
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, sObjectMgr->GetSkyFireStringForDBCLocale(WG_NPCQUEUE_TEXTOPTION_JOIN), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-                    player->SEND_GOSSIP_MENU(BfWG->GetDefenderTeam() ? WG_NPCQUEUE_TEXT_H_QUEUE : WG_NPCQUEUE_TEXT_A_QUEUE, creature->GetGUID());
-                }
+                if (pvpWG->getDefenderTeam() == TEAM_HORDE)
+                    pPlayer->SEND_GOSSIP_MENU(14777, pCreature->GetGUID());
                 else
-                {
-                    player->SEND_GOSSIP_MENU(BfWG->GetDefenderTeam() ? WG_NPCQUEUE_TEXT_H_NOWAR : WG_NPCQUEUE_TEXT_A_NOWAR, creature->GetGUID());
-                }
-            }
-        }
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* /*creature */ , uint32 /*Sender */ , uint32 /*action */ )
-    {
-        player->CLOSE_GOSSIP_MENU();
-
-        BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
-        if (BfWG)
-        {
-            if (BfWG->IsWarTime())
-            {
-                BfWG->InvitePlayerToWar(player);
+                    pPlayer->SEND_GOSSIP_MENU(14781, pCreature->GetGUID());
             }
             else
             {
-                uint32 uiTime = BfWG->GetTimer() / 1000;
-                if (uiTime < 15 * MINUTE)
-                    BfWG->InvitePlayerToQueue(player);
+                if (pvpWG->getDefenderTeam() == TEAM_HORDE)
+                    pPlayer->SEND_GOSSIP_MENU(14775, pCreature->GetGUID());
+                else
+                    pPlayer->SEND_GOSSIP_MENU(14782, pCreature->GetGUID());
             }
         }
         return true;
     }
-};
 
-const uint32 Vehicles[4] = { 32627, 28312, 28094, 27881 };
-
-class go_wg_vehicle_teleporter : public GameObjectScript
-{
-  public:
-    go_wg_vehicle_teleporter() : GameObjectScript("go_wg_vehicle_teleporter")
+    struct npc_wg_ally_battle_mageAI : public ScriptedAI
     {
-    }
-
-    struct go_wg_vehicle_teleporterAI : public GameObjectAI
-    {
-        go_wg_vehicle_teleporterAI(GameObject* g) : GameObjectAI(g)
+        npc_wg_ally_battle_mageAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            uiCheckTimer = 1000;
+            uiPortalTimer = 0;
+            uiPortalPhase = 0;
+            Check = true;
         }
+
+        uint32 uiPortalTimer;
+        uint8 uiPortalPhase;
+        GameObject* WintergraspPortal;
+        bool Player;
+        bool Check;
+        bool Check2;
 
         void UpdateAI(const uint32 diff)
         {
-            if (uiCheckTimer <= diff)
+            // If WG is disabled, don't do anything.
+            if (!sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+                return;
+
+            if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
             {
-                for (uint8 i = 0; i < 4; i++)
-                    if (Creature* vehicle = go->FindNearestCreature(Vehicles[i], 3.0f, true))
-                        if (!vehicle->HasAura(SPELL_VEHICLE_TELEPORT))
+                // Get playerlist if there is.
+                if (pvpWG->isWarTime() && Check == true)
+                {
+                    Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (!PlayerList.isEmpty())
                         {
-                            if (vehicle->GetVehicle())
+                            if (i->getSource()->GetDistance2d(me) <= 75)
                             {
-                                if (Unit* player = vehicle->GetVehicle()->GetPassenger(0))
-                                {
-                                    uint32 gofaction = go->GetUInt32Value(GAMEOBJECT_FACTION);
-                                    uint32 plfaction = player->getFaction();
-                                    if (gofaction == plfaction)
-                                    {
-                                        vehicle->CastSpell(vehicle, SPELL_VEHICLE_TELEPORT, true);
-                                        if (Creature* TargetTeleport = vehicle->FindNearestCreature(23472, 100.0f, true))
-                                        {
-                                            float x, y, z, o;
-                                            TargetTeleport->GetPosition(x, y, z, o);
-                                            vehicle->GetVehicle()->TeleportVehicle(x, y, z, o);
-                                        }
-                                    }
-                                }
+                                Player = true;
+                                Check = false;
+                            }
+                            else
+                            {
+                                Player = false;
+                                Check = false;
+                                Check2 = true;
                             }
                         }
-                uiCheckTimer = 1000;
-            }
-            else
-                uiCheckTimer -= diff;
-        }
-      private:
-          uint32 uiCheckTimer;
-    };
-
-    GameObjectAI *GetAI(GameObject* go) const
-    {
-        return new go_wg_vehicle_teleporterAI(go);
-    }
-};
-
-class npc_wg_quest_giver : public CreatureScript
-{
-  public:
-    npc_wg_quest_giver() : CreatureScript("npc_wg_quest_giver")
-    {
-    }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (creature->isQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
-
-        BattlefieldWG* BfWG = (BattlefieldWG *) sBattlefieldMgr.GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
-        if (BfWG)
-        {
-            if (creature->isQuestGiver())
-            {
-                Object* pObject = (Object *) creature;
-                QuestRelations* objectQR = sObjectMgr->GetCreatureQuestRelationMap();
-                QuestRelations* objectQIR = sObjectMgr->GetCreatureQuestInvolvedRelation();
-
-                QuestMenu & qm = player->PlayerTalkClass->GetQuestMenu();
-                qm.ClearMenu();
-
-                for (QuestRelations::const_iterator i = objectQIR->lower_bound(pObject->GetEntry()); i != objectQIR->upper_bound(pObject->GetEntry()); ++i)
-                {
-                    uint32 quest_id = i->second;
-                    QuestStatus status = player->GetQuestStatus(quest_id);
-                    if (status == QUEST_STATUS_COMPLETE && !player->GetQuestRewardStatus(quest_id))
-                        qm.AddMenuItem(quest_id, 4);
-                    else if (status == QUEST_STATUS_INCOMPLETE)
-                        qm.AddMenuItem(quest_id, 4);
+                        else
+                        {
+                            Player = false;
+                            Check = false;
+                            Check2 = true;
+                        }
+                    }
                 }
 
-                for (QuestRelations::const_iterator i = objectQR->lower_bound(pObject->GetEntry()); i != objectQR->upper_bound(pObject->GetEntry()); ++i)
+                if (pvpWG->m_changeAlly != true) // If wg is switching (.wg switch)
                 {
-                    uint32 quest_id = i->second;
-                    Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id);
-                    if (!quest)
-                        continue;
-
-                    switch (quest_id)
+                    if (pvpWG->isWarTime())
                     {
-                        // Horde attacker
-                        case 13193:
-                        case 13202:
-                        case 13180:
-                        case 13200:
-                        case 13201:
-                        case 13223:
-                            if (BfWG->GetAttackerTeam() == TEAM_HORDE)
+                        if (Player == true) //(false) If there isn't any player, then, don't cast the portal spell. Just summon gameobject.
+                        {
+                            if (uiPortalTimer <= diff)
                             {
-                                QuestStatus status = player->GetQuestStatus(quest_id);
-
-                                if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 4);
-                                else if (status == QUEST_STATUS_NONE && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 2);
-                            }
-                            break;
-                        // Horde defender
-                        case 13199:
-                        case 13192:
-                        case 13178:
-                        case 13191:
-                        case 13194:
-                        case 13539:
-                        case 13185:
-                            if (BfWG->GetDefenderTeam() == TEAM_HORDE)
+                                switch (uiPortalPhase)
+                                {
+                                case 0:
+                                    me->SetOrientation(4.037271f);
+                                    me->SendMovementFlagUpdate();
+                                    ++uiPortalPhase;
+                                    uiPortalTimer = 100;
+                                    break;
+                                case 1:
+                                    me->AI()->DoCast(SPELL_PORTAL_VISUAL);
+                                    ++uiPortalPhase;
+                                    uiPortalTimer = 900;
+                                    break;
+                                case 2:
+                                    WintergraspPortal = me->SummonGameObject(GO_WINTERGRASP_PORTAL, 5686.974609f, 773.303711f, 647.753235f, 5.572729f, 0, 0, 0.324484f, -0.945891f, 0);
+                                    me->SetOrientation(5.515240f);
+                                    me->SendMovementFlagUpdate();
+                                    me->MonsterYell("Reinforcements are needed on the Wintergrasp battlefield! I have opened a portal for quick travel to the battle at The Silver Enclave.", LANG_UNIVERSAL, 0);
+                                    ++uiPortalPhase;
+                                    uiPortalTimer = 1000;
+                                    break;
+                                }
+                            }else uiPortalTimer -= diff;
+                        }
+                        else
+                        {
+                            if (Check2 == true) // If the portal isn't exist
                             {
-                                QuestStatus status = player->GetQuestStatus(quest_id);
-
-                                if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 4);
-                                else if (status == QUEST_STATUS_NONE && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 2);
+                                WintergraspPortal = me->SummonGameObject(GO_WINTERGRASP_PORTAL, 5686.974609f, 773.303711f, 647.753235f, 5.572729f, 0, 0, 0.324484f, -0.945891f, 0);
+                                Check2 = false;
                             }
-                            break;
-                        // Alliance attacker
-                        case 13196:
-                        case 13198:
-                        case 13179:
-                        case 13222:
-                        case 13195:
-                            if (BfWG->GetAttackerTeam() == TEAM_ALLIANCE)
+                        }
+                    }
+                    else
+                    {
+                        if (pvpWG->getDefenderTeam() == TEAM_ALLIANCE)
+                        {
+                            if (pvpWG->m_timer <= 3600000) // An hour before battle begin, the portal will disappear.
                             {
-                                QuestStatus status = player->GetQuestStatus(quest_id);
-
-                                if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 4);
-                                else if (status == QUEST_STATUS_NONE && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 2);
+                                uiPortalTimer = 0;
+                                uiPortalPhase = 0;
+                                Check = true;
+                                Check2 = false;
+                                if (GameObject* WintergraspPortal = me->FindNearestGameObject(GO_WINTERGRASP_PORTAL, 5.0f)) // If the portal is exist
+                                    WintergraspPortal->RemoveFromWorld();
                             }
-                            break;
-                        // Alliance defender
-                        case 13154:
-                        case 13153:
-                        case 13177:
-                        case 13538:
-                        case 13186:
-                        case 13156:
-                            if (BfWG->GetDefenderTeam() == TEAM_ALLIANCE)
-                            {
-                                QuestStatus status = player->GetQuestStatus(quest_id);
-
-                                if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 4);
-                                else if (status == QUEST_STATUS_NONE && player->CanTakeQuest(quest, false))
-                                    qm.AddMenuItem(quest_id, 2);
-                            }
-                            break;
-                        default:
-                            QuestStatus status = player->GetQuestStatus(quest_id);
-
-                            if (quest->IsAutoComplete() && player->CanTakeQuest(quest, false))
-                                qm.AddMenuItem(quest_id, 4);
-                            else if (status == QUEST_STATUS_NONE && player->CanTakeQuest(quest, false))
-                                qm.AddMenuItem(quest_id, 2);
-                            break;
+                        }
+                        else
+                        {
+                            uiPortalTimer = 0;
+                            uiPortalPhase = 0;
+                            Check = true;
+                            Check2 = false;
+                            if (GameObject* WintergraspPortal = me->FindNearestGameObject(GO_WINTERGRASP_PORTAL, 5.0f)) // If the portal is exist
+                                WintergraspPortal->RemoveFromWorld();
+                        }
                     }
                 }
             }
-            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-            return true;
+        }
+    };
+};
+
+class npc_wg_horde_battle_mage : public CreatureScript
+{
+public:
+    npc_wg_horde_battle_mage() : CreatureScript("npc_wg_horde_battle_mage") { }
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_wg_horde_battle_mageAI(creature);
+    }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+            return false;
+
+        if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+        {
+            if (pvpWG->isWarTime())
+            {
+                if (pvpWG->getDefenderTeam() == TEAM_HORDE)
+                    pPlayer->SEND_GOSSIP_MENU(14777, pCreature->GetGUID());
+                else
+                    pPlayer->SEND_GOSSIP_MENU(14781, pCreature->GetGUID());
+            }
+            else
+            {
+                if (pvpWG->getDefenderTeam() == TEAM_HORDE)
+                    pPlayer->SEND_GOSSIP_MENU(14775, pCreature->GetGUID());
+                else
+                    pPlayer->SEND_GOSSIP_MENU(14782, pCreature->GetGUID());
+            }
+        }
+        return true;
+    }
+
+    struct npc_wg_horde_battle_mageAI : public ScriptedAI
+    {
+        npc_wg_horde_battle_mageAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            uiPortalTimer = 0;
+            uiPortalPhase = 0;
+            Check = true;
+        }
+
+        uint32 uiPortalTimer;
+        uint8 uiPortalPhase;
+        GameObject* WintergraspPortal;
+        bool Player;
+        bool Check;
+        bool Check2;
+
+        void UpdateAI(const uint32 diff)
+        {
+            // If WG is disabled, don't do anything.
+            if (!sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
+                return;
+
+            if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+            {
+                // Get playerlist if there is.
+                if (pvpWG->isWarTime() && Check == true)
+                {
+                    Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (!PlayerList.isEmpty())
+                        {
+                            if (i->getSource()->GetDistance2d(me) <= 75)
+                            {
+                                Player = true;
+                                Check = false;
+                            }
+                            else
+                            {
+                                Player = false;
+                                Check = false;
+                                Check2 = true;
+                            }
+                        }
+                        else
+                        {
+                            Player = false;
+                            Check = false;
+                            Check2 = true;
+                        }
+                    }
+                }
+
+                if (pvpWG->m_changeHorde != true) // If wg is switching (.wg switch)
+                {
+                    if (pvpWG->isWarTime())
+                    {
+                        if (Player == true) //(false) If there isn't any player, then, don't cast the portal spell. Just summon gameobject.
+                        {
+                            if (uiPortalTimer <= diff)
+                            {
+                                switch (uiPortalPhase)
+                                {
+                                case 0:
+                                    me->SetOrientation(4.356160f);
+                                    me->SendMovementFlagUpdate();
+                                    ++uiPortalPhase;
+                                    uiPortalTimer = 100;
+                                    break;
+                                case 1:
+                                    me->AI()->DoCast(SPELL_PORTAL_VISUAL);
+                                    ++uiPortalPhase;
+                                    uiPortalTimer = 900;
+                                    break;
+                                case 2:
+                                    WintergraspPortal = me->SummonGameObject(GO_WINTERGRASP_PORTAL, 5924.042969f, 570.354492f, 661.087280f, 5.930885f, 0, 0, 0.324484f, -0.945891f, 0);
+                                    me->SetOrientation(6.003930f);
+                                    me->SendMovementFlagUpdate();
+                                    ++uiPortalPhase;
+                                    uiPortalTimer = 1000;
+                                    break;
+                                }
+                            }else uiPortalTimer -= diff;
+                        }
+                        else
+                        {
+                            if (Check2 == true) // If the portal isn't exist
+                            {
+                                WintergraspPortal = me->SummonGameObject(GO_WINTERGRASP_PORTAL, 5686.974609f, 773.303711f, 647.753235f, 5.572729f, 0, 0, 0.324484f, -0.945891f, 0);
+                                Check2 = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (pvpWG->getDefenderTeam() == TEAM_HORDE)
+                        {
+                            if (pvpWG->m_timer <= 3600000) // An hour before battle begin, the portal will disappear.
+                            {
+                                uiPortalTimer = 0;
+                                uiPortalPhase = 0;
+                                Check = true;
+                                Check2 = false;
+                                if (GameObject* WintergraspPortal = me->FindNearestGameObject(GO_WINTERGRASP_PORTAL, 5.0f)) // If the portal is exist
+                                    WintergraspPortal->RemoveFromWorld();
+                            }
+                        }
+                        else
+                        {
+                            uiPortalTimer = 0;
+                            uiPortalPhase = 0;
+                            Check = true;
+                            Check2 = false;
+                            if (GameObject* WintergraspPortal = me->FindNearestGameObject(GO_WINTERGRASP_PORTAL, 5.0f)) // If the portal is exist
+                                WintergraspPortal->RemoveFromWorld();
+                        }
+                    }
+                }
+            }
+        }
+    };
+};
+
+class go_wg_veh_teleporter : public GameObjectScript
+{
+public:
+    go_wg_veh_teleporter() : GameObjectScript("go_wg_veh_teleporter") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (GameObject* trigger = go->FindNearestGameObject(190375, 500)) // Wintergrasp Fortress Gate
+        {
+            if (Vehicle* vehicle = player->GetVehicle())
+            {
+                Position triggerPos;
+                trigger->GetPosition(&triggerPos);
+                triggerPos.m_positionX -= 30;
+                vehicle->Relocate(triggerPos);
+            }
         }
         return true;
     }
@@ -423,9 +432,8 @@ class npc_wg_quest_giver : public CreatureScript
 
 void AddSC_wintergrasp()
 {
-    new npc_wg_queue();
-    new npc_wg_spirit_guide();
-    new npc_wg_demolisher_engineer();
-    new go_wg_vehicle_teleporter();
-    new npc_wg_quest_giver();
+    new npc_demolisher_engineerer();
+    new npc_wg_ally_battle_mage();
+    new npc_wg_horde_battle_mage();
+    new go_wg_veh_teleporter();
 }

@@ -24,7 +24,7 @@
 
 char CopyrightPkware[] = "PKWARE Data Compression Library for Win32\r\n"
                          "Copyright 1989-1995 PKWARE Inc.  All Rights Reserved\r\n"
-                         "Patent No. 5, 051, 745\r\n"
+                         "Patent No. 5,051,745\r\n"
                          "PKWARE Data Compression Library Reg. U.S. Pat. and Tm. Off.\r\n"
                          "Version 1.11\r\n";
 
@@ -137,11 +137,11 @@ static void GenDecodeTabs(
     unsigned long length;
     size_t i;
 
-    for (i = 0; i < elements; i++)
+    for(i = 0; i < elements; i++)
     {
         length = 1 << length_bits[i];   // Get the length in bytes
 
-        for (index = start_indexes[i]; index < 0x100; index += length)
+        for(index = start_indexes[i]; index < 0x100; index += length)
         {
             positions[index] = (unsigned char)i;
         }
@@ -154,7 +154,7 @@ static void GenAscTabs(TDcmpStruct * pWork)
     unsigned long  acc, add;
     unsigned short count;
 
-    for (count = 0x00FF; pChCodeAsc >= ChCodeAsc; pChCodeAsc--, count--)
+    for(count = 0x00FF; pChCodeAsc >= ChCodeAsc; pChCodeAsc--, count--)
     {
         unsigned char * pChBitsAsc = pWork->ChBitsAsc + count;
         unsigned char bits_asc = *pChBitsAsc;
@@ -169,7 +169,7 @@ static void GenAscTabs(TDcmpStruct * pWork)
                 pWork->offs2C34[acc] = (unsigned char)count;
                 acc += add;
             }
-            while (acc < 0x100);
+            while(acc < 0x100);
         }
         else if ((acc = (*pChCodeAsc & 0xFF)) != 0)
         {
@@ -187,7 +187,7 @@ static void GenAscTabs(TDcmpStruct * pWork)
                     pWork->offs2D34[acc] = (unsigned char)count;
                     acc += add;
                 }
-                while (acc < 0x100);
+                while(acc < 0x100);
             }
             else
             {
@@ -201,7 +201,7 @@ static void GenAscTabs(TDcmpStruct * pWork)
                     pWork->offs2E34[acc] = (unsigned char)count;
                     acc += add;
                 }
-                while (acc < 0x80);
+                while(acc < 0x80);
             }
         }
         else
@@ -216,7 +216,7 @@ static void GenAscTabs(TDcmpStruct * pWork)
                 pWork->offs2EB4[acc] = (unsigned char)count;
                 acc += add;
             }
-            while (acc < 0x100);
+            while(acc < 0x100);
         }
     }
 }
@@ -400,7 +400,7 @@ static unsigned long Expand(TDcmpStruct * pWork)
     // The returned literal can either be an uncompressed byte (next_literal < 0x100)
     // or an encoded length of the repeating byte sequence that
     // is to be copied to the current buffer position
-    while ((result = next_literal = DecodeLit(pWork)) < 0x305)
+    while((result = next_literal = DecodeLit(pWork)) < 0x305)
     {
         // If the literal is greater than 0x100, it holds length
         // of repeating byte sequence
@@ -435,7 +435,7 @@ static unsigned long Expand(TDcmpStruct * pWork)
             pWork->outputPos += rep_length;
 
             // Copy the repeating sequence
-            while (rep_length-- > 0)
+            while(rep_length-- > 0)
                 *target++ = *source++;
         }
         else

@@ -1,80 +1,86 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 #include "PassiveAI.h"
 #include "Creature.h"
 #include "TemporarySummon.h"
 
-PassiveAI::PassiveAI(Creature* c) : CreatureAI(c) { me->SetReactState(REACT_PASSIVE); }
-PossessedAI::PossessedAI(Creature* c) : CreatureAI(c) { me->SetReactState(REACT_PASSIVE); }
-NullCreatureAI::NullCreatureAI(Creature* c) : CreatureAI(c) { me->SetReactState(REACT_PASSIVE); }
-
-void PassiveAI::UpdateAI(const uint32)
-{
-    if (me->isInCombat() && me->getAttackers().empty())
-        EnterEvadeMode();
+PassiveAI::PassiveAI(Creature *c) :
+		CreatureAI(c) {
+	me->SetReactState(REACT_PASSIVE);
+}
+PossessedAI::PossessedAI(Creature *c) :
+		CreatureAI(c) {
+	me->SetReactState(REACT_PASSIVE);
+}
+NullCreatureAI::NullCreatureAI(Creature *c) :
+		CreatureAI(c) {
+	me->SetReactState(REACT_PASSIVE);
 }
 
-void PossessedAI::AttackStart(Unit* target)
-{
-    me->Attack(target, true);
+void PassiveAI::UpdateAI(const uint32) {
+	if (me->isInCombat() && me->getAttackers().empty())
+		EnterEvadeMode();
 }
 
-void PossessedAI::UpdateAI(const uint32 /*diff*/)
-{
-    if (me->getVictim())
-    {
-        if (!me->IsValidAttackTarget(me->getVictim()))
-            me->AttackStop();
-        else
-            DoMeleeAttackIfReady();
-    }
+void PossessedAI::AttackStart(Unit *target) {
+	me->Attack(target, true);
 }
 
-void PossessedAI::JustDied(Unit* /*u*/)
-{
-    // We died while possessed, disable our loot
-    me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+void PossessedAI::UpdateAI(const uint32 /*diff*/) {
+	if (me->getVictim()) {
+		if (!me->canAttack(me->getVictim()))
+			me->AttackStop();
+		else
+			DoMeleeAttackIfReady();
+	}
 }
 
-void PossessedAI::KilledUnit(Unit* victim)
-{
-    // We killed a creature, disable victim's loot
-    if (victim->GetTypeId() == TYPEID_UNIT)
-        victim->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+void PossessedAI::JustDied(Unit * /*u*/) {
+	// We died while possessed, disable our loot
+	me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 }
 
-void CritterAI::DamageTaken(Unit* /*done_by*/, uint32&)
-{
-    if (!me->HasUnitState(UNIT_STATE_FLEEING))
-        me->SetControlled(true, UNIT_STATE_FLEEING);
+void PossessedAI::KilledUnit(Unit* victim) {
+	// We killed a creature, disable victim's loot
+	if (victim->GetTypeId() == TYPEID_UNIT)
+		victim->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
 }
 
-void CritterAI::EnterEvadeMode()
-{
-    if (me->HasUnitState(UNIT_STATE_FLEEING))
-        me->SetControlled(false, UNIT_STATE_FLEEING);
-    CreatureAI::EnterEvadeMode();
+void CritterAI::DamageTaken(Unit * /*done_by*/, uint32 &) {
+	if (!me->HasUnitState(UNIT_STAT_FLEEING))
+		me->SetControlled(true, UNIT_STAT_FLEEING);
 }
 
-void TriggerAI::IsSummonedBy(Unit* summoner)
-{
-    if (me->_spells[0])
-        me->CastSpell(me, me->_spells[0], false, 0, 0, summoner->GetGUID());
+void CritterAI::EnterEvadeMode() {
+	if (me->HasUnitState(UNIT_STAT_FLEEING))
+		me->SetControlled(false, UNIT_STAT_FLEEING);
+	CreatureAI::EnterEvadeMode();
+}
+
+void TriggerAI::IsSummonedBy(Unit *summoner) {
+	if (me->m_spells[0])
+		me->CastSpell(me, me->m_spells[0], false, 0, 0, summoner->GetGUID());
 }

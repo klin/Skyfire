@@ -1,10 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2011-2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -17,10 +20,12 @@
  */
 
  /*
- SFName: boss_setesh
- SF%Complete: 75%
- SFComment:
- SFCategory: Halls Of Origination
+ Made By: Jenova
+ Project: Atlantiss Core
+ SDName: boss_setesh
+ SD%Complete: 75%
+ SDComment:
+ SDCategory: Halls Of Origination
 
  Known Bugs:
 
@@ -54,9 +59,9 @@ enum Spells
 
 enum Texts
 {
-    SAY_AGGRO    = 0,
-    SAY_KILL     = 1,
-    SAY_DEATH    = 2
+    SAY_AGGRO = 0,
+    SAY_KILL = 1,
+    SAY_DEATH = 2
 };
 
 enum Gameobjects
@@ -121,12 +126,12 @@ class boss_setesh : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+                if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
                 while(uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    switch(eventId)
                     {
                         case EVENT_CHAOS_BOLT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
@@ -187,11 +192,11 @@ public:
     {
         mob_seed_of_chaosAI(Creature* creature) : Scripted_NoMovementAI(creature), Summons(me)
         {
-            instance = (InstanceScript*)creature->GetInstanceScript();
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* instance;
+        InstanceScript* m_pInstance;
 
         SummonList Summons;
 
@@ -229,11 +234,11 @@ public:
     {
         mob_choas_portalAI(Creature* creature) : Scripted_NoMovementAI(creature), Summons(me)
         {
-            instance = (InstanceScript*)creature->GetInstanceScript();
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* instance;
+        InstanceScript* m_pInstance;
 
         SummonList Summons;
         uint32 SummonTimer;
@@ -266,7 +271,7 @@ public:
         {
             if (SummonTimer <= diff)
             {
-                uint8 summon = urand(0, 1);
+                uint8 summon = urand(0,1);
                 Summon(summon);
                 SummonTimer = 15000;
             } else SummonTimer -= diff;
@@ -306,11 +311,11 @@ public:
     {
         mob_void_sentinelAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = (InstanceScript*)creature->GetInstanceScript();
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* instance;
+        InstanceScript* m_pInstance;
         uint32 BarrierTimer;
         uint32 FistTimer;
 
@@ -325,7 +330,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
 
             if (BarrierTimer <= diff)
@@ -363,11 +368,11 @@ public:
     {
         mob_void_seekerAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = (InstanceScript*)creature->GetInstanceScript();
+            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* instance;
+        InstanceScript* m_pInstance;
         uint32 PrisonTimer;
 
         void Reset()
@@ -380,7 +385,7 @@ public:
                 if (!UpdateVictim())
                     return;
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+                if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
             if (PrisonTimer <= diff)

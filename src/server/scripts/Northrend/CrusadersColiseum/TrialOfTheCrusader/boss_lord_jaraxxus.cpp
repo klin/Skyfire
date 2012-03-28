@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2008 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2006-2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -16,22 +16,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: trial_of_the_crusader
-SD%Complete: ??%
-SDComment: based on /dev/rsa
-SDCategory: Crusader Coliseum
-EndScriptData */
-
-// Known bugs:
-// Some visuals aren't appearing right sometimes
-//
-// TODO:
-// Redone summon's scripts in SAI
-// Add immunities to the boss and summons
-
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
+#include "Vehicle.h"
 
 enum Yells
 {
@@ -66,26 +53,41 @@ enum Summons
 
 enum BossSpells
 {
-    SPELL_LEGION_FLAME                = 66197, // player should run away from raid because he triggers Legion Flame
-    SPELL_LEGION_FLAME_EFFECT         = 66201, // used by trigger npc
-    SPELL_NETHER_POWER                = 66228, // +20% of spell damage per stack, stackable up to 5/10 times, must be dispelled/stealed
-    SPELL_FEL_LIGHTING                = 66528, // jumps to nearby targets
-    SPELL_FEL_FIREBALL                = 66532, // does heavy damage to the tank, interruptable
-    SPELL_INCINERATE_FLESH            = 66237, // target must be healed or will trigger Burning Inferno
-    SPELL_BURNING_INFERNO             = 66242, // triggered by Incinerate Flesh
-    SPELL_INFERNAL_ERUPTION           = 66258, // summons Infernal Volcano
-    SPELL_INFERNAL_ERUPTION_EFFECT    = 66252, // summons Felflame Infernal (3 at Normal and inifinity at Heroic)
-    SPELL_NETHER_PORTAL               = 66269, // summons Nether Portal
-    SPELL_NETHER_PORTAL_EFFECT        = 66263, // summons Mistress of Pain (1 at Normal and infinity at Heroic)
-
-    SPELL_BERSERK                     = 64238, // unused
-
-    // Mistress of Pain spells
-    SPELL_SHIVAN_SLASH                = 67098,
-    SPELL_SPINNING_STRIKE             = 66283,
-    SPELL_MISTRESS_KISS               = 67077,
-    SPELL_FEL_INFERNO                 = 67047,
-    SPELL_FEL_STREAK                  = 66494,
+    SPELL_NETHER_POWER               = 66228, // +20% of spell damage per stack, stackable up to 5/10 times, must be dispelled/stealed
+    SPELL_INFERNAL_ERUPTION          = 66258, // summons Infernal Volcano
+    SPELL_INFERNAL_ERUPTION_EFFECT   = 66252, // summons Felflame Infernal (3 at Normal and inifinity at Heroic)
+    SPELL_FEL_FIREBALL_10_N          = 66532, // does heavy damage to the tank, interruptable
+    SPELL_FEL_FIREBALL_25_N          = 66963,
+    SPELL_FEL_FIREBALL_10_H          = 66964,
+    SPELL_FEL_FIREBALL_25_H          = 66965,
+    SPELL_FEL_LIGHTING_10_N          = 66528, // jumps to nearby targets
+    SPELL_FEL_LIGHTING_25_N          = 67029,
+    SPELL_FEL_LIGHTING_10_H          = 67030,
+    SPELL_FEL_LIGHTING_25_H          = 67031,
+    SPELL_INCINERATE_FLESH_10_N      = 66237, // target must be healed or will trigger Burning Inferno
+    SPELL_INCINERATE_FLESH_25_N      = 67049,
+    SPELL_INCINERATE_FLESH_10_H      = 67050,
+    SPELL_INCINERATE_FLESH_25_H      = 67051,
+    SPELL_TOUCH_OF_JARAXXUS          = 66209, // used only in 25H
+    SPELL_BURNING_INFERNO            = 66242, // triggered by Incinerate Flesh
+    SPELL_NETHER_PORTAL              = 66269, // summons Nether Portal
+    SPELL_NETHER_PORTAL_EFFECT       = 66263, // summons Mistress of Pain (1 at Normal and infinity at Heroic)
+    SPELL_LEGION_FLAME_10_N          = 66197, // player should run away from raid because he triggers Legion Flame
+    SPELL_LEGION_FLAME_25_N          = 68123,
+    SPELL_LEGION_FLAME_10_H          = 68124,
+    SPELL_LEGION_FLAME_25_H          = 68125,
+    SPELL_LEGION_FLAME_EFFECT_10_N   = 66201, // used by trigger npc
+    SPELL_LEGION_FLAME_EFFECT_25_N   = 67070,
+    SPELL_LEGION_FLAME_EFFECT_10_H   = 67071,
+    SPELL_LEGION_FLAME_EFFECT_25_H   = 67072,
+    SPELL_SHIVAN_SLASH               = 67098,
+    SPELL_SPINNING_STRIKE            = 66283,
+    SPELL_MISTRESS_KISS              = 67077,
+    SPELL_SPINNING_STRIKE_1          = 66283,
+    SPELL_SPINNING_STRIKE_2          = 66285,
+    SPELL_FEL_INFERNO                = 67047,
+    SPELL_FEL_STREAK                 = 66494,
+    SPELL_BERSERK                    = 64238, // unused
 };
 
 /*######
@@ -108,6 +110,8 @@ public:
         {
             m_pInstance = creature->GetInstanceScript();
             Reset();
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         }
 
         InstanceScript* m_pInstance;
@@ -119,6 +123,7 @@ public:
         uint32 m_uiIncinerateFleshTimer;
         uint32 m_uiNetherPowerTimer;
         uint32 m_uiLegionFlameTimer;
+        uint32 m_uiTouchOfJaraxxusTimer;
         uint32 m_uiSummonNetherPortalTimer;
         uint32 m_uiSummonInfernalEruptionTimer;
 
@@ -132,6 +137,7 @@ public:
             m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
             m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
+            m_uiTouchOfJaraxxusTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             m_uiSummonNetherPortalTimer = 1*MINUTE*IN_MILLISECONDS;
             m_uiSummonInfernalEruptionTimer = 2*MINUTE*IN_MILLISECONDS;
             Summons.DespawnAll();
@@ -199,31 +205,31 @@ public:
 
             if (m_uiFelFireballTimer <= uiDiff)
             {
-                DoCastVictim(SPELL_FEL_FIREBALL);
+                DoCastVictim(RAID_MODE(SPELL_FEL_FIREBALL_10_N, SPELL_FEL_FIREBALL_25_N, SPELL_FEL_FIREBALL_10_H, SPELL_FEL_FIREBALL_25_H));
                 m_uiFelFireballTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelFireballTimer -= uiDiff;
 
             if (m_uiFelLightningTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                    DoCast(target, SPELL_FEL_LIGHTING);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(target, RAID_MODE(SPELL_FEL_LIGHTING_10_N, SPELL_FEL_LIGHTING_25_N, SPELL_FEL_LIGHTING_10_H, SPELL_FEL_LIGHTING_25_H));
                 m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
 
             if (m_uiIncinerateFleshTimer <= uiDiff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                 {
                     DoScriptText(EMOTE_INCINERATE, me, target);
                     DoScriptText(SAY_INCINERATE, me);
-                    DoCast(target, SPELL_INCINERATE_FLESH);
+                    DoCast(target, RAID_MODE(SPELL_INCINERATE_FLESH_10_N, SPELL_INCINERATE_FLESH_25_N, SPELL_INCINERATE_FLESH_10_H, SPELL_INCINERATE_FLESH_25_H));
                 }
                 m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             } else m_uiIncinerateFleshTimer -= uiDiff;
 
             if (m_uiNetherPowerTimer <= uiDiff)
             {
-                me->CastCustomSpell(SPELL_NETHER_POWER, SPELLVALUE_AURA_STACK, RAID_MODE<uint32>(5, 10, 5, 10), me, true);
+                me->CastCustomSpell(SPELL_NETHER_POWER, SPELLVALUE_AURA_STACK, RAID_MODE<uint32>(5,10,5,10), me, true);
                 m_uiNetherPowerTimer = 40*IN_MILLISECONDS;
             } else m_uiNetherPowerTimer -= uiDiff;
 
@@ -232,10 +238,17 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
                 {
                     DoScriptText(EMOTE_LEGION_FLAME, me, target);
-                    DoCast(target, SPELL_LEGION_FLAME);
+                    DoCast(target, RAID_MODE(SPELL_LEGION_FLAME_10_N, SPELL_LEGION_FLAME_25_N, SPELL_LEGION_FLAME_10_H, SPELL_LEGION_FLAME_25_H));
                 }
                 m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
             } else m_uiLegionFlameTimer -= uiDiff;
+
+            if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC && m_uiTouchOfJaraxxusTimer <= uiDiff)
+            {
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(target, SPELL_TOUCH_OF_JARAXXUS);
+                m_uiTouchOfJaraxxusTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+            } else m_uiTouchOfJaraxxusTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
@@ -263,7 +276,7 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             me->SetInCombatWithZone();
-            DoCast(SPELL_LEGION_FLAME_EFFECT);
+            DoCast(RAID_MODE(SPELL_LEGION_FLAME_EFFECT_10_N, SPELL_LEGION_FLAME_EFFECT_25_N, SPELL_LEGION_FLAME_EFFECT_10_H, SPELL_LEGION_FLAME_EFFECT_25_H));
         }
 
         void UpdateAI(const uint32 /*uiDiff*/)
@@ -362,11 +375,11 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
-            if (!UpdateVictim())
-                return;
-
             if (m_pInstance && m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
                 me->DespawnOrUnsummon();
+
+            if (!UpdateVictim())
+                return;
 
             if (m_uiFelStreakTimer <= uiDiff)
             {
@@ -476,10 +489,7 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             if (m_pInstance && m_pInstance->GetData(TYPE_JARAXXUS) != IN_PROGRESS)
-            {
                 me->DespawnOrUnsummon();
-                return;
-            }
 
             if (!UpdateVictim())
                 return;
@@ -493,7 +503,11 @@ public:
             if (m_uiSpinningStrikeTimer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
-                    DoCast(target, SPELL_SPINNING_STRIKE);
+                {
+                    DoCast(target,SPELL_SPINNING_STRIKE_1);
+                    DoCast(target,SPELL_SPINNING_STRIKE_2);
+                    target->CastSpell(me, 66287, true);
+                }
                 m_uiSpinningStrikeTimer = 30*IN_MILLISECONDS;
             } else m_uiSpinningStrikeTimer -= uiDiff;
 
@@ -509,6 +523,73 @@ public:
     };
 };
 
+class spell_spinning_pain_strike : public SpellScriptLoader
+{
+public:
+    spell_spinning_pain_strike() : SpellScriptLoader("spell_spinning_pain_strike") { }
+
+    class spell_spinning_pain_strike_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_spinning_pain_strike_SpellScript)
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            return true;
+        }
+
+        void CalcDamage(SpellEffIndex /*effIndex*/)
+        {
+            uint32 dmg = 0;
+            if(Unit* target = GetHitUnit())
+                dmg = ((float)target->GetMaxHealth())*50.0f/100.0f;
+            SetHitDamage(dmg);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_spinning_pain_strike_SpellScript::CalcDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_spinning_pain_strike_SpellScript();
+    }
+};
+
+class spell_eject_all_passengers : public SpellScriptLoader
+{
+public:
+    spell_eject_all_passengers() : SpellScriptLoader("spell_eject_all_passengers") { }
+
+    class spell_eject_all_passengers_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_eject_all_passengers_SpellScript)
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* pCaster = GetCaster())
+                if (Vehicle* pVehicle = pCaster->GetVehicleKit())
+                    pVehicle->RemoveAllPassengers();
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_eject_all_passengers_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_eject_all_passengers_SpellScript();
+    }
+};
+
 void AddSC_boss_jaraxxus()
 {
     new boss_jaraxxus();
@@ -517,4 +598,6 @@ void AddSC_boss_jaraxxus()
     new mob_fel_infernal();
     new mob_nether_portal();
     new mob_mistress_of_pain();
+	new spell_spinning_pain_strike();
+    new spell_eject_all_passengers();
 }

@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -21,10 +25,10 @@
 
 enum eSpell
 {
-    SPELL_CONSUMING_FLAMES          = 77786,
-    SPELL_ARCANE_STORM              = 77896,
-    SPELL_SCORCHING_BLAST           = 77679,
-    SPELL_REMEDY                    = 77912,
+    SPELL_CONSUMING_FLAMES = 77786,
+    SPELL_ARCANE_STORM = 77896,
+    SPELL_SCORCHING_BLAST = 77679,
+    SPELL_REMEDY = 77912,
 };
 
 class boss_maloriak : public CreatureScript
@@ -41,39 +45,39 @@ public:
     {
         boss_maloriakAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = creature->GetInstanceScript();
+            pInstance = creature->GetInstanceScript();
         }
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
-        uint32 ConsumingFlames;
-        uint32 ArcaneStorm;
-        uint32 ScorchingBlast;
-        uint32 Remedy;
+        uint32 uiConsumingFlames;
+        uint32 uiArcaneStorm;
+        uint32 uiScorchingBlast;
+        uint32 uiRemedy;
 
         void Reset()
         {
-            instance->SetData(DATA_MALORIAK, NOT_STARTED);
+            pInstance->SetData(DATA_MALORIAK, NOT_STARTED);
 
-            ConsumingFlames = 5*IN_MILLISECONDS;
-            ArcaneStorm = 15*IN_MILLISECONDS;
-            ScorchingBlast = 120*IN_MILLISECONDS;
-            Remedy = 30*IN_MILLISECONDS;
+            uiConsumingFlames = 5*IN_MILLISECONDS;
+            uiArcaneStorm = 15*IN_MILLISECONDS;
+            uiScorchingBlast = 120*IN_MILLISECONDS;
+            uiRemedy = 30*IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*pWho*/)
         {
-            instance->SetData(DATA_MALORIAK, IN_PROGRESS);
+            pInstance->SetData(DATA_MALORIAK, IN_PROGRESS);
         }
 
         void JustReachedHome()
         {
-            instance->SetData(DATA_MALORIAK, FAIL);
+            pInstance->SetData(DATA_MALORIAK, FAIL);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
-            instance->SetData(DATA_MALORIAK, DONE);
+            pInstance->SetData(DATA_MALORIAK, DONE);
         }
 
         void UpdateAI(const uint32 Diff)
@@ -81,35 +85,35 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (ConsumingFlames <= Diff)
+            if (uiConsumingFlames <= Diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     me->CastSpell(target, SPELL_CONSUMING_FLAMES, true);
 
-                ConsumingFlames = urand(10*IN_MILLISECONDS, 12*IN_MILLISECONDS);
-            } else ConsumingFlames -= Diff;
+                uiConsumingFlames = urand(10*IN_MILLISECONDS, 12*IN_MILLISECONDS);
+            } else uiConsumingFlames -= Diff;
 
-            if (ArcaneStorm <= Diff)
+            if (uiArcaneStorm <= Diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     me->CastSpell(target, SPELL_ARCANE_STORM, true);
 
-                ArcaneStorm = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
-            } else ArcaneStorm -= Diff;
+                uiArcaneStorm = urand(15*IN_MILLISECONDS, 17*IN_MILLISECONDS);
+            } else uiArcaneStorm -= Diff;
 
-            if (ScorchingBlast <= Diff)
+            if (uiScorchingBlast <= Diff)
             {
                 me->CastSpell(me->getVictim(), SPELL_SCORCHING_BLAST, true);
 
-                ScorchingBlast = urand(120*IN_MILLISECONDS, 130*IN_MILLISECONDS);
-            } else ScorchingBlast -= Diff;
+                uiScorchingBlast = urand(120*IN_MILLISECONDS, 130*IN_MILLISECONDS);
+            } else uiScorchingBlast -= Diff;
 
-            if (Remedy <= Diff)
+            if (uiRemedy <= Diff)
             {
                 me->CastSpell(me, SPELL_REMEDY, true);
 
-                Remedy = urand(30*IN_MILLISECONDS, 32*IN_MILLISECONDS);
-            } else Remedy -= Diff;
+                uiRemedy = urand(30*IN_MILLISECONDS, 32*IN_MILLISECONDS);
+            } else uiRemedy -= Diff;
 
             DoMeleeAttackIfReady();
         }

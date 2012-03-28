@@ -49,7 +49,7 @@
 #define __fastcall
 #endif
 
-#if defined(_MSC_VER) || defined(_WIN32) || defined(WIN32) || defined(__MINGW32__)
+#ifdef _MSC_VER 
     #define G3D_WIN32
 #elif  defined(__FreeBSD__) || defined(__OpenBSD__)
     #define G3D_FREEBSD
@@ -57,7 +57,7 @@
 #elif defined(__linux__)
     #define G3D_LINUX
 #elif defined(__APPLE__)
-    #define G3D_LINUX
+    #define G3D_OSX
 
    // Prevent OS X fp.h header from being included; it defines
    // pi as a constant, which creates a conflict with G3D

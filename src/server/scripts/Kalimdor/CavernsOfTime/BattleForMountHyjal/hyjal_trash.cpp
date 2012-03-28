@@ -1,9 +1,11 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -458,7 +460,7 @@ public:
                 {
                     trigger->SetVisible(false);
                     trigger->setFaction(me->getFaction());
-                    trigger->SetLevitate(true);
+                    trigger->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                     trigger->CastSpell(me, SPELL_METEOR, true);
                 }
                 me->GetMotionMaster()->Clear();
@@ -494,7 +496,7 @@ public:
                     go = true;
                     if (instance)
                     {
-                        AddWaypoint(0, HordeWPs[7][0]+irand(-3, 3),   HordeWPs[7][1]+irand(-3, 3),   HordeWPs[7][2]);//HordeWPs[7] infront of thrall
+                        AddWaypoint(0, HordeWPs[7][0]+irand(-3, 3),    HordeWPs[7][1]+irand(-3, 3),    HordeWPs[7][2]);//HordeWPs[7] infront of thrall
                         Start(true, true);
                         SetDespawnAtEnd(false);
                     }
@@ -597,13 +599,13 @@ public:
                         if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, use horde WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),   HordeWPs[i][1]+irand(-3, 3),   HordeWPs[i][2]);
+                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),    HordeWPs[i][1]+irand(-3, 3),    HordeWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }else//use alliance WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),   AllianceWPs[i][1]+irand(-3, 3),   AllianceWPs[i][2]);
+                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),    AllianceWPs[i][1]+irand(-3, 3),    AllianceWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }
@@ -702,13 +704,13 @@ public:
                         if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, use horde WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),   HordeWPs[i][1]+irand(-3, 3),   HordeWPs[i][2]);
+                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),    HordeWPs[i][1]+irand(-3, 3),    HordeWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }else//use alliance WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),   AllianceWPs[i][1]+irand(-3, 3),   AllianceWPs[i][2]);
+                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),    AllianceWPs[i][1]+irand(-3, 3),    AllianceWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }
@@ -823,13 +825,13 @@ public:
                         if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, use horde WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),   HordeWPs[i][1]+irand(-3, 3),   HordeWPs[i][2]);
+                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),    HordeWPs[i][1]+irand(-3, 3),    HordeWPs[i][2]);
                             Start(true, true);
                             SetDespawnAtEnd(false);
                         }else//use alliance WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),   AllianceWPs[i][1]+irand(-3, 3),   AllianceWPs[i][2]);
+                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),    AllianceWPs[i][1]+irand(-3, 3),    AllianceWPs[i][2]);
                             Start(true, true);
                             SetDespawnAtEnd(false);
                         }
@@ -920,13 +922,13 @@ public:
                         if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, use horde WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),   HordeWPs[i][1]+irand(-3, 3),   HordeWPs[i][2]);
+                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),    HordeWPs[i][1]+irand(-3, 3),    HordeWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }else//use alliance WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),   AllianceWPs[i][1]+irand(-3, 3),   AllianceWPs[i][2]);
+                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),    AllianceWPs[i][1]+irand(-3, 3),    AllianceWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }
@@ -1020,13 +1022,13 @@ public:
                         if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, use horde WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),   HordeWPs[i][1]+irand(-3, 3),   HordeWPs[i][2]);
+                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),    HordeWPs[i][1]+irand(-3, 3),    HordeWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }else//use alliance WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),   AllianceWPs[i][1]+irand(-3, 3),   AllianceWPs[i][2]);
+                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),    AllianceWPs[i][1]+irand(-3, 3),    AllianceWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }
@@ -1110,13 +1112,13 @@ public:
                         if (instance->GetData(DATA_ALLIANCE_RETREAT))//2.alliance boss down, use horde WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),   HordeWPs[i][1]+irand(-3, 3),   HordeWPs[i][2]);
+                                AddWaypoint(i, HordeWPs[i][0]+irand(-3, 3),    HordeWPs[i][1]+irand(-3, 3),    HordeWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }else//use alliance WPs
                         {
                             for (uint8 i = 0; i < 8; ++i)
-                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),   AllianceWPs[i][1]+irand(-3, 3),   AllianceWPs[i][2]);
+                                AddWaypoint(i, AllianceWPs[i][0]+irand(-3, 3),    AllianceWPs[i][1]+irand(-3, 3),    AllianceWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }
@@ -1166,7 +1168,7 @@ public:
         {
             FrostBreathTimer = 5000;
             MoveTimer = 0;
-            me->SetLevitate(true);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
         }
 
         void WaypointReached(uint32 i)
@@ -1215,12 +1217,12 @@ public:
                         if (!useFlyPath)
                         {
                             for (uint8 i = 0; i < 3; ++i)
-                                AddWaypoint(i, FrostWyrmWPs[i][0],   FrostWyrmWPs[i][1],   FrostWyrmWPs[i][2]);
+                                AddWaypoint(i, FrostWyrmWPs[i][0],    FrostWyrmWPs[i][1],    FrostWyrmWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }else{//fly path FlyPathWPs
                             for (uint8 i = 0; i < 3; ++i)
-                                AddWaypoint(i, FlyPathWPs[i][0]+irand(-10, 10),   FlyPathWPs[i][1]+irand(-10, 10),   FlyPathWPs[i][2]);
+                                AddWaypoint(i, FlyPathWPs[i][0]+irand(-10, 10),    FlyPathWPs[i][1]+irand(-10, 10),    FlyPathWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }
@@ -1287,7 +1289,7 @@ public:
             Zpos = 10.0f;
             StrikeTimer = 2000+rand()%5000;
             MoveTimer = 0;
-            me->SetLevitate(true);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
         }
 
         void WaypointReached(uint32 i)
@@ -1337,7 +1339,7 @@ public:
                             SetDespawnAtEnd(false);
                         }else{//fly path FlyPathWPs
                             for (uint8 i = 0; i < 3; ++i)
-                                AddWaypoint(i, FlyPathWPs[i][0]+irand(-10, 10),   FlyPathWPs[i][1]+irand(-10, 10),   FlyPathWPs[i][2]);
+                                AddWaypoint(i, FlyPathWPs[i][0]+irand(-10, 10),    FlyPathWPs[i][1]+irand(-10, 10),    FlyPathWPs[i][2]);
                             Start(false, true);
                             SetDespawnAtEnd(false);
                         }

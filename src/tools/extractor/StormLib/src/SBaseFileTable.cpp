@@ -190,7 +190,7 @@ void BIT_ARRAY::LoadBits(
     nNextBytePosition = nBytePosition + 1;
 
     // Copy whole bytes, if any
-    while (nByteLength > 0)
+    while(nByteLength > 0)
     {
         if (nBitOffset != 0)
         {
@@ -397,7 +397,7 @@ static TMPQBetTable * TranslateBetTable(TMPQExtTable * pExtTable, DWORD dwOpenFl
                     pBetTable->pFileFlags = ALLOCMEM(DWORD, BetHeader.dwFlagCount);
                     if (pBetTable->pFileFlags != NULL)
                     {
-                        for (int i = 0; i < BetHeader.dwFlagCount; i++)
+                        for(int i = 0; i < BetHeader.dwFlagCount; i++)
                             pBetTable->pFileFlags[i] = BSWAP_INT32_UNSIGNED(FileFlags[i]);
                     }
 
@@ -461,7 +461,7 @@ static TMPQHash * GetHashEntryAny(TMPQArchive * ha, const char * szFileName)
     TMPQHash * pHash = pFirstHash;
 
     // Parse the found hashes
-    while (pHash != NULL)
+    while(pHash != NULL)
     {
         // If we found neutral hash, remember it
         if (pHash->lcLocale == 0)
@@ -488,7 +488,7 @@ static TMPQHash * GetHashEntryLocale(TMPQArchive * ha, const char * szFileName, 
     TMPQHash * pHash = pFirstHash;
 
     // Parse the found hashes
-    while (pHash != NULL)
+    while(pHash != NULL)
     {
         // If the locales match, return it
         if (pHash->lcLocale == lcLocale)
@@ -515,7 +515,7 @@ static TMPQHash * GetHashEntryExact(TMPQArchive * ha, const char * szFileName, L
     TMPQHash * pHash = pFirstHash;
 
     // Parse the found hashes
-    while (pHash != NULL)
+    while(pHash != NULL)
     {
         // If the locales match, return it
         if (pHash->lcLocale == lcLocale)
@@ -724,7 +724,7 @@ int BuildFileTable(TMPQArchive * ha, ULONGLONG FileSize)
         if (nError == ERROR_SUCCESS)
         {
             // Merge the block table to the file table
-            for (pHash = ha->pHashTable; pHash < pHashEnd; pHash++)
+            for(pHash = ha->pHashTable; pHash < pHashEnd; pHash++)
             {
                 if (pHash->dwBlockIndex < pHeader->dwBlockTableSize)
                 {
@@ -779,7 +779,7 @@ int BuildFileTable(TMPQArchive * ha, ULONGLONG FileSize)
 
                 // Add the high file offset to the base file offset.
                 // We also need to swap it during the process.
-                for (DWORD i = 0; i < pHeader->dwBlockTableSize; i++)
+                for(DWORD i = 0; i < pHeader->dwBlockTableSize; i++)
                 {
                     pFileEntry->ByteOffset |= ((ULONGLONG)BSWAP_INT16_UNSIGNED(pHiBlockTable[i]) << 32);
                     pFileEntry++;
@@ -826,7 +826,7 @@ int SaveMPQTables(TMPQArchive * ha)
     // Construct the block table and hi-block table
     if (nError == ERROR_SUCCESS)
     {
-        for (i = 0; i < ha->dwFileTableSize; i++)
+        for(i = 0; i < ha->dwFileTableSize; i++)
         {
             // Set high 16 bits of the file offset
             pHiBlockTable[i] = (USHORT)(ha->pFileTable[i].ByteOffset >> 32);
@@ -1009,7 +1009,7 @@ static TFileEntry * GetFileEntry_HetBet(
     NameHashPart2 = MaskedHash64 & (AndMask64 >> 0x08);
 
     // Go through hash table until we find a terminator
-    while (pHetTable->pHashPart1[Index] != 0)
+    while(pHetTable->pHashPart1[Index] != 0)
     {
         // Did we find match ?
         if (pHetTable->pHashPart1[Index] == NameHashPart1)
@@ -1115,7 +1115,7 @@ TFileEntry * FindFreeFileEntry(TMPQArchive * ha)
     TMPQHash * pHash;
 
     // Otherwise, find a free entry within existing entries in the file table
-    for (pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
+    for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
     {
         // If that entry is free, we don't need
         // to reallocate file table
@@ -1393,7 +1393,7 @@ void TestNewHashBlockTables(TMPQArchive * ha)
         bool bResult = 1;
 
         hFind = SFileFindFirstFile((HANDLE)ha, "*", &sf, NULL);
-        while (hFind && bResult)
+        while(hFind && bResult)
         {
             MPQ_FILE_BLOCK_ENTRY BlockEntry;
             TFileEntry * pFileEntry;

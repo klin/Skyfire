@@ -741,7 +741,7 @@ static bool PartFile_Read(
     dwPartOffset = (DWORD)(*pByteOffset) & (pStream->PartSize - 1);
 
     // Read all data, one part at a time
-    while (dwBytesRemaining != 0)
+    while(dwBytesRemaining != 0)
     {
         PPART_FILE_MAP_ENTRY PartMap = pStream->PartMap + dwPartIndex;
         DWORD dwBytesInPart;
@@ -890,7 +890,7 @@ static void DecryptFileChunk(
     KeyMirror[0x05] = (DWORD)(ChunkOffset >> 32);
     KeyMirror[0x08] = (DWORD)(ChunkOffset);
 
-    while (dwLength >= MPQE_CHUNK_SIZE)
+    while(dwLength >= MPQE_CHUNK_SIZE)
     {
         // Shuffle the key - part 1
         KeyShuffled[0x0E] = KeyMirror[0x00];
@@ -911,7 +911,7 @@ static void DecryptFileChunk(
         KeyShuffled[0x00] = KeyMirror[0x0F];
 
         // Shuffle the key - part 2
-        for (DWORD i = 0; i < RoundCount; i += 2)
+        for(DWORD i = 0; i < RoundCount; i += 2)
         {
             KeyShuffled[0x0A] = KeyShuffled[0x0A] ^ Rol32((KeyShuffled[0x0E] + KeyShuffled[0x02]), 0x07);
             KeyShuffled[0x03] = KeyShuffled[0x03] ^ Rol32((KeyShuffled[0x0A] + KeyShuffled[0x0E]), 0x09);
@@ -996,7 +996,7 @@ static bool DetectFileKey(TEncryptedStream * pStream)
         return false;
 
     // We just try all known keys one by one
-    for (int i = 0; MpqKeyArray[i] != NULL; i++)
+    for(int i = 0; MpqKeyArray[i] != NULL; i++)
     {
         // Copy the key there
         memcpy(pStream->Key, MpqKeyArray[i], MPQE_CHUNK_SIZE);
@@ -1562,7 +1562,7 @@ int main(void)
         return -1;
     }
 
-    for (int i = 0; i < 10; i++)
+    for(int i = 0; i < 10; i++)
     {
         if (!FileStream_Write(pStream, NULL, szString1, dwLength))
         {
@@ -1590,7 +1590,7 @@ int main(void)
         return -1;
     }
 
-    for (int i = 0; i < 10; i++)
+    for(int i = 0; i < 10; i++)
     {
         if (!FileStream_Read(pStream, NULL, szString2, dwLength))
         {
@@ -1632,7 +1632,7 @@ int main(void)
         return -1;
     }
 
-    while (FileSize.QuadPart != 0)
+    while(FileSize.QuadPart != 0)
     {
         DWORD dwBytesToRead = FileSize.LowPart;
 
@@ -1670,7 +1670,7 @@ int main(void)
         return -1;
     }
 
-    for (int i = 0; i < 10; i++)
+    for(int i = 0; i < 10; i++)
     {
         if (!FileStream_Read(pStream, NULL, szString2, dwLength))
         {

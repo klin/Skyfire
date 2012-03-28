@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2010 - 2012 Arkania <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +24,7 @@ void LoadLocaleMPQFiles(int const locale)
     char filename[512];
 
     //Locale-xxXX.MPQ
-    sprintf(filename, "%s/Data/%s/locale-%s.MPQ", input_path, langs[locale], langs[locale]);
+    sprintf(filename,"%s/Data/%s/locale-%s.MPQ", input_path, langs[locale], langs[locale]);
     printf("Loading %s\n", filename);
     if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &localeMPQ[0]))
     {
@@ -34,12 +32,12 @@ void LoadLocaleMPQFiles(int const locale)
         assert(false && "\nLoad of MPQ failed");
     }
 
-    for (int i = 0; i < PATCH_REV_COUNT; ++i)
+    for(int i = 0; i < PATCH_REV_COUNT; ++i)
     {
         char ext[7] = "";
         sprintf(ext, "-%i", patchRev[i]);
 
-        sprintf(filename, "%s/Data/wow-update%s.MPQ", input_path, ext);
+        sprintf(filename,"%s/Data/wow-update%s.MPQ", input_path, ext);
         if (!SFileOpenPatchArchive(localeMPQ[0], filename, langs[locale], MPQ_OPEN_READ_ONLY))
         {
             printf("%i\n", GetLastError());
@@ -50,12 +48,12 @@ void LoadLocaleMPQFiles(int const locale)
         assert(false && "An error occured");
 
     //Others
-    for (int i = 0; i < PATCH_REV_COUNT; ++i)
+    for(int i = 0; i < PATCH_REV_COUNT; ++i)
     {
         char ext[7] = "";
         sprintf(ext, "-%i", patchRev[i]);
 
-        sprintf(filename, "%s/Data/wow-update%s.MPQ", input_path, ext);
+        sprintf(filename,"%s/Data/wow-update%s.MPQ", input_path, ext);
         printf("Loading %s\n", filename);
         if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &localeMPQ[i+1]))
         {
@@ -63,12 +61,12 @@ void LoadLocaleMPQFiles(int const locale)
             assert(false && "Load of MPQ failed");
         }
 
-        for (int j = i; j < PATCH_REV_COUNT; ++j)
+        for(int j = i; j < PATCH_REV_COUNT; ++j)
         {
             char ext[7] = "";
             sprintf(ext, "-%i", patchRev[j]);
 
-            sprintf(filename, "%s/Data/wow-update%s.MPQ", input_path, ext);
+            sprintf(filename,"%s/Data/wow-update%s.MPQ", input_path, ext);
             if (!SFileOpenPatchArchive(localeMPQ[i+1], filename, langs[locale], MPQ_OPEN_READ_ONLY))
             {
                 printf("%i\n", GetLastError());
@@ -85,7 +83,7 @@ void LoadMapMPQFiles()
     char filename[512];
 
     //Locale-xxXX.MPQ
-    sprintf(filename, "%s/Data/world.MPQ", input_path);
+    sprintf(filename,"%s/Data/world.MPQ", input_path);
     printf("Loading %s\n", filename);
     if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &WorldMPQ))
     {
@@ -93,12 +91,12 @@ void LoadMapMPQFiles()
         assert(false && "\nLoad of MPQ failed");
     }
 
-    for (int i = 0; i < PATCH_REV_COUNT; ++i)
+    for(int i = 0; i < PATCH_REV_COUNT; ++i)
     {
         char ext[7] = "";
         sprintf(ext, "-%i", patchRev[i]);
 
-        sprintf(filename, "%s/Data/wow-update%s.MPQ", input_path, ext);
+        sprintf(filename,"%s/Data/wow-update%s.MPQ", input_path, ext);
         printf("    -%i\n", patchRev[i]);
         if (!SFileOpenPatchArchive(WorldMPQ, filename, "base", MPQ_OPEN_READ_ONLY))
         {
@@ -109,7 +107,7 @@ void LoadMapMPQFiles()
     if (!SFileIsPatchedArchive(WorldMPQ))
         assert(false && "An error occured");
 
-    for (int j = 0; j < 3; j++)
+    for(int j = 0; j < 3; j++)
     {
         sprintf(filename, "%s/Data/expansion%u.MPQ", input_path, j+1);
         printf("Loading %s\n", filename);
@@ -126,12 +124,12 @@ void LoadMapMPQFiles()
             exit(1);
         }
 
-        for (int i = 0; i < PATCH_REV_COUNT; ++i)
+        for(int i = 0; i < PATCH_REV_COUNT; ++i)
         {
             char ext[7] = "";
             sprintf(ext, "-%i", patchRev[i]);
 
-            sprintf(filename, "%s/Data/wow-update%s.MPQ", input_path, ext);
+            sprintf(filename,"%s/Data/wow-update%s.MPQ", input_path, ext);
             printf("    -%i\n", patchRev[i]);
             if (!SFileOpenPatchArchive(ExpansionsMPQ[j], filename, "base", MPQ_OPEN_READ_ONLY))
             {

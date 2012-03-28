@@ -1,57 +1,71 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
+
+/* ScriptData
+ SDName: Deadmines
+ SD%Complete: 0
+ SDComment: Placeholder
+ SDCategory: Deadmines
+ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "deadmines.h"
 #include "Spell.h"
 
 /*#####
-# item_Defias_Gunpowder
-#####*/
+ # item_Defias_Gunpowder
+ #####*/
 
-class item_defias_gunpowder : public ItemScript
-{
+class item_defias_gunpowder: public ItemScript {
 public:
-    item_defias_gunpowder() : ItemScript("item_defias_gunpowder") { }
+	item_defias_gunpowder() :
+			ItemScript("item_defias_gunpowder") {
+	}
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& targets)
-    {
-        InstanceScript* instance = player->GetInstanceScript();
+	bool OnUse(Player* player, Item* item, SpellCastTargets const& targets) {
+		InstanceScript *pInstance = player->GetInstanceScript();
 
-        if (!instance)
-        {
-            player->GetSession()->SendNotification("Instance script not initialized");
-            return true;
-        }
-        if (instance->GetData(EVENT_STATE)!= CANNON_NOT_USED)
-            return false;
-        if (targets.GetGOTarget() && targets.GetGOTarget()->GetEntry() == GO_DEFIAS_CANNON)
-        {
-            instance->SetData(EVENT_STATE, CANNON_GUNPOWDER_USED);
-        }
+		if (!pInstance) {
+			player->GetSession()->SendNotification(
+					"Instance script not initialized");
+			return true;
+		}
+		if (pInstance->GetData(EVENT_STATE) != CANNON_NOT_USED)
+			return false;
+		if (targets.getGOTarget()
+				&& targets.getGOTarget()->GetTypeId() == TYPEID_GAMEOBJECT
+				&& targets.getGOTarget()->GetEntry() == GO_DEFIAS_CANNON) {
+			pInstance->SetData(EVENT_STATE, CANNON_GUNPOWDER_USED);
+		}
 
-        player->DestroyItemCount(item->GetEntry(), 1, true);
-        return true;
-    }
+		player->DestroyItemCount(item->GetEntry(), 1, true);
+		return true;
+	}
 };
 
-void AddSC_deadmines()
-{
-    new item_defias_gunpowder();
+void AddSC_deadmines() {
+	new item_defias_gunpowder();
 }

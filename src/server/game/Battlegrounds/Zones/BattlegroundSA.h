@@ -1,20 +1,25 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef __BATTLEGROUNDSA_H
@@ -96,7 +101,7 @@ enum npc
 };
 
 enum BG_SA_NPCs
-  {
+{
     BG_SA_GUN_1 = 0,
     BG_SA_GUN_2,
     BG_SA_GUN_3,
@@ -119,7 +124,7 @@ enum BG_SA_NPCs
     BG_SA_NPC_SPARKLIGHT,
     BG_SA_NPC_RIGSPARK,
     BG_SA_MAXNPC
-  };
+};
 
 enum BG_SA_Boat
 {
@@ -130,7 +135,7 @@ enum BG_SA_Boat
 };
 
 const uint32 BG_SA_NpcEntries[BG_SA_MAXNPC] =
-  {
+{
     NPC_ANTI_PERSONNAL_CANNON,
     NPC_ANTI_PERSONNAL_CANNON,
     NPC_ANTI_PERSONNAL_CANNON,
@@ -155,7 +160,7 @@ const uint32 BG_SA_NpcEntries[BG_SA_MAXNPC] =
     //Used Demolisher Salesman
     NPC_RIGGER_SPARKLIGHT,
     NPC_GORGRIL_RIGSPARK
-  };
+};
 
 const float BG_SA_NpcSpawnlocs[BG_SA_MAXNPC + BG_SA_DEMOLISHER_AMOUNT][4] =
 {
@@ -411,8 +416,12 @@ struct BG_SA_RoundScore
 /// Class for manage Strand of Ancient battleground
 class BattlegroundSA : public Battleground
 {
+    friend class BattlegroundMgr;
+
     public:
+        /// Constructor
         BattlegroundSA();
+        /// Destructor
         ~BattlegroundSA();
 
         /**
@@ -420,34 +429,35 @@ class BattlegroundSA : public Battleground
          * -Update timer
          * -Round switch
          */
-        void PostUpdateImpl(uint32 diff);
+        void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
         /// Called when a player join battle
-        virtual void AddPlayer(Player* player);
+        virtual void AddPlayer(Player *plr);
         /// Called when battle start
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
+
         /// Called for ini battleground, after that the first player be entered
         virtual bool SetupBattleground();
         virtual void Reset();
         /// Called for generate packet contain worldstate data
         virtual void FillInitialWorldStates(WorldPacket& data);
         /// Called when a player deal damage to building (door)
-        virtual void EventPlayerDamagedGO(Player* player, GameObject* go, uint32 eventType);
+        virtual void EventPlayerDamagedGO(Player* plr, GameObject* go, uint8 hitType, uint32 destroyedEvent);
         /// Called when a player kill a unit in bg
         virtual void HandleKillUnit(Creature* unit, Player* killer);
         /// Return the nearest graveyard where player can respawn
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
         /// Called when a player click on flag (graveyard flag)
-        virtual void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj);
+        virtual void EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj);
         /// Called when a player use a gamobject (relic)
         virtual void EventPlayerUsedGO(Player* Source, GameObject* object);
         /// Return gate id, relative to bg data, according to gameobject id
         uint32 GetGateIDFromDestroyEventID(uint32 id)
         {
             uint32 i = 0;
-            switch (id)
+            switch(id)
             {
                 case 19046: i = BG_SA_GREEN_GATE;   break; //Green gate destroyed
                 case 19045: i = BG_SA_BLUE_GATE;    break; //blue gate
@@ -462,7 +472,7 @@ class BattlegroundSA : public Battleground
         uint32 GetWorldStateFromGateID(uint32 id)
         {
             uint32 uws = 0;
-            switch (id)
+            switch(id)
             {
                 case BG_SA_GREEN_GATE:   uws = BG_SA_GREEN_GATEWS;   break;
                 case BG_SA_YELLOW_GATE:  uws = BG_SA_YELLOW_GATEWS;  break;
@@ -478,18 +488,14 @@ class BattlegroundSA : public Battleground
         void EndBattleground(uint32 winner);
 
         /// CAlled when a player leave battleground
-        void RemovePlayer(Player* player, uint64 guid, uint32 team);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
+        void RemovePlayer(Player *plr, uint64 guid);
+        void HandleAreaTrigger(Player *Source, uint32 Trigger);
 
         /* Scorekeeping */
         /// Update score board
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
+        //uint32 GetPlayerDemolisherScore(Player* /*source*/);  // Future use
 
-        // Achievement Defense of the Ancients
-        bool gateDestroyed;
-
-        /// Id of attacker team
-        TeamId Attackers;
+        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value, bool doAddHonor = true);
 
     private:
 
@@ -519,7 +525,7 @@ class BattlegroundSA : public Battleground
          * -Update worldstate
          * -Delete gameobject in front of door (lighting object, with different colours for each door)
          */
-        void DestroyGate(Player* player, GameObject* go);
+        void DestroyGate(Player* pl, GameObject* /*go*/, uint32 destroyedEvent);
         /// Update timer worldstate
         void SendTime();
         /**
@@ -531,7 +537,7 @@ class BattlegroundSA : public Battleground
          * \param i : id of graveyard
          * \param Source : Player who capture gy
          */
-        void CaptureGraveyard(BG_SA_Graveyards i, Player* Source);
+        void CaptureGraveyard(BG_SA_Graveyards i, Player *Source);
         /// Switch on/off timer worldstate
         void ToggleTimer();
 
@@ -539,11 +545,13 @@ class BattlegroundSA : public Battleground
         void UpdateDemolisherSpawns();
 
         /// Send packet to player for create boats (client part)
-        void SendTransportInit(Player* player);
+        void SendTransportInit(Player *player);
         /// Send packet to player for destroy boats (client part)
-        void SendTransportsRemove(Player* player);
+        void SendTransportsRemove(Player * player);
 
-        /// Totale elapsed time of current round
+        /// Id of attacker team
+        TeamId Attackers;
+        /// Total elapsed time of current round
         uint32 TotalTime;
         /// Max time of round
         uint32 EndRoundTimer;
@@ -551,9 +559,9 @@ class BattlegroundSA : public Battleground
         bool ShipsStarted;
         /// Status of each gate (Destroy/Damage/Intact)
         BG_SA_GateState GateStatus[6];
-        /// Statu of battle (Start or not, and what round)
+        /// Status of battle (Start or not, and what round)
         BG_SA_Status Status;
-        /// Team witch conntrol each graveyard
+        /// Team witch control each graveyard
         TeamId GraveyardStatus[BG_SA_MAX_GY];
         /// Score of each round
         BG_SA_RoundScore RoundScores[2];

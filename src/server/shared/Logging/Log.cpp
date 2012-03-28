@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2010 - 2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -109,16 +109,16 @@ void Log::SetDBLogLevel(char *Level)
 void Log::Initialize()
 {
     /// Check whether we'll log GM commands/RA events/character outputs/chat stuffs
-    m_dbChar = ConfigMgr::GetBoolDefault("LogDB.Char", false);
-    m_dbRA = ConfigMgr::GetBoolDefault("LogDB.RA", false);
-    m_dbGM = ConfigMgr::GetBoolDefault("LogDB.GM", false);
-    m_dbChat = ConfigMgr::GetBoolDefault("LogDB.Chat", false);
+    m_dbChar = sConfig->GetBoolDefault("LogDB.Char", false);
+    m_dbRA = sConfig->GetBoolDefault("LogDB.RA", false);
+    m_dbGM = sConfig->GetBoolDefault("LogDB.GM", false);
+    m_dbChat = sConfig->GetBoolDefault("LogDB.Chat", false);
 
     /// Realm must be 0 by default
     SetRealmID(0);
 
     /// Common log files data
-    m_logsDir = ConfigMgr::GetStringDefault("LogsDir", "");
+    m_logsDir = sConfig->GetStringDefault("LogsDir", "");
     if (!m_logsDir.empty())
         if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
             m_logsDir.push_back('/');
@@ -127,18 +127,18 @@ void Log::Initialize()
 
     /// Open specific log files
     logfile = openLogFile("LogFile", "LogTimestamp", "w");
-    InitColors(ConfigMgr::GetStringDefault("LogColors", ""));
+    InitColors(sConfig->GetStringDefault("LogColors", ""));
 
-    m_gmlog_per_account = ConfigMgr::GetBoolDefault("GmLogPerAccount", false);
+    m_gmlog_per_account = sConfig->GetBoolDefault("GmLogPerAccount", false);
     if (!m_gmlog_per_account)
         gmLogfile = openLogFile("GMLogFile", "GmLogTimestamp", "a");
     else
     {
         // GM log settings for per account case
-        m_gmlog_filename_format = ConfigMgr::GetStringDefault("GMLogFile", "");
+        m_gmlog_filename_format = sConfig->GetStringDefault("GMLogFile", "");
         if (!m_gmlog_filename_format.empty())
         {
-            bool m_gmlog_timestamp = ConfigMgr::GetBoolDefault("GmLogTimestamp", false);
+            bool m_gmlog_timestamp = sConfig->GetBoolDefault("GmLogTimestamp", false);
 
             size_t dot_pos = m_gmlog_filename_format.find_last_of('.');
             if (dot_pos!=m_gmlog_filename_format.npos)
@@ -169,19 +169,19 @@ void Log::Initialize()
     sqlDevLogFile = openLogFile("SQLDeveloperLogFile", NULL, "a");
 
     // Main log file settings
-    m_logLevel     = ConfigMgr::GetIntDefault("LogLevel", LOGL_NORMAL);
-    m_logFileLevel = ConfigMgr::GetIntDefault("LogFileLevel", LOGL_NORMAL);
-    m_dbLogLevel   = ConfigMgr::GetIntDefault("DBLogLevel", LOGL_NORMAL);
-    m_sqlDriverQueryLogging  = ConfigMgr::GetBoolDefault("SQLDriverQueryLogging", false);
+    m_logLevel     = sConfig->GetIntDefault("LogLevel", LOGL_NORMAL);
+    m_logFileLevel = sConfig->GetIntDefault("LogFileLevel", LOGL_NORMAL);
+    m_dbLogLevel   = sConfig->GetIntDefault("DBLogLevel", LOGL_NORMAL);
+    m_sqlDriverQueryLogging  = sConfig->GetBoolDefault("SQLDriverQueryLogging", false);
 
-    _DebugLogMask = DebugLogFilters(ConfigMgr::GetIntDefault("DebugLogMask", LOG_FILTER_NONE));
+    _DebugLogMask = DebugLogFilters(sConfig->GetIntDefault("DebugLogMask", LOG_FILTER_NONE));
 
     // Char log settings
-    m_charLog_Dump = ConfigMgr::GetBoolDefault("CharLogDump", false);
-    m_charLog_Dump_Separate = ConfigMgr::GetBoolDefault("CharLogDump.Separate", false);
+    m_charLog_Dump = sConfig->GetBoolDefault("CharLogDump", false);
+    m_charLog_Dump_Separate = sConfig->GetBoolDefault("CharLogDump.Separate", false);
     if (m_charLog_Dump_Separate)
     {
-        m_dumpsDir = ConfigMgr::GetStringDefault("CharLogDump.SeparateDir", "");
+        m_dumpsDir = sConfig->GetStringDefault("CharLogDump.SeparateDir", "");
         if (!m_dumpsDir.empty())
             if ((m_dumpsDir.at(m_dumpsDir.length() - 1) != '/') && (m_dumpsDir.at(m_dumpsDir.length() - 1) != '\\'))
                 m_dumpsDir.push_back('/');
@@ -190,20 +190,20 @@ void Log::Initialize()
 
 void Log::ReloadConfig()
 {
-    m_logLevel     = ConfigMgr::GetIntDefault("LogLevel", LOGL_NORMAL);
-    m_logFileLevel = ConfigMgr::GetIntDefault("LogFileLevel", LOGL_NORMAL);
-    m_dbLogLevel   = ConfigMgr::GetIntDefault("DBLogLevel", LOGL_NORMAL);
+    m_logLevel     = sConfig->GetIntDefault("LogLevel", LOGL_NORMAL);
+    m_logFileLevel = sConfig->GetIntDefault("LogFileLevel", LOGL_NORMAL);
+    m_dbLogLevel   = sConfig->GetIntDefault("DBLogLevel", LOGL_NORMAL);
 
-    _DebugLogMask = DebugLogFilters(ConfigMgr::GetIntDefault("DebugLogMask", LOG_FILTER_NONE));
+    _DebugLogMask = DebugLogFilters(sConfig->GetIntDefault("DebugLogMask", LOG_FILTER_NONE));
 }
 
 FILE* Log::openLogFile(char const* configFileName, char const* configTimeStampFlag, char const* mode)
 {
-    std::string logfn=ConfigMgr::GetStringDefault(configFileName, "");
+    std::string logfn=sConfig->GetStringDefault(configFileName, "");
     if (logfn.empty())
         return NULL;
 
-    if (configTimeStampFlag && ConfigMgr::GetBoolDefault(configTimeStampFlag, false))
+    if (configTimeStampFlag && sConfig->GetBoolDefault(configTimeStampFlag, false))
     {
         size_t dot_pos = logfn.find_last_of(".");
         if (dot_pos!=logfn.npos)
@@ -220,8 +220,8 @@ FILE* Log::openGmlogPerAccount(uint32 account)
     if (m_gmlog_filename_format.empty())
         return NULL;
 
-    char namebuf[TRINITY_PATH_MAX];
-    snprintf(namebuf, TRINITY_PATH_MAX, m_gmlog_filename_format.c_str(), account);
+    char namebuf[ARKCORE_PATH_MAX];
+    snprintf(namebuf, ARKCORE_PATH_MAX, m_gmlog_filename_format.c_str(), account);
     return fopen(namebuf, "a");
 }
 
@@ -371,16 +371,13 @@ void Log::outDB(LogTypes type, const char * str)
     if (!str || type >= MAX_LOG_TYPES)
          return;
 
-    std::string logStr(str);
-    if (logStr.empty())
+    std::string new_str(str);
+    if (new_str.empty())
         return;
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_ADD_LOG);
+    LoginDatabase.EscapeString(new_str);
 
-    stmt->setInt32(0, realm);
-    stmt->setInt32(1, type);
-    stmt->setString(2, logStr);
-
-    LoginDatabase.Execute(stmt);
+    LoginDatabase.PExecute("INSERT INTO logs (time, realm, type, string) "
+        "VALUES (" UI64FMTD ", %u, %u, '%s');", uint64(time(0)), realm, type, new_str.c_str());
 }
 
 void Log::outString(const char * str, ...)
@@ -1052,8 +1049,8 @@ void Log::outErrorST(const char * str, ...)
     vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap);
     va_end(ap);
 
-    ACE_Stack_Trace st;
-    outError("%s [Stacktrace: %s]", nnew_str, st.c_str());
+    //ACE_Stack_Trace st;
+   // outError("%s [Stacktrace: %s]", nnew_str, st.c_str());
 }
 
 void Log::outOpCode(uint32 op, const char * name, bool smsg)

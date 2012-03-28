@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -31,29 +38,31 @@ class instance_zulgurub : public InstanceMapScript
 {
     public:
         instance_zulgurub()
-            : InstanceMapScript("instance_zulgurub", 309) {}
+            : InstanceMapScript("instance_zulgurub", 309)
+        {
+        }
 
         struct instance_zulgurub_InstanceMapScript : public InstanceScript
         {
-            instance_zulgurub_InstanceMapScript(Map* map) : InstanceScript(map) {}
+            instance_zulgurub_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
             //If all High Priest bosses were killed. Lorkhan, Zath and Ohgan are added too.
-            uint32 Encounter[MAX_ENCOUNTERS];
+            uint32 m_auiEncounter[MAX_ENCOUNTERS];
 
             //Storing Lorkhan, Zath and Thekal because we need to cast on them later. Jindo is needed for healfunction too.
-            uint64 LorKhanGUID;
-            uint64 ZathGUID;
-            uint64 ThekalGUID;
-            uint64 JindoGUID;
+            uint64 m_uiLorKhanGUID;
+            uint64 m_uiZathGUID;
+            uint64 m_uiThekalGUID;
+            uint64 m_uiJindoGUID;
 
             void Initialize()
             {
-                memset(&Encounter, 0, sizeof(Encounter));
+                memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-                LorKhanGUID  = 0;
-                ZathGUID     = 0;
-                ThekalGUID   = 0;
-                JindoGUID    = 0;
+                m_uiLorKhanGUID = 0;
+                m_uiZathGUID = 0;
+                m_uiThekalGUID = 0;
+                m_uiJindoGUID = 0;
             }
 
             bool IsEncounterInProgress() const
@@ -64,97 +73,97 @@ class instance_zulgurub : public InstanceMapScript
 
             void OnCreatureCreate(Creature* creature)
             {
-                switch (creature->GetEntry())
+                switch(creature->GetEntry())
                 {
-                    case 11347: LorKhanGUID = creature->GetGUID(); break;
-                    case 11348: ZathGUID    = creature->GetGUID(); break;
-                    case 14509: ThekalGUID  = creature->GetGUID(); break;
-                    case 11380: JindoGUID   = creature->GetGUID(); break;
+                    case 11347: m_uiLorKhanGUID = creature->GetGUID(); break;
+                    case 11348: m_uiZathGUID = creature->GetGUID(); break;
+                    case 14509: m_uiThekalGUID = creature->GetGUID(); break;
+                    case 11380: m_uiJindoGUID = creature->GetGUID(); break;
                 }
             }
 
-            void SetData(uint32 Type, uint32 Data)
+            void SetData(uint32 uiType, uint32 uiData)
             {
-                switch (Type)
+                switch(uiType)
                 {
-                    case DATA_ARLOKK:
-                        Encounter[0] = Data;
+                    case TYPE_ARLOKK:
+                        m_auiEncounter[0] = uiData;
                         break;
 
-                    case DATA_JEKLIK:
-                        Encounter[1] = Data;
+                    case TYPE_JEKLIK:
+                        m_auiEncounter[1] = uiData;
                         break;
 
-                    case DATA_VENOXIS:
-                        Encounter[2] = Data;
+                    case TYPE_VENOXIS:
+                        m_auiEncounter[2] = uiData;
                         break;
 
-                    case DATA_MARLI:
-                        Encounter[3] = Data;
+                    case TYPE_MARLI:
+                        m_auiEncounter[3] = uiData;
                         break;
 
-                    case DATA_THEKAL:
-                        Encounter[4] = Data;
+                    case TYPE_THEKAL:
+                        m_auiEncounter[4] = uiData;
                         break;
 
-                    case DATA_LORKHAN:
-                        Encounter[5] = Data;
+                    case TYPE_LORKHAN:
+                        m_auiEncounter[5] = uiData;
                         break;
 
-                    case DATA_ZATH:
-                        Encounter[6] = Data;
+                    case TYPE_ZATH:
+                        m_auiEncounter[6] = uiData;
                         break;
 
-                    case DATA_OHGAN:
-                        Encounter[7] = Data;
+                    case TYPE_OHGAN:
+                        m_auiEncounter[7] = uiData;
                         break;
                 }
             }
 
-            uint32 GetData(uint32 Type)
+            uint32 GetData(uint32 uiType)
             {
-                switch (Type)
+                switch(uiType)
                 {
-                    case DATA_ARLOKK:
-                        return Encounter[0];
-                    case DATA_JEKLIK:
-                        return Encounter[1];
-                    case DATA_VENOXIS:
-                        return Encounter[2];
-                    case DATA_MARLI:
-                        return Encounter[3];
-                    case DATA_THEKAL:
-                        return Encounter[4];
-                    case DATA_LORKHAN:
-                        return Encounter[5];
-                    case DATA_ZATH:
-                        return Encounter[6];
-                    case DATA_OHGAN:
-                        return Encounter[7];
+                    case TYPE_ARLOKK:
+                        return m_auiEncounter[0];
+                    case TYPE_JEKLIK:
+                        return m_auiEncounter[1];
+                    case TYPE_VENOXIS:
+                        return m_auiEncounter[2];
+                    case TYPE_MARLI:
+                        return m_auiEncounter[3];
+                    case TYPE_THEKAL:
+                        return m_auiEncounter[4];
+                    case TYPE_LORKHAN:
+                        return m_auiEncounter[5];
+                    case TYPE_ZATH:
+                        return m_auiEncounter[6];
+                    case TYPE_OHGAN:
+                        return m_auiEncounter[7];
                 }
                 return 0;
             }
 
-            uint64 GetData64(uint32 Data)
+            uint64 GetData64(uint32 uiData)
             {
-                switch (Data)
+                switch(uiData)
                 {
                     case DATA_LORKHAN:
-                        return LorKhanGUID;
+                        return m_uiLorKhanGUID;
                     case DATA_ZATH:
-                        return ZathGUID;
+                        return m_uiZathGUID;
                     case DATA_THEKAL:
-                        return ThekalGUID;
+                        return m_uiThekalGUID;
                     case DATA_JINDO:
-                        return JindoGUID;
+                        return m_uiJindoGUID;
                 }
                 return 0;
             }
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
+        InstanceScript* GetInstanceScript(InstanceMap* pMap) const
         {
-            return new instance_zulgurub_InstanceMapScript(map);
+            return new instance_zulgurub_InstanceMapScript(pMap);
         }
 };
 

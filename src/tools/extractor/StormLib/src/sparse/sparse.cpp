@@ -44,7 +44,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
     *pbOutBuffer++ = (unsigned char)(cbInBuffer >> 0x00);
 
     // If there is at least 3 bytes in the input buffer, do this loop
-    while (pbInBuffer < (pbInBufferEnd - 3))
+    while(pbInBuffer < (pbInBufferEnd - 3))
     {
         // Reset the zero count and frontal pointer
         pbLastNonZero = pbInBuffer;
@@ -69,7 +69,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
                     NumberOfZeros = 0;
                 }
             }
-            while (++pbInBuffPtr < pbInBufferEnd);
+            while(++pbInBuffPtr < pbInBufferEnd);
         }
 
         // Get number of nonzeros that we found so far and flush them
@@ -77,7 +77,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
         if (NumberOfNonZeros != 0)
         {
             // Process blocks that are longer than 0x81 nonzero bytes
-            while (NumberOfNonZeros > 0x81)
+            while(NumberOfNonZeros > 0x81)
             {
                 // Verify if we still have enough space in output buffer
                 if ((pbOutBuffer + 0x81) >= pbOutBufferEnd)
@@ -145,7 +145,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
         }
 
         // Now flush all zero bytes
-        while (NumberOfZeros > 0x85)
+        while(NumberOfZeros > 0x85)
         {
             // Do we have at least 2 bytes in the output buffer ?
             if ((pbOutBuffer + 1) >= pbOutBufferEnd)
@@ -194,7 +194,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
     {
         pbInBuffPtr = pbInBuffer;
 
-        for (;;)
+        for(;;)
         {
             if (*pbInBuffPtr++ != 0)
             {
@@ -259,7 +259,7 @@ int DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned c
     *pcbOutBuffer = cbOutBuffer;
 
     // Process the input buffer
-    while (pbInBuffer < pbInBufferEnd)
+    while(pbInBuffer < pbInBufferEnd)
     {
         // Get (next) byte from the stream
         OneByte = *pbInBuffer++;

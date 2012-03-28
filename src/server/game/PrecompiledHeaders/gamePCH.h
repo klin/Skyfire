@@ -1,68 +1,43 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 //add here most rarely modified headers to speed up debug build compilation
-
+#ifndef _GAMEPCH_H
+#define _GAMEPCH_H
+#ifdef ARKCORE_COREPCH
 #include "WorldSocket.h"        // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
+
 #include "MapManager.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
+#include "SQLStorage.h"
 #include "Opcodes.h"
 #include "SharedDefines.h"
 #include "ObjectMgr.h"
-#include "AchievementMgrBase.h"
-#include "AchievementMgr.h"
-#include "GuildAchievementMgr.h"
-#include "SmartAI.h"
-#include "SmartScript.h"
-#include "SmartScriptMgr.h"
-#include "CreatureAI.h"
-#include "CreatureAIFactory.h"
-#include "CreatureAIImpl.h"
-#include "CreatureAIRegistry.h"
-#include "CreatureAISelector.h"
-#include "ScriptedCreature.h"
-#include "ScriptedEscortAI.h"
-#include "ScriptedFollowerAI.h"
-#include "ScriptedGossip.h"
-#include "ScriptedSimpleAI.h"
-#include "CreatureEventAI.h"
-#include "CreatureEventAIMgr.h"
-#include "CombatAI.h"
-#include "GameObjectAI.h"
-#include "GuardAI.h"
-#include "PassiveAI.h"
-#include "PetAI.h"
-#include "ReactorAI.h"
-#include "TotemAI.h"
-#include "UnitAI.h"
-#include "AddonMgr.h"
-#include "AccountMgr.h"
-#include "AuctionHouseMgr.h"
-#include "Calendar.h"
-#include "UnitEvents.h"
-#include "HostileRefManager.h"
-#include "ThreatManager.h"
-#include "DisableMgr.h"
-#include "ScriptSystem.h"
-#include "ConditionMgr.h"
-#include "ScriptMgr.h"
-#include "ScriptLoader.h"
+#include "Util.h"
+
+#endif /* ARKCORE_COREPCH */
+#endif  /* _GAMEPCH_H */

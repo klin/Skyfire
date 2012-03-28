@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2005-2011 MaNGOS <http://www.getmangos.com/>
- * Copyright (C) 2008-2011 Trinity <http://www.trinitycore.org/>
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2010 - 2012 Arkania <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +111,7 @@ bool adt_MCIN::prepareLoadedData()
     // Check cells data
     for (int i=0; i<ADT_CELLS_PER_GRID;i++)
         for (int j=0; j<ADT_CELLS_PER_GRID;j++)
-            if (cells[i][j].offsMCNK && !getMCNK(i, j)->prepareLoadedData())
+            if (cells[i][j].offsMCNK && !getMCNK(i,j)->prepareLoadedData())
                 return false;
 
     return true;

@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -65,7 +73,7 @@ class boss_pathaleon_the_calculator : public CreatureScript
 
         struct boss_pathaleon_the_calculatorAI : public ScriptedAI
         {
-            boss_pathaleon_the_calculatorAI(Creature* creature) : ScriptedAI(creature), summons(me)
+            boss_pathaleon_the_calculatorAI(Creature* pCreature) : ScriptedAI(pCreature), summons(me)
             {
             }
 
@@ -83,17 +91,17 @@ class boss_pathaleon_the_calculator : public CreatureScript
             void Reset()
             {
                 Summon_Timer = 30000;
-                ManaTap_Timer = urand(12000, 20000);
-                ArcaneTorrent_Timer = urand(16000, 25000);
-                Domination_Timer = urand(25000, 40000);
-                ArcaneExplosion_Timer = urand(8000, 13000);
+                ManaTap_Timer = 12000 + rand()%8000;
+                ArcaneTorrent_Timer = 16000 + rand()%9000;
+                Domination_Timer = 25000 + rand()%15000;
+                ArcaneExplosion_Timer = 8000 + rand()%5000;
 
                 Enraged = false;
 
                 Counter = 0;
                 summons.DespawnAll();
             }
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 DoScriptText(SAY_AGGRO, me);
             }
@@ -110,11 +118,11 @@ class boss_pathaleon_the_calculator : public CreatureScript
                 summons.DespawnAll();
             }
 
-            void JustSummoned(Creature* summon)
+            void JustSummoned(Creature *summon)
             {
                 summons.Summon(summon);
             }
-            void SummonedCreatureDespawn(Creature* summon)
+            void SummonedCreatureDespawn(Creature *summon)
             {
                 summons.Despawn(summon);
             }
@@ -129,13 +137,13 @@ class boss_pathaleon_the_calculator : public CreatureScript
                 {
                     for (uint8 i = 0; i < 3; ++i)
                     {
-                        Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                        Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                         Creature* Wraith = me->SummonCreature(21062, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
-                        if (target && Wraith)
-                            Wraith->AI()->AttackStart(target);
+                        if (pTarget && Wraith)
+                            Wraith->AI()->AttackStart(pTarget);
                     }
                     DoScriptText(SAY_SUMMON, me);
-                    Summon_Timer = urand(30000, 45000);
+                    Summon_Timer = 30000 + rand()%15000;
                 }
                 else
                     Summon_Timer -= diff;
@@ -143,7 +151,7 @@ class boss_pathaleon_the_calculator : public CreatureScript
                 if (ManaTap_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_MANA_TAP);
-                    ManaTap_Timer = urand(14000, 22000);
+                    ManaTap_Timer = 14000 + rand()%8000;
                 }
                 else
                     ManaTap_Timer -= diff;
@@ -151,19 +159,19 @@ class boss_pathaleon_the_calculator : public CreatureScript
                 if (ArcaneTorrent_Timer <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_ARCANE_TORRENT);
-                    ArcaneTorrent_Timer = urand(12000, 18000);
+                    ArcaneTorrent_Timer = 12000 + rand()%6000;
                 }
                 else
                     ArcaneTorrent_Timer -= diff;
 
                 if (Domination_Timer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
                     {
                         DoScriptText(RAND(SAY_DOMINATION_1, SAY_DOMINATION_2), me);
-                        DoCast(target, SPELL_DOMINATION);
+                        DoCast(pTarget, SPELL_DOMINATION);
                     }
-                    Domination_Timer = urand(25000, 30000);
+                    Domination_Timer = 25000 + rand()%5000;
                 }
                 else
                     Domination_Timer -= diff;
@@ -174,7 +182,7 @@ class boss_pathaleon_the_calculator : public CreatureScript
                     if (ArcaneExplosion_Timer <= diff)
                     {
                         DoCast(me->getVictim(), H_SPELL_ARCANE_EXPLOSION);
-                        ArcaneExplosion_Timer = urand(10000, 14000);
+                        ArcaneExplosion_Timer = 10000 + rand()%4000;
                     }
                     else
                         ArcaneExplosion_Timer -= diff;
@@ -191,9 +199,9 @@ class boss_pathaleon_the_calculator : public CreatureScript
             }
         };
 
-            CreatureAI* GetAI(Creature* creature) const
+            CreatureAI* GetAI(Creature* pCreature) const
             {
-                return new boss_pathaleon_the_calculatorAI (creature);
+                return new boss_pathaleon_the_calculatorAI (pCreature);
             }
 };
 
@@ -208,7 +216,7 @@ class mob_nether_wraith : public CreatureScript
 
         struct mob_nether_wraithAI : public ScriptedAI
         {
-            mob_nether_wraithAI(Creature* creature) : ScriptedAI(creature) {}
+            mob_nether_wraithAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
             uint32 ArcaneMissiles_Timer;
             uint32 Detonation_Timer;
@@ -217,7 +225,7 @@ class mob_nether_wraith : public CreatureScript
 
             void Reset()
             {
-                ArcaneMissiles_Timer = urand(1000, 4000);
+                ArcaneMissiles_Timer = 1000 + rand()%3000;
                 Detonation_Timer = 20000;
                 Die_Timer = 2200;
                 Detonation = false;
@@ -232,11 +240,11 @@ class mob_nether_wraith : public CreatureScript
 
                 if (ArcaneMissiles_Timer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        DoCast(target, SPELL_ARCANE_MISSILES);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
+                        DoCast(pTarget, SPELL_ARCANE_MISSILES);
                     else
                         DoCast(me->getVictim(), SPELL_ARCANE_MISSILES);
-                    ArcaneMissiles_Timer = urand(5000, 10000);
+                    ArcaneMissiles_Timer = 5000 + rand()%5000;
                 }
                 else
                     ArcaneMissiles_Timer -=diff;
@@ -266,9 +274,9 @@ class mob_nether_wraith : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* pCreature) const
         {
-            return new mob_nether_wraithAI (creature);
+            return new mob_nether_wraithAI (pCreature);
         }
 };
 

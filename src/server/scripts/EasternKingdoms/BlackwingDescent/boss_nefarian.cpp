@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,8 +24,8 @@
 
 enum eSpells
 {
-    SPELL_SHADOWFLAME_BREATH        = 94126,
-    SPELL_SHADOW_COWARDICE          = 79353
+    SPELL_SHADOWFLAME_BREATH = 94126,
+    SPELL_SHADOW_COWARDICE = 79353
 };
 
 class boss_bd_nefarian : public CreatureScript
@@ -38,28 +42,28 @@ public:
     {
         boss_bd_nefarianAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = creature->GetInstanceScript();
+            pInstance = creature->GetInstanceScript();
         }
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
-        uint32 ShadowflameBreathTimer;
-        uint32 ShadowCowardiceTimer;
+        uint32 uiShadowflameBreathTimer;
+        uint32 uiShadowCowardiceTimer;
 
         void Reset()
         {
-            ShadowflameBreathTimer = 10*IN_MILLISECONDS;
-            ShadowCowardiceTimer = 13*IN_MILLISECONDS;
+            uiShadowflameBreathTimer = 10*IN_MILLISECONDS;
+            uiShadowCowardiceTimer = 13*IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*pWho*/)
         {
-            instance->SetData(DATA_NEFARIAN, IN_PROGRESS);
+            pInstance->SetData(DATA_NEFARIAN, IN_PROGRESS);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
-            instance->SetData(DATA_NEFARIAN, DONE);
+            pInstance->SetData(DATA_NEFARIAN, DONE);
         }
 
         void UpdateAI(const uint32 Diff)
@@ -67,20 +71,20 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (ShadowflameBreathTimer <= Diff)
+            if (uiShadowflameBreathTimer <= Diff)
             {
                 me->CastSpell(me->getVictim(), SPELL_SHADOWFLAME_BREATH, true);
 
-                ShadowflameBreathTimer = urand(10*IN_MILLISECONDS, 12*IN_MILLISECONDS);
-            } else ShadowflameBreathTimer -= Diff;
+                uiShadowflameBreathTimer = urand(10*IN_MILLISECONDS, 12*IN_MILLISECONDS);
+            } else uiShadowflameBreathTimer -= Diff;
 
-            if (ShadowCowardiceTimer <= Diff)
+            if (uiShadowCowardiceTimer <= Diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     me->CastSpell(target, SPELL_SHADOW_COWARDICE , true);
 
-                ShadowCowardiceTimer = urand(8*IN_MILLISECONDS, 9*IN_MILLISECONDS);
-            } else ShadowCowardiceTimer -= Diff;
+                uiShadowCowardiceTimer = urand(8*IN_MILLISECONDS, 9*IN_MILLISECONDS);
+            } else uiShadowCowardiceTimer -= Diff;
 
             DoMeleeAttackIfReady();
         }

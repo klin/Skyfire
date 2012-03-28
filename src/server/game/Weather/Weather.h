@@ -1,26 +1,30 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /// \addtogroup world
 /// @{
 /// \file
-
 #ifndef __WEATHER_H
 #define __WEATHER_H
 
@@ -31,15 +35,13 @@
 class Player;
 
 #define WEATHER_SEASONS 4
-struct WeatherSeasonChances
-{
+struct WeatherSeasonChances {
     uint32 rainChance;
     uint32 snowChance;
     uint32 stormChance;
 };
 
-struct WeatherData
-{
+struct WeatherData {
     WeatherSeasonChances data[WEATHER_SEASONS];
     uint32 ScriptId;
 };
@@ -62,31 +64,38 @@ enum WeatherState
 };
 
 /// Weather for one zone
-class Weather
-{
-    public:
+class Weather {
+public:
 
-        Weather(uint32 zone, WeatherData const* weatherChances);
-        ~Weather() { };
+    Weather(uint32 zone, WeatherData const* weatherChances);
+    ~Weather() {
+    }
+    ;
 
-        bool Update(uint32 diff);
-        bool ReGenerate();
-        bool UpdateWeather();
+    bool Update(uint32 diff);
+    bool ReGenerate();
+    bool UpdateWeather();
 
-        void SendWeatherUpdateToPlayer(Player* player);
-        void SetWeather(WeatherType type, float grade);
+    void SendWeatherUpdateToPlayer(Player *player);
+    static void SendFineWeatherUpdateToPlayer(Player *player);
+    void SetWeather(WeatherType type, float grade);
 
-        /// For which zone is this weather?
-        uint32 GetZone() const { return m_zone; };
-        uint32 GetScriptId() const { return m_weatherChances->ScriptId; }
+    /// For which zone is this weather?
+    uint32 GetZone() const {
+        return m_zone;
+    }
+    ;
+    uint32 GetScriptId() const {
+        return m_weatherChances->ScriptId;
+    }
 
-    private:
+private:
 
-        WeatherState GetWeatherState() const;
-        uint32 m_zone;
-        WeatherType m_type;
-        float m_grade;
-        IntervalTimer _timer;
-        WeatherData const* m_weatherChances;
+    WeatherState GetWeatherState() const;
+    uint32 m_zone;
+    WeatherType m_type;
+    float m_grade;
+    IntervalTimer m_timer;
+    WeatherData const* m_weatherChances;
 };
 #endif

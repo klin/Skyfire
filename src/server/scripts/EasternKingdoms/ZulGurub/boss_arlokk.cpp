@@ -1,20 +1,27 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -39,7 +46,7 @@ enum eSpells
     SPELL_SHADOWWORDPAIN        = 23952,
     SPELL_GOUGE                 = 24698,
     SPELL_MARK                  = 24210,
-    SPELL_CLEAVE                = 26350,        //Perhaps not right. Not a red aura...
+    SPELL_CLEAVE                = 26350,                    //Perhaps not right. Not a red aura...
     SPELL_PANTHER_TRANSFORM     = 24190,
 
     MODEL_ID_NORMAL             = 15218,
@@ -52,164 +59,168 @@ enum eSpells
 class boss_arlokk : public CreatureScript
 {
     public:
-        boss_arlokk() : CreatureScript("boss_arlokk") {}
+
+        boss_arlokk()
+            : CreatureScript("boss_arlokk")
+        {
+        }
 
         struct boss_arlokkAI : public ScriptedAI
         {
-            boss_arlokkAI(Creature* creature) : ScriptedAI(creature)
+            boss_arlokkAI(Creature* pCreature) : ScriptedAI(pCreature)
             {
-                instance = creature->GetInstanceScript();
+                m_pInstance = pCreature->GetInstanceScript();
             }
 
-            InstanceScript* instance;
+            InstanceScript* m_pInstance;
 
-            uint32 ShadowWordPain_Timer;
-            uint32 Gouge_Timer;
-            uint32 Mark_Timer;
-            uint32 Cleave_Timer;
-            uint32 Vanish_Timer;
-            uint32 Visible_Timer;
+            uint32 m_uiShadowWordPain_Timer;
+            uint32 m_uiGouge_Timer;
+            uint32 m_uiMark_Timer;
+            uint32 m_uiCleave_Timer;
+            uint32 m_uiVanish_Timer;
+            uint32 m_uiVisible_Timer;
 
-            uint32 Summon_Timer;
-            uint32 SummonCount;
+            uint32 m_uiSummon_Timer;
+            uint32 m_uiSummonCount;
 
-            Unit* _pMarkedTarget;
+            Unit* m_pMarkedTarget;
             uint64 MarkedTargetGUID;
 
-            bool _bIsPhaseTwo;
-            bool _bIsVanished;
+            bool m_bIsPhaseTwo;
+            bool m_bIsVanished;
 
             void Reset()
             {
-                ShadowWordPain_Timer     = 8000;
-                Gouge_Timer              = 14000;
-                Mark_Timer               = 35000;
-                Cleave_Timer             = 4000;
-                Vanish_Timer             = 60000;
-                Visible_Timer            = 6000;
+                m_uiShadowWordPain_Timer = 8000;
+                m_uiGouge_Timer = 14000;
+                m_uiMark_Timer = 35000;
+                m_uiCleave_Timer = 4000;
+                m_uiVanish_Timer = 60000;
+                m_uiVisible_Timer = 6000;
 
-                Summon_Timer             = 5000;
-                SummonCount              = 0;
+                m_uiSummon_Timer = 5000;
+                m_uiSummonCount = 0;
 
-                _bIsPhaseTwo             = false;
-                _bIsVanished             = false;
+                m_bIsPhaseTwo = false;
+                m_bIsVanished = false;
 
-                MarkedTargetGUID         = 0;
+                MarkedTargetGUID = 0;
 
                 me->SetDisplayId(MODEL_ID_NORMAL);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*pWho*/)
             {
                 DoScriptText(SAY_AGGRO, me);
             }
 
             void JustReachedHome()
             {
-                if (instance)
-                    instance->SetData(DATA_ARLOKK, NOT_STARTED);
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_ARLOKK, NOT_STARTED);
 
                 //we should be summoned, so despawn
                 me->DespawnOrUnsummon();
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*pKiller*/)
             {
                 DoScriptText(SAY_DEATH, me);
 
                 me->SetDisplayId(MODEL_ID_NORMAL);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-                if (instance)
-                    instance->SetData(DATA_ARLOKK, DONE);
+                if (m_pInstance)
+                    m_pInstance->SetData(TYPE_ARLOKK, DONE);
             }
 
             void DoSummonPhanters()
             {
-                if (Unit* markedTarget = Unit::GetUnit(*me, MarkedTargetGUID))
-                    DoScriptText(SAY_FEAST_PANTHER, me, markedTarget);
+                if (Unit *pMarkedTarget = Unit::GetUnit(*me, MarkedTargetGUID))
+                    DoScriptText(SAY_FEAST_PANTHER, me, pMarkedTarget);
 
                 me->SummonCreature(NPC_ZULIAN_PROWLER, -11532.7998f, -1649.6734f, 41.4800f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
                 me->SummonCreature(NPC_ZULIAN_PROWLER, -11532.9970f, -1606.4840f, 41.2979f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature* pSummoned)
             {
-                if (Unit* markedTarget = Unit::GetUnit(*me, MarkedTargetGUID))
-                    summoned->AI()->AttackStart(markedTarget);
+                if (Unit *pMarkedTarget = Unit::GetUnit(*me, MarkedTargetGUID))
+                    pSummoned->AI()->AttackStart(pMarkedTarget);
 
-                ++SummonCount;
+                ++m_uiSummonCount;
             }
 
-            void UpdateAI(const uint32 Diff)
+            void UpdateAI(const uint32 uiDiff)
             {
                 if (!UpdateVictim())
                     return;
 
-                if (!_bIsPhaseTwo)
+                if (!m_bIsPhaseTwo)
                 {
-                    if (ShadowWordPain_Timer <= Diff)
+                    if (m_uiShadowWordPain_Timer <= uiDiff)
                     {
                         DoCast(me->getVictim(), SPELL_SHADOWWORDPAIN);
-                        ShadowWordPain_Timer = 15000;
+                        m_uiShadowWordPain_Timer = 15000;
                     }
                     else
-                        ShadowWordPain_Timer -= Diff;
+                        m_uiShadowWordPain_Timer -= uiDiff;
 
-                    if (Mark_Timer <= Diff)
+                    if (m_uiMark_Timer <= uiDiff)
                     {
-                        Unit* markedTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                        Unit *pMarkedTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
 
-                        if (markedTarget)
+                        if (pMarkedTarget)
                         {
-                            DoCast(markedTarget, SPELL_MARK);
-                            MarkedTargetGUID = markedTarget->GetGUID();
+                            DoCast(pMarkedTarget, SPELL_MARK);
+                            MarkedTargetGUID = pMarkedTarget->GetGUID();
                         }
                         else
-                            sLog->outError("TSCR: boss_arlokk could not accuire MarkedTarget.");
+                            sLog->outError("TSCR: boss_arlokk could not accuire pMarkedTarget.");
 
-                        Mark_Timer = 15000;
+                        m_uiMark_Timer = 15000;
                     }
                     else
-                        Mark_Timer -= Diff;
+                        m_uiMark_Timer -= uiDiff;
                 }
                 else
                 {
                     //Cleave_Timer
-                    if (Cleave_Timer <= Diff)
+                    if (m_uiCleave_Timer <= uiDiff)
                     {
                         DoCast(me->getVictim(), SPELL_CLEAVE);
-                        Cleave_Timer = 16000;
+                        m_uiCleave_Timer = 16000;
                     }
                     else
-                        Cleave_Timer -= Diff;
+                        m_uiCleave_Timer -= uiDiff;
 
                     //Gouge_Timer
-                    if (Gouge_Timer <= Diff)
+                    if (m_uiGouge_Timer <= uiDiff)
                     {
                         DoCast(me->getVictim(), SPELL_GOUGE);
 
                         DoModifyThreatPercent(me->getVictim(), -80);
 
-                        Gouge_Timer = 17000+rand()%10000;
+                        m_uiGouge_Timer = 17000+rand()%10000;
                     }
                     else
-                        Gouge_Timer -= Diff;
+                        m_uiGouge_Timer -= uiDiff;
                 }
 
-                if (SummonCount <= 30)
+                if (m_uiSummonCount <= 30)
                 {
-                    if (Summon_Timer <= Diff)
+                    if (m_uiSummon_Timer <= uiDiff)
                     {
                         DoSummonPhanters();
-                        Summon_Timer = 5000;
+                        m_uiSummon_Timer = 5000;
                     }
                     else
-                        Summon_Timer -= Diff;
+                        m_uiSummon_Timer -= uiDiff;
                 }
 
-                if (Vanish_Timer <= Diff)
+                if (m_uiVanish_Timer <= uiDiff)
                 {
                     //Invisble Model
                     me->SetDisplayId(MODEL_ID_BLANK);
@@ -218,35 +229,35 @@ class boss_arlokk : public CreatureScript
                     me->AttackStop();
                     DoResetThreat();
 
-                    _bIsVanished = true;
+                    m_bIsVanished = true;
 
-                    Vanish_Timer  = 45000;
-                    Visible_Timer = 6000;
+                    m_uiVanish_Timer = 45000;
+                    m_uiVisible_Timer = 6000;
                 }
                 else
-                    Vanish_Timer -= Diff;
+                    m_uiVanish_Timer -= uiDiff;
 
-                if (_bIsVanished)
+                if (m_bIsVanished)
                 {
-                    if (Visible_Timer <= Diff)
+                    if (m_uiVisible_Timer <= uiDiff)
                     {
                         //The Panther Model
                         me->SetDisplayId(MODEL_ID_PANTHER);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-                        const CreatureTemplate* cinfo = me->GetCreatureTemplate();
+                        const CreatureInfo *cinfo = me->GetCreatureInfo();
                         me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (cinfo->mindmg +((cinfo->mindmg/100) * 35)));
                         me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (cinfo->maxdmg +((cinfo->maxdmg/100) * 35)));
                         me->UpdateDamagePhysical(BASE_ATTACK);
 
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            AttackStart(target);
+                        if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                            AttackStart(pTarget);
 
-                        _bIsPhaseTwo = true;
-                        _bIsVanished = false;
+                        m_bIsPhaseTwo = true;
+                        m_bIsVanished = false;
                     }
                     else
-                        Visible_Timer -= Diff;
+                        m_uiVisible_Timer -= uiDiff;
                 }
                 else
                     DoMeleeAttackIfReady();
@@ -262,16 +273,18 @@ class boss_arlokk : public CreatureScript
 class go_gong_of_bethekk : public GameObjectScript
 {
     public:
-        go_gong_of_bethekk() : GameObjectScript("go_gong_of_bethekk") {}
-
-        bool OnGossipHello(Player* /*player*/, GameObject* go)
+        go_gong_of_bethekk() : GameObjectScript("go_gong_of_bethekk")
         {
-            if (InstanceScript* instance = go->GetInstanceScript())
+        }
+
+        bool OnGossipHello(Player* /*pPlayer*/, GameObject* pGo)
+        {
+            if (InstanceScript* m_pInstance = pGo->GetInstanceScript())
             {
-                if (instance->GetData(DATA_ARLOKK) == DONE || instance->GetData(DATA_ARLOKK) == IN_PROGRESS)
+                if (m_pInstance->GetData(TYPE_ARLOKK) == DONE || m_pInstance->GetData(TYPE_ARLOKK) == IN_PROGRESS)
                     return true;
 
-                instance->SetData(DATA_ARLOKK, IN_PROGRESS);
+                m_pInstance->SetData(TYPE_ARLOKK, IN_PROGRESS);
                 return true;
             }
 

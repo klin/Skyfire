@@ -25,10 +25,4 @@ endif()
 #  endif()
 #endif()
 
-if( MSVC )
-    include(${CMAKE_SOURCE_DIR}/cmake/compiler/msvc/settings.cmake)
-endif()
-
-if( MSYS OR MINGW )
-    include(${CMAKE_SOURCE_DIR}/cmake/compiler/gcc/settings.cmake)
-endif()
+include(${CMAKE_SOURCE_DIR}/cmake/compiler/msvc/settings.cmake)

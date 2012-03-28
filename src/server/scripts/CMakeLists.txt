@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2008 - 2012 ArkCORE <http://www.arkania.net/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -8,78 +8,55 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-# Enable precompiled headers when using the GCC compiler.
-if( USE_SCRIPTPCH )
-  include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
-  )
-endif()
+file(GLOB_RECURSE scripts_easternkingdoms EasternKingdoms/*.cpp EasternKingdoms/*.h)
+file(GLOB_RECURSE scripts_kalimdor Kalimdor/*.cpp Kalimdor/*.h)
+file(GLOB_RECURSE scripts_northrend Northrend/*.cpp Northrend/*.h)
+file(GLOB_RECURSE scripts_maelstrom Maelstrom/*.cpp Maelstrom/*.h)
+file(GLOB_RECURSE scripts_outland Outland/*.cpp Outland/*.h)
+file(GLOB_RECURSE scripts_world World/*.cpp World/*.h)
+file(GLOB_RECURSE scripts_spells Spells/*.cpp Spells/*.h)
+file(GLOB_RECURSE scripts_outdoorpvp OutdoorPvP/*.cpp OutdoorPvP/*.h)
+file(GLOB_RECURSE scripts_commands Commands/*.cpp Commands/*.h)
+file(GLOB_RECURSE scripts_custom Custom/*.cpp Custom/*.h)
+file(GLOB_RECURSE scripts_examples Examples/*.cpp Examples/*.h)
 
-file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
-file(GLOB_RECURSE sources_EasternKingdoms EasternKingdoms/*.cpp EasternKingdoms/*.h)
-file(GLOB_RECURSE sources_Kalimdor Kalimdor/*.cpp Kalimdor/*.h)
-file(GLOB_RECURSE sources_Outland Outland/*.cpp Outland/*.h)
-file(GLOB_RECURSE sources_Northrend Northrend/*.cpp Northrend/*.h)
-file(GLOB_RECURSE sources_Maelstrom Maelstrom/*.cpp Maelstrom/*.h)
-file(GLOB_RECURSE sources_Custom Custom/*.cpp Custom/*.h)
-file(GLOB_RECURSE sources_Commands Commands/*.cpp Commands/*.h)
-file(GLOB_RECURSE sources_Examples Examples/*.cpp Examples/*.h)
-file(GLOB_RECURSE sources_OutdoorPvP OutdoorPvP/*.cpp OutdoorPvP/*.h)
-file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
-file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
+source_group(EasternKingdoms FILES ${scripts_easternkingdoms})
+source_group(Kalimdor FILES ${scripts_kalimdor})
+source_group(Northrend FILES ${scripts_northrend})
+source_group(Maelstrom FILES ${scripts_maelstrom})
+source_group(Outland FILES ${scripts_outland})
+source_group(World FILES ${scripts_world})
+source_group(Spells FILES ${scripts_spells})
+source_group(OutdoorPvP FILES ${scripts_outdoorpvp})
+source_group(Commands FILES ${scripts_commands})
+source_group(Custom FILES ${scripts_custom})
+source_group(Examples FILES ${scripts_examples})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-source_group(CMake FILES CMakeLists.txt)
-source_group(PrecompiledHeaders FILES ${sources_PrecompiledHeaders})
-source_group(EasternKingdoms FILES ${sources_EasternKingdoms})
-source_group(Kalimdor FILES ${sources_Kalimdor})
-source_group(Outland FILES ${sources_Outland})
-source_group(Northrend FILES ${sources_Northrend})
-source_group(Maelstrom FILES ${sources_Maelstrom})
-source_group(OutdoorPvP FILES ${sources_OutdoorPvP})
-source_group(Commands FILES ${sources_Commands})
-source_group(Examples FILES ${sources_Examples})
-source_group(Spells FILES ${sources_Spells})
-source_group(World FILES ${sources_World})
-
- if( USE_SCRIPTPCH AND MSVC )
-  file(GLOB_RECURSE sources_PreHeaders PrecompiledHeaders/ScriptPCH.cpp PrecompiledHeaders/ScriptPCH.h)
-  source_group(PrecompiledHeaders FILES ${sources_PreHeaders})
   set(scripts_STAT_SRCS
-  ${sources_PreHeaders}
-  )
- endif()
+    PrecompiledHeaders/ScriptPCH.cpp
+  PrecompiledHeaders/ScriptPCH.h)
 
 message(STATUS "SCRIPT PREPARATIONS")
-include(Spells/CMakeLists.txt)
-include(Commands/CMakeLists.txt)
 
-file(GLOB_RECURSE sources_ScriptedAI 
-  ../game/AI/ScriptedAI/ScriptedEscortAI.cpp 
-  ../game/AI/ScriptedAI/ScriptedCreature.cpp
-  ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp 
-  ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp)
-
-source_group(ScriptedAI FILES ${sources_ScriptedAI})
-  
- set(scripts_STAT_SRCS
+set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
-  ${sources_ScriptedAI}
-  )
-
-if(EXAMPLES)
-  include(Examples/CMakeLists.txt)
- endif()
- 
-if(SCRIPTS)
-  include(Custom/CMakeLists.txt)
-  include(World/CMakeLists.txt)
-  include(OutdoorPvP/CMakeLists.txt)
-  include(EasternKingdoms/CMakeLists.txt)
-  include(Kalimdor/CMakeLists.txt)
-  include(Outland/CMakeLists.txt)
-  include(Northrend/CMakeLists.txt)
-  include(Maelstrom/CMakeLists.txt)
-endif()
+  ${scripts_easternkingdoms}
+  ${scripts_kalimdor}
+  ${scripts_northrend}
+  ${scripts_maelstrom}
+  ${scripts_outland}
+  ${scripts_world}
+  ${scripts_spells}
+  ${scripts_outdoorpvp}
+  ${scripts_commands}
+  ${scripts_custom}
+  ${scripts_examples}
+  ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
+  ../game/AI/ScriptedAI/ScriptedCreature.cpp
+  ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
+  ../game/AI/ScriptedAI/ScriptedSimpleAI.cpp
+)
 
 message(STATUS "SCRIPT PREPARATION COMPLETE")
 message("")
@@ -92,13 +69,16 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
   ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography/Authentication
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database
   ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
   ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic/CountedReference
   ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic/LinkedReference
   ${CMAKE_SOURCE_DIR}/src/server/shared/Dynamic
   ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
   ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Policies
   ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_SOURCE_DIR}/src/server/collision
@@ -114,8 +94,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/ScriptedAI
   ${CMAKE_SOURCE_DIR}/src/server/game/AI/SmartScripts
   ${CMAKE_SOURCE_DIR}/src/server/game/AuctionHouse
-  ${CMAKE_SOURCE_DIR}/src/server/game/Battlefields
-  ${CMAKE_SOURCE_DIR}/src/server/game/Battlefields/Zones  
   ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds
   ${CMAKE_SOURCE_DIR}/src/server/game/Battlegrounds/Zones
   ${CMAKE_SOURCE_DIR}/src/server/game/Calendar
@@ -157,26 +135,27 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Waypoints
   ${CMAKE_SOURCE_DIR}/src/server/game/Opcodes
   ${CMAKE_SOURCE_DIR}/src/server/game/OutdoorPvP
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/OutdoorPvP  
   ${CMAKE_SOURCE_DIR}/src/server/game/Pools
   ${CMAKE_SOURCE_DIR}/src/server/game/PrecompiledHeaders
   ${CMAKE_SOURCE_DIR}/src/server/game/Quests
   ${CMAKE_SOURCE_DIR}/src/server/game/Reputation
   ${CMAKE_SOURCE_DIR}/src/server/game/Scripting
   ${CMAKE_SOURCE_DIR}/src/server/game/Server
-  ${CMAKE_SOURCE_DIR}/src/server/game/Server/Packets
   ${CMAKE_SOURCE_DIR}/src/server/game/Server/Protocol
-  ${CMAKE_SOURCE_DIR}/src/server/game/Handlers
+  ${CMAKE_SOURCE_DIR}/src/server/game/Server/Protocol/Handlers
   ${CMAKE_SOURCE_DIR}/src/server/game/Skills
   ${CMAKE_SOURCE_DIR}/src/server/game/Spells
   ${CMAKE_SOURCE_DIR}/src/server/game/Spells/Auras
-  ${CMAKE_SOURCE_DIR}/src/server/game/Texts
   ${CMAKE_SOURCE_DIR}/src/server/game/Tickets
   ${CMAKE_SOURCE_DIR}/src/server/game/Tools
+  ${CMAKE_SOURCE_DIR}/src/server/game/Texts
   ${CMAKE_SOURCE_DIR}/src/server/game/Weather
   ${CMAKE_SOURCE_DIR}/src/server/game/World
   ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
+  ${OPENSSL_INCLUDE_DIR}
 )
 
 add_library(scripts STATIC ${scripts_STAT_SRCS})
@@ -184,10 +163,8 @@ add_library(scripts STATIC ${scripts_STAT_SRCS})
 add_dependencies(scripts revision.h)
 
 # Generate precompiled header
-if( USE_SCRIPTPCH )
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.h)
   elseif(MSVC)
     add_native_precompiled_header(scripts ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH)
   endif()
-endif()

@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -83,19 +91,19 @@ class boss_mother_shahraz : public CreatureScript
 public:
     boss_mother_shahraz() : CreatureScript("boss_mother_shahraz") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_shahrazAI (creature);
+        return new boss_shahrazAI (pCreature);
     }
 
     struct boss_shahrazAI : public ScriptedAI
     {
-        boss_shahrazAI(Creature* c) : ScriptedAI(c)
+        boss_shahrazAI(Creature *c) : ScriptedAI(c)
         {
-            instance = c->GetInstanceScript();
+            pInstance = c->GetInstanceScript();
         }
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
         uint64 TargetGUID[3];
         uint32 BeamTimer;
@@ -114,8 +122,8 @@ public:
 
         void Reset()
         {
-            if (instance)
-                instance->SetData(DATA_MOTHERSHAHRAZEVENT, NOT_STARTED);
+            if (pInstance)
+                pInstance->SetData(DATA_MOTHERSHAHRAZEVENT, NOT_STARTED);
 
             for (uint8 i = 0; i<3; ++i)
                 TargetGUID[i] = 0;
@@ -128,31 +136,31 @@ public:
             FatalAttractionExplodeTimer = 70000;
             ShriekTimer = 30000;
             SaberTimer = 35000;
-            RandomYellTimer = urand(70, 111) * 1000;
+            RandomYellTimer = 70000 + rand()%41 * 1000;
             EnrageTimer = 600000;
             ExplosionCount = 0;
 
             Enraged = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
-            if (instance)
-                instance->SetData(DATA_MOTHERSHAHRAZEVENT, IN_PROGRESS);
+            if (pInstance)
+                pInstance->SetData(DATA_MOTHERSHAHRAZEVENT, IN_PROGRESS);
 
             DoZoneInCombat();
             DoScriptText(SAY_AGGRO, me);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit * /*victim*/)
         {
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
         }
 
-        void JustDied(Unit* /*victim*/)
+        void JustDied(Unit * /*victim*/)
         {
-            if (instance)
-                instance->SetData(DATA_MOTHERSHAHRAZEVENT, DONE);
+            if (pInstance)
+                pInstance->SetData(DATA_MOTHERSHAHRAZEVENT, DONE);
 
             DoScriptText(SAY_DEATH, me);
         }
@@ -165,12 +173,12 @@ public:
             float Z = TeleportPoint[random].z;
             for (uint8 i = 0; i < 3; ++i)
             {
-                Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 1);
-                if (unit && unit->isAlive() && (unit->GetTypeId() == TYPEID_PLAYER))
+                Unit* pUnit = SelectUnit(SELECT_TARGET_RANDOM, 1);
+                if (pUnit && pUnit->isAlive() && (pUnit->GetTypeId() == TYPEID_PLAYER))
                 {
-                    TargetGUID[i] = unit->GetGUID();
-                    unit->CastSpell(unit, SPELL_TELEPORT_VISUAL, true);
-                    DoTeleportPlayer(unit, X, Y, Z, unit->GetOrientation());
+                    TargetGUID[i] = pUnit->GetGUID();
+                    pUnit->CastSpell(pUnit, SPELL_TELEPORT_VISUAL, true);
+                    DoTeleportPlayer(pUnit, X, Y, Z, pUnit->GetOrientation());
                 }
             }
         }
@@ -190,25 +198,25 @@ public:
             //Randomly cast one beam.
             if (BeamTimer <= diff)
             {
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
-                if (!target || !target->isAlive())
+                Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                if (!pTarget || !pTarget->isAlive())
                     return;
 
                 BeamTimer = 9000;
 
-                switch (CurrentBeam)
+                switch(CurrentBeam)
                 {
                     case 0:
-                        DoCast(target, SPELL_BEAM_SINISTER);
+                        DoCast(pTarget, SPELL_BEAM_SINISTER);
                         break;
                     case 1:
-                        DoCast(target, SPELL_BEAM_VILE);
+                        DoCast(pTarget, SPELL_BEAM_VILE);
                         break;
                     case 2:
-                        DoCast(target, SPELL_BEAM_WICKED);
+                        DoCast(pTarget, SPELL_BEAM_WICKED);
                         break;
                     case 3:
-                        DoCast(target, SPELL_BEAM_SINFUL);
+                        DoCast(pTarget, SPELL_BEAM_SINFUL);
                         break;
                 }
                 ++BeamCount;
@@ -236,7 +244,7 @@ public:
 
                 DoScriptText(RAND(SAY_SPELL2, SAY_SPELL3), me);
                 FatalAttractionExplodeTimer = 2000;
-                FatalAttractionTimer = urand(40, 71) * 1000;
+                FatalAttractionTimer = 40000 + rand()%31 * 1000;
             } else FatalAttractionTimer -= diff;
 
             if (FatalAttractionExplodeTimer <= diff)
@@ -246,12 +254,12 @@ public:
                 {
                     for (uint8 i = 0; i < 3; ++i)
                     {
-                        Unit* unit = NULL;
+                        Unit* pUnit = NULL;
                         if (TargetGUID[i])
                         {
-                            unit = Unit::GetUnit((*me), TargetGUID[i]);
-                            if (unit)
-                                unit->CastSpell(unit, SPELL_ATTRACTION, true);
+                            pUnit = Unit::GetUnit((*me), TargetGUID[i]);
+                            if (pUnit)
+                                pUnit->CastSpell(pUnit, SPELL_ATTRACTION, true);
                             TargetGUID[i] = 0;
                         }
                     }
@@ -292,7 +300,7 @@ public:
             if (RandomYellTimer <= diff)
             {
                 DoScriptText(RAND(SAY_TAUNT1, SAY_TAUNT2, SAY_TAUNT3), me);
-                RandomYellTimer = urand(60, 151) * 1000;
+                RandomYellTimer = 60000 + rand()%91 * 1000;
             } else RandomYellTimer -= diff;
 
             DoMeleeAttackIfReady();

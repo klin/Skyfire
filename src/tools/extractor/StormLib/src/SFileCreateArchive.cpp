@@ -101,7 +101,7 @@ bool WINAPI SFileCreateArchive(const char * szMpqName, DWORD dwFlags, DWORD dwHa
     if (nError == ERROR_SUCCESS)
     {
         // Round the hash table size up to the nearest power of two
-        for (dwPowerOfTwo = HASH_TABLE_SIZE_MIN; dwPowerOfTwo < HASH_TABLE_SIZE_MAX; dwPowerOfTwo <<= 1)
+        for(dwPowerOfTwo = HASH_TABLE_SIZE_MIN; dwPowerOfTwo < HASH_TABLE_SIZE_MAX; dwPowerOfTwo <<= 1)
         {
             if (dwPowerOfTwo >= dwHashTableSize)
             {

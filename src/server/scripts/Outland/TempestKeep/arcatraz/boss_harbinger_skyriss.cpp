@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -67,13 +75,13 @@ class boss_harbinger_skyriss : public CreatureScript
         }
         struct boss_harbinger_skyrissAI : public ScriptedAI
         {
-            boss_harbinger_skyrissAI(Creature* creature) : ScriptedAI(creature)
+            boss_harbinger_skyrissAI(Creature* pCreature) : ScriptedAI(pCreature)
             {
-                instance = creature->GetInstanceScript();
+                pInstance = pCreature->GetInstanceScript();
                 Intro = false;
             }
 
-            InstanceScript* instance;
+            InstanceScript *pInstance;
 
             bool Intro;
             bool IsImage33;
@@ -89,7 +97,7 @@ class boss_harbinger_skyriss : public CreatureScript
             void Reset()
             {
                 if (!Intro)
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 
                 IsImage33 = false;
                 IsImage66 = false;
@@ -102,7 +110,7 @@ class boss_harbinger_skyriss : public CreatureScript
                 ManaBurn_Timer = 25000;
             }
 
-            void MoveInLineOfSight(Unit* who)
+            void MoveInLineOfSight(Unit *who)
             {
                 if (!Intro)
                     return;
@@ -110,16 +118,16 @@ class boss_harbinger_skyriss : public CreatureScript
                 ScriptedAI::MoveInLineOfSight(who);
             }
 
-            void EnterCombat(Unit* /*who*/) {}
+            void EnterCombat(Unit * /*who*/) {}
 
             void JustDied(Unit* /*Killer*/)
             {
                 DoScriptText(SAY_DEATH, me);
-                if (instance)
-                    instance->SetData(TYPE_HARBINGERSKYRISS, DONE);
+                if (pInstance)
+                    pInstance->SetData(TYPE_HARBINGERSKYRISS, DONE);
             }
 
-            void JustSummoned(Creature* summon)
+            void JustSummoned(Creature *summon)
             {
                 if (!summon)
                     return;
@@ -128,8 +136,8 @@ class boss_harbinger_skyriss : public CreatureScript
                 else
                     summon->SetHealth(summon->CountPctFromMaxHealth(66));
                 if (me->getVictim())
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        summon->AI()->AttackStart(target);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        summon->AI()->AttackStart(pTarget);
             }
 
             void KilledUnit(Unit* victim)
@@ -158,33 +166,33 @@ class boss_harbinger_skyriss : public CreatureScript
             {
                 if (!Intro)
                 {
-                    if (!instance)
+                    if (!pInstance)
                         return;
 
                     if (Intro_Timer <= diff)
                     {
-                        switch (Intro_Phase)
+                        switch(Intro_Phase)
                         {
                         case 1:
                             DoScriptText(SAY_INTRO, me);
-                            instance->HandleGameObject(instance->GetData64(DATA_SPHERE_SHIELD), true);
+                            pInstance->HandleGameObject(pInstance->GetData64(DATA_SPHERE_SHIELD), true);
                             ++Intro_Phase;
                             Intro_Timer = 25000;
                             break;
                         case 2:
                             DoScriptText(SAY_AGGRO, me);
-                            if (Unit* mellic = Unit::GetUnit(*me, instance->GetData64(DATA_MELLICHAR)))
+                            if (Unit *mellic = Unit::GetUnit(*me, pInstance->GetData64(DATA_MELLICHAR)))
                             {
                                 //should have a better way to do this. possibly spell exist.
                                 mellic->setDeathState(JUST_DIED);
                                 mellic->SetHealth(0);
-                                instance->SetData(TYPE_SHIELD_OPEN, IN_PROGRESS);
+                                pInstance->SetData(TYPE_SHIELD_OPEN, IN_PROGRESS);
                             }
                             ++Intro_Phase;
                             Intro_Timer = 3000;
                             break;
                         case 3:
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                             Intro = true;
                             break;
                         }
@@ -208,8 +216,8 @@ class boss_harbinger_skyriss : public CreatureScript
 
                 if (MindRend_Timer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        DoCast(target, SPELL_MIND_REND);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
+                        DoCast(pTarget, SPELL_MIND_REND);
                     else
                         DoCast(me->getVictim(), SPELL_MIND_REND);
 
@@ -225,8 +233,8 @@ class boss_harbinger_skyriss : public CreatureScript
 
                     DoScriptText(RAND(SAY_FEAR_1, SAY_FEAR_2), me);
 
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        DoCast(target, SPELL_FEAR);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
+                        DoCast(pTarget, SPELL_FEAR);
                     else
                         DoCast(me->getVictim(), SPELL_FEAR);
 
@@ -242,8 +250,8 @@ class boss_harbinger_skyriss : public CreatureScript
 
                     DoScriptText(RAND(SAY_MIND_1, SAY_MIND_2), me);
 
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                        DoCast(target, SPELL_DOMINATION);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
+                        DoCast(pTarget, SPELL_DOMINATION);
                     else
                         DoCast(me->getVictim(), SPELL_DOMINATION);
 
@@ -259,8 +267,8 @@ class boss_harbinger_skyriss : public CreatureScript
                         if (me->IsNonMeleeSpellCasted(false))
                             return;
 
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                            DoCast(target, H_SPELL_MANA_BURN);
+                        if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
+                            DoCast(pTarget, H_SPELL_MANA_BURN);
 
                         ManaBurn_Timer = 16000+rand()%16000;
                     }
@@ -271,9 +279,9 @@ class boss_harbinger_skyriss : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* pCreature) const
         {
-            return new boss_harbinger_skyrissAI (creature);
+            return new boss_harbinger_skyrissAI (pCreature);
         }
 };
 
@@ -290,11 +298,11 @@ class boss_harbinger_skyriss_illusion : public CreatureScript
         }
         struct boss_harbinger_skyriss_illusionAI : public ScriptedAI
         {
-            boss_harbinger_skyriss_illusionAI(Creature* creature) : ScriptedAI(creature) {}
+            boss_harbinger_skyriss_illusionAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
             void Reset() { }
 
-            void EnterCombat(Unit* /*who*/) { }
+            void EnterCombat(Unit * /*who*/) { }
         };
 
         CreatureAI* GetAI(Creature* creature) const

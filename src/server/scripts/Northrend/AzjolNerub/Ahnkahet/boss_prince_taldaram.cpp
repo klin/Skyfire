@@ -1,9 +1,15 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -42,7 +48,7 @@ enum Misc
 {
     DATA_EMBRACE_DMG                              = 20000,
     H_DATA_EMBRACE_DMG                            = 40000,
-    DATA_SPHERE_DISTANCE                          =    15
+    DATA_SPHERE_DISTANCE                          =   100
 };
 #define DATA_SPHERE_ANGLE_OFFSET            0.7f
 #define DATA_GROUND_POSITION_Z             11.4f
@@ -81,9 +87,14 @@ public:
     {
         boss_taldaramAI(Creature* c) : ScriptedAI(c)
         {
-            instance = c->GetInstanceScript();
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            pInstance = c->GetInstanceScript();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            //below may need another adjustment
+            SpellEntry* spell = (SpellEntry*)sSpellStore.LookupEntry(DUNGEON_MODE(SPELL_FLAME_SPHERE_PERIODIC, H_SPELL_FLAME_SPHERE_PERIODIC));
+            if (spell)
+                spell->EffectAmplitude[0] = 500;
         }
 
         uint32 uiBloodthirstTimer;
@@ -98,7 +109,7 @@ public:
 
         CombatPhase Phase;
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
         void Reset()
         {
@@ -110,14 +121,14 @@ public:
             Phase = NORMAL;
             uiPhaseTimer = 0;
             uiEmbraceTarget = 0;
-            if (instance)
-                instance->SetData(DATA_PRINCE_TALDARAM_EVENT, NOT_STARTED);
+            if (pInstance)
+                pInstance->SetData(DATA_PRINCE_TALDARAM_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            if (instance)
-                instance->SetData(DATA_PRINCE_TALDARAM_EVENT, IN_PROGRESS);
+            if (pInstance)
+                pInstance->SetData(DATA_PRINCE_TALDARAM_EVENT, IN_PROGRESS);
             DoScriptText(SAY_AGGRO, me);
         }
 
@@ -125,6 +136,7 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
             if (uiPhaseTimer <= diff)
             {
                 switch (Phase)
@@ -179,8 +191,9 @@ public:
                         uiPhaseTimer = 1300;
                         break;
                     case VANISHED:
+                        me->SetVisible(true);
                         if (Unit* pEmbraceTarget = GetEmbraceTarget())
-                            DoCast(pEmbraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
+                            DoCast(pEmbraceTarget, DUNGEON_MODE(SPELL_EMBRACE_OF_THE_VAMPYR, H_SPELL_EMBRACE_OF_THE_VAMPYR));
                         me->GetMotionMaster()->Clear();
                         me->SetSpeed(MOVE_WALK, 1.0f, true);
                         me->GetMotionMaster()->MoveChase(me->getVictim());
@@ -224,8 +237,9 @@ public:
                             //He only vanishes if there are 3 or more alive players
                             if (target_list.size() > 2)
                             {
-                                DoScriptText(RAND(SAY_VANISH_1, SAY_VANISH_2), me);
-                                DoCast(me, SPELL_VANISH);
+                                DoScriptText(RAND(SAY_VANISH_1,SAY_VANISH_2), me);
+                                //DoCast(me, SPELL_VANISH);                             // causes health reset issue?
+                                me->SetVisible(false);
                                 Phase = JUST_VANISHED;
                                 uiPhaseTimer = 500;
                                 if (Unit* pEmbraceTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
@@ -261,8 +275,8 @@ public:
         {
             DoScriptText(SAY_DEATH, me);
 
-            if (instance)
-                instance->SetData(DATA_PRINCE_TALDARAM_EVENT, DONE);
+            if (pInstance)
+                pInstance->SetData(DATA_PRINCE_TALDARAM_EVENT, DONE);
         }
 
         void KilledUnit(Unit* victim)
@@ -282,16 +296,16 @@ public:
 
         bool CheckSpheres()
         {
-            if (!instance)
+            if (!pInstance)
                 return false;
 
             uint64 uiSphereGuids[2];
-            uiSphereGuids[0] = instance->GetData64(DATA_SPHERE1);
-            uiSphereGuids[1] = instance->GetData64(DATA_SPHERE2);
+            uiSphereGuids[0] = pInstance->GetData64(DATA_SPHERE1);
+            uiSphereGuids[1] = pInstance->GetData64(DATA_SPHERE2);
 
             for (uint8 i=0; i < 2; ++i)
             {
-                GameObject* pSpheres = instance->instance->GetGameObject(uiSphereGuids[i]);
+                GameObject* pSpheres = pInstance->instance->GetGameObject(uiSphereGuids[i]);
                 if (!pSpheres)
                     return false;
                 if (pSpheres->GetGoState() != GO_STATE_ACTIVE)
@@ -311,16 +325,16 @@ public:
 
         void RemovePrison()
         {
-            if (!instance)
+            if (!pInstance)
                 return;
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->RemoveAurasDueToSpell(SPELL_BEAM_VISUAL);
             me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), DATA_GROUND_POSITION_Z, me->GetOrientation());
-            uint64 prison_GUID = instance->GetData64(DATA_PRINCE_TALDARAM_PLATFORM);
-            instance->HandleGameObject(prison_GUID, true);
+            uint64 prison_GUID = pInstance->GetData64(DATA_PRINCE_TALDARAM_PLATFORM);
+            pInstance->HandleGameObject(prison_GUID, true);
         }
     };
 
@@ -339,11 +353,11 @@ public:
     {
         mob_taldaram_flamesphereAI(Creature* c) : ScriptedAI(c)
         {
-            instance = c->GetInstanceScript();
+            pInstance = c->GetInstanceScript();
         }
 
         uint32 uiDespawnTimer;
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
         void Reset()
         {
@@ -353,7 +367,7 @@ public:
             me->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
             DoCast(me, SPELL_FLAME_SPHERE_VISUAL);
             DoCast(me, SPELL_FLAME_SPHERE_SPAWN_EFFECT);
-            DoCast(me, SPELL_FLAME_SPHERE_PERIODIC);
+            DoCast(me, DUNGEON_MODE(SPELL_FLAME_SPHERE_PERIODIC, H_SPELL_FLAME_SPHERE_PERIODIC));
             uiDespawnTimer = 10*IN_MILLISECONDS;
         }
 
@@ -387,21 +401,19 @@ public:
 
     bool OnGossipHello(Player* /*player*/, GameObject* pGO)
     {
-        InstanceScript* instance = pGO->GetInstanceScript();
-        if (!instance)
-            return true;
+        InstanceScript* pInstance = pGO->GetInstanceScript();
 
-        Creature* pPrinceTaldaram = Unit::GetCreature(*pGO, instance->GetData64(DATA_PRINCE_TALDARAM));
+        Creature* pPrinceTaldaram = Unit::GetCreature(*pGO, pInstance ? pInstance->GetData64(DATA_PRINCE_TALDARAM) : 0);
         if (pPrinceTaldaram && pPrinceTaldaram->isAlive())
         {
             // maybe these are hacks :(
-            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+            pGO->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
             pGO->SetGoState(GO_STATE_ACTIVE);
 
             switch (pGO->GetEntry())
             {
-                case GO_SPHERE1: instance->SetData(DATA_SPHERE1_EVENT, IN_PROGRESS); break;
-                case GO_SPHERE2: instance->SetData(DATA_SPHERE2_EVENT, IN_PROGRESS); break;
+                case GO_SPHERE1: pInstance->SetData(DATA_SPHERE1_EVENT, IN_PROGRESS); break;
+                case GO_SPHERE2: pInstance->SetData(DATA_SPHERE2_EVENT, IN_PROGRESS); break;
             }
 
             CAST_AI(boss_taldaram::boss_taldaramAI, pPrinceTaldaram->AI())->CheckSpheres();

@@ -1,9 +1,13 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -29,6 +33,7 @@ enum Spells
     SPELL_WATER_BOLT_VOLLEY                     = 54241,
     SPELL_WATER_BOLT_VOLLEY_H                   = 59521,
     SPELL_SPLASH                                = 59516,
+    SPELL_BURST                                 = 54379,
     SPELL_WATER_GLOBULE                         = 54268
 };
 
@@ -92,6 +97,7 @@ public:
 
         uint32 uiBubbleCheckerTimer;
         uint32 uiWaterBoltVolleyTimer;
+        uint32 uiWaterBlastTimer;
 
         InstanceScript* instance;
 
@@ -104,6 +110,7 @@ public:
             dehydration = true;
             uiBubbleCheckerTimer = 1000;
             uiWaterBoltVolleyTimer = urand(10000, 15000);
+            uiWaterBlastTimer = urand(10000, 15000);
 
             me->SetVisible(true);
             DespawnWaterElements();
@@ -140,7 +147,7 @@ public:
 
         void AttackStart(Unit* who)
         {
-            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 return;
 
             if (me->Attack(who, true))
@@ -169,8 +176,11 @@ public:
                     break;
                 case ACTION_WATER_ELEMENT_KILLED:
                     uint32 damage = me->CountPctFromMaxHealth(3);
+                    if (me->GetHealth() > damage)
+                    {
                     me->ModifyHealth(-int32(damage));
                     me->LowerPlayerDamageReq(damage);
+                    }
                     break;
             }
         }
@@ -214,7 +224,7 @@ public:
             if (!bIsFrenzy && HealthBelowPct(25) && !bIsExploded)
             {
                 DoScriptText(SAY_ENRAGE, me);
-                DoCast(me, SPELL_FRENZY, true);
+                DoCast(me, DUNGEON_MODE(SPELL_FRENZY,SPELL_FRENZY_H), true);
                 bIsFrenzy = true;
             }
 
@@ -227,8 +237,8 @@ public:
                         if (!me->HasAura(SPELL_PROTECTIVE_BUBBLE, 0))
                         {
                             DoScriptText(SAY_SHATTER, me);
-                            DoCast(me, SPELL_WATER_BLAST);
                             DoCast(me, SPELL_DRAINED);
+                            DoCast(me, SPELL_BURST, true);
                             bIsExploded = true;
                             me->AttackStop();
                             me->SetVisible(false);
@@ -265,10 +275,23 @@ public:
             {
                 if (uiWaterBoltVolleyTimer <= uiDiff)
                 {
-                    DoCast(me, SPELL_WATER_BOLT_VOLLEY);
+                    if(!me->IsNonMeleeSpellCasted(false))
+                    {
+                        DoCast(me, DUNGEON_MODE(SPELL_WATER_BOLT_VOLLEY,SPELL_WATER_BOLT_VOLLEY_H));
                     uiWaterBoltVolleyTimer = urand(10000, 15000);
+                    }
                 }
                 else uiWaterBoltVolleyTimer -= uiDiff;
+
+                if (uiWaterBlastTimer <= uiDiff)
+                {
+                    if(!me->IsNonMeleeSpellCasted(false))
+                    {
+                        DoCast(me->getVictim(), DUNGEON_MODE(SPELL_WATER_BLAST,SPELL_WATER_BLAST_H));
+                        uiWaterBlastTimer = urand(10000, 15000);
+                    }
+                }
+                else uiWaterBlastTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();
             }
@@ -290,11 +313,17 @@ public:
             {
                 if (instance->GetData(DATA_WAVE_COUNT) == 6)
                 {
+                    if(IsHeroic() && instance->GetData(DATA_1ST_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     instance->SetData(DATA_1ST_BOSS_EVENT, DONE);
                     instance->SetData(DATA_WAVE_COUNT, 7);
                 }
                 else if (instance->GetData(DATA_WAVE_COUNT) == 12)
                 {
+                    if(IsHeroic() && instance->GetData(DATA_2ND_BOSS_EVENT) == DONE)
+                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
                     instance->SetData(DATA_2ND_BOSS_EVENT, DONE);
                     instance->SetData(DATA_WAVE_COUNT, 13);
                 }
@@ -370,7 +399,7 @@ public:
                 {
                     if (Creature* pIchoron = Unit::GetCreature(*me, instance->GetData64(DATA_ICHORON)))
                     {
-                        if (me->IsWithinDist(pIchoron, 2.0f , false))
+                        if (me->IsWithinDist(pIchoron, 2.0f, false))
                         {
                             if (pIchoron->AI())
                                 pIchoron->AI()->DoAction(ACTION_WATER_ELEMENT_HIT);

@@ -37,7 +37,7 @@ static DWORD GetMpqFileCount(TMPQArchive * ha)
     bool bPatchMode = (ha->haPatch != NULL) ? true : false;
 
     // Go through all open MPQs, including patches
-    while (ha != NULL)
+    while(ha != NULL)
     {
         // Go through the entire hash table
         pFileTableEnd = ha->pFileTable + ha->dwFileTableSize;
@@ -46,7 +46,7 @@ static DWORD GetMpqFileCount(TMPQArchive * ha)
         {
             // If we are in patch mode, only count files that
             // are not patch files
-            for (pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
+            for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
             {
                 // If the file is patch file and this is not primary archive, skip it
                 // BUGBUG: This errorneously counts non-patch files that are
@@ -58,7 +58,7 @@ static DWORD GetMpqFileCount(TMPQArchive * ha)
         else
         {
             // When we are not in patch mode, count all files, no matter what.
-            for (pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
+            for(pFileEntry = ha->pFileTable; pFileEntry < pFileTableEnd; pFileEntry++)
             {
                 if (pFileEntry->dwFlags & MPQ_FILE_EXISTS)
                     dwFileCount++;
@@ -141,7 +141,7 @@ static int ReadMpqSectors(TMPQFile * hf, LPBYTE pbBuffer, DWORD dwByteOffset, DW
     dwBytesRead = 0;
 
     // Now we have to decrypt and decompress all file sectors that have been loaded
-    for (DWORD i = 0; i < dwSectorsToRead; i++)
+    for(DWORD i = 0; i < dwSectorsToRead; i++)
     {
         DWORD dwRawBytesInThisSector = ha->dwSectorSize;
         DWORD dwBytesInThisSector = ha->dwSectorSize;
@@ -689,7 +689,7 @@ DWORD WINAPI SFileGetFileSize(HANDLE hFile, LPDWORD pdwFileSizeHigh)
         if (hf->hfPatchFile != NULL)
         {
             // Walk through the entire patch chain, take the last version
-            while (hf != NULL)
+            while(hf != NULL)
             {
                 // Get the size of the currently pointed version
                 FileSize = hf->pFileEntry->dwFileSize;
@@ -737,7 +737,7 @@ DWORD WINAPI SFileSetFilePointer(HANDLE hFile, LONG lFilePos, LONG * plFilePosHi
     }
 
     // Get the relative point where to move from
-    switch (dwMoveMethod)
+    switch(dwMoveMethod)
     {
         case FILE_BEGIN:
             FilePosition = 0;
@@ -885,7 +885,7 @@ bool WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
         SFileSetFilePointer(hf, dwFilePos, NULL, FILE_BEGIN);
 
         // Try to guess file extension from those 2 DWORDs
-        for (i = 0; data2ext[i].szExt != NULL; i++)
+        for(i = 0; data2ext[i].szExt != NULL; i++)
         {
             if ((FirstBytes[0] & data2ext[i].dwOffset00Mask) == data2ext[i].dwOffset00Data &&
                (FirstBytes[1] & data2ext[i].dwOffset04Mask) == data2ext[i].dwOffset04Data)
@@ -954,7 +954,7 @@ bool WINAPI SFileGetFileInfo(
     DWORD i;
     int nError = ERROR_SUCCESS;
 
-    switch (dwInfoType)
+    switch(dwInfoType)
     {
         case SFILE_INFO_ARCHIVE_NAME:
             VERIFY_MPQ_HANDLE(ha);
@@ -1009,7 +1009,7 @@ bool WINAPI SFileGetFileInfo(
 
             // Construct block table from file table size
             pBlock = (TMPQBlock *)pvFileInfo;
-            for (i = 0; i < ha->dwFileTableSize; i++)
+            for(i = 0; i < ha->dwFileTableSize; i++)
             {
                 pBlock->dwFilePos = (DWORD)ha->pFileTable[i].ByteOffset;
                 pBlock->dwFSize   = ha->pFileTable[i].dwFileSize;

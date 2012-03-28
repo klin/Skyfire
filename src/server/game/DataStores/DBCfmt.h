@@ -1,43 +1,47 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef TRINITY_DBCSFRM_H
-#define TRINITY_DBCSFRM_H
+#ifndef ARKCORE_DBCSFRM_H
+#define ARKCORE_DBCSFRM_H
 
 const char Achievementfmt[]="niixsxiixixxii";
-const std::string CustomAchievementfmt="pppaaaapapaapp";
-const std::string CustomAchievementIndex="ID";
-const char AchievementCriteriafmt[]="niiiiiiiisiiiiixxiiiiii";
+//const std::string CustomAchievementfmt="pppaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaapapaaaaaaaaaaaaaaaaaapp";
+//const std::string CustomAchievementIndex = "ID";
+const char AchievementCriteriafmt[]="niiiiiiiisiiiiixxxxxxxx";
 const char AreaTableEntryfmt[]="iiinixxxxxisixxxxxxxxxxxx";
 const char AreaGroupEntryfmt[]="niiiiiii";
 const char AreaPOIEntryfmt[]="niiiiiiiiiiiffixixxixx";
 const char AreaTriggerEntryfmt[]="nifffxxxfffff";
 const char ArmorLocationfmt[]="nfffff";
 const char AuctionHouseEntryfmt[]="niiix";
-
 const char BankBagSlotPricesEntryfmt[]="ni";
 const char BarberShopStyleEntryfmt[]="nixxxiii";
 const char BattlemasterListEntryfmt[]="niiiiiiiiixsiiiiiiix";
 const char CharStartOutfitEntryfmt[]="diiiiiiiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char CharTitlesEntryfmt[]="nxsxix";
 const char ChatChannelsEntryfmt[]="nixsx";
-                         // ChatChannelsEntryfmt, index not used (more compact store)
+                                                            // ChatChannelsEntryfmt, index not used (more compact store)
 const char ChrClassesEntryfmt[]="nixsxxxixiixxx";
 const char ChrRacesEntryfmt[]="nxixiixixxxxixsxxxxxixxx";
 const char CinematicSequencesEntryfmt[]="nxxxxxxxxx";
@@ -46,8 +50,7 @@ const char CreatureFamilyfmt[]="nfifiiiiixsx";
 const char CreatureSpellDatafmt[]="niiiixxxx";
 const char CreatureTypefmt[]="nxx";
 const char CurrencyTypesfmt[]="nxxxxxxiixx";
-const char ItemCurrencyCostfmt[]="xn";
-const char DestructibleModelDatafmt[]="ixxixxxixxxixxxixxxxxxxx";
+const char DestructibleModelDatafmt[]="nxxixxxixxxixxxixxx";
 const char DungeonEncounterfmt[]="niixisxx";
 const char DurabilityCostsfmt[]="niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char DurabilityQualityfmt[]="nf";
@@ -67,12 +70,11 @@ const char GtChanceToSpellCritBasefmt[]="xf";
 const char GtChanceToSpellCritfmt[]="xf";
 const char GtOCTClassCombatRatingScalarfmt[]="df";
 const char GtOCTRegenHPfmt[]="xf";
-const char GtOCTRegenMPfmt[]="f";
+//const char GtOCTRegenMPfmt[]="f";
 const char GtRegenHPPerSptfmt[]="xf";
-const char gtOCTHpPerStaminafmt[]="xf";
 const char GtRegenMPPerSptfmt[]="xf";
 const char GtSpellScalingfmt[]="nf";
-const char Holidaysfmt[]="nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";       // this needs checked for 406a
+const char Holidaysfmt[]="nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char ItemArmorQualityfmt[]="nfffffffi";
 const char ItemArmorShieldfmt[]="nifffffff";
 const char ItemArmorTotalfmt[]="niffff";
@@ -80,43 +82,45 @@ const char ItemBagFamilyfmt[]="nx";
 //const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
 //const char ItemCondExtCostsEntryfmt[]="xiii";
 const char ItemDamagefmt[]="nfffffffi";
-const char ItemDisenchantLootfmt[]="niiiiii";
 const char ItemExtendedCostEntryfmt[]="nxxiiiiiiiiiiiixiiiiiiiiiixxxxx";
 const char ItemLimitCategoryEntryfmt[]="nxii";
-const char ItemRandomPropertiesfmt[]="nxiiixxs";
-const char ItemRandomSuffixfmt[]="nsxiiiiiiiiii";;
+const char ItemRandomPropertiesfmt[]="nxiiiiis";
+const char ItemRandomSuffixfmt[]="nsxiiiiiiiiii";
 const char ItemReforgefmt[]="nifif";
-const char ItemSetEntryfmt[]="dsiiiiiiiiiixxxxxxxiiiiiiiiiiiiiiiiii";
+const char ItemSetEntryfmt[]="dsiiiiiiiiiixxxxxxxiiiiiiiiiiiiiiiiii"; /// "dsxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii"
 const char LFGDungeonEntryfmt[]="nxiiiiiiixixxixix";
-//const char LiquidTypeEntryfmt[]="nsiiiiffffifiiisssssiiffffffffffffffffffiiii";  // unused atm... still tc values.
 const char LockEntryfmt[]="niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
 const char MailTemplateEntryfmt[]="nxs";
 const char MapEntryfmt[]="nxixxxsixxixiffxiixx";
 const char MapDifficultyEntryfmt[]="diisiix";
+const char MovieEntryfmt[]="nxxx";
 const char MountCapabilityfmt[]="niixxiii";
 const char MountTypefmt[]="niiiiiiiiiiiiiiiiixxxxxxx";
-const char MovieEntryfmt[]="nxxx";
-const char NameGenfmt[]="dsii";
 const char OverrideSpellDatafmt[]="niiiiiiiiiixx";
+const char QuestFactionRewardfmt[]="niiiiiiiiii";
 const char QuestSortEntryfmt[]="nx";
 const char QuestXPfmt[]="niiiiiiiiii";
-const char QuestFactionRewardfmt[]="niiiiiiiiii";
 const char PvPDifficultyfmt[]="diiiii";
-const char PhaseEntryfmt[]="nsi";
 const char RandomPropertiesPointsfmt[]="niiiiiiiiiiiiiii";
 const char ScalingStatDistributionfmt[]="niiiiiiiiiiiiiiiiiiiixi";
-const char ScalingStatValuesfmt[]="iniiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
+const char ScalingStatValuesfmt[]="iniiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SkillLinefmt[]="nixsxixi";
-const char SkillLineAbilityfmt[]="niiiixxiiiiiix";
+const char SkillLineAbilityfmt[]="niiiixxiiiiixx";
 const char SoundEntriesfmt[]="nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SpellCastTimefmt[]="nixx";
+const std::string CustomSpellCastTimeEntryfmt="ppaa";
+const std::string CustomSpellCastTimeEntryIndex="id";
 const char SpellDifficultyfmt[]="niiii";
 const std::string CustomSpellDifficultyfmt="ppppp";
 const std::string CustomSpellDifficultyIndex="id";
 const char SpellDurationfmt[]="niii";
-const char SpellEntryfmt[]="niiiiiiiiixiiiifiiiissxxiixxixiiiiiiixiiiiiiiix";
+const std::string CustomDurationEntryfmt="pppp";
+const std::string CustomDurationEntryIndex="id";
+//const std::string CustomSpellEntryfmt="pppppppppaappapaaaaaaaaapaaaaaaaaaaaaaaaaaaaaaappppaaaaaaaaapaappppappppaaappppppppppppppppppaaapppaaapppppppppaaappppppppppppppppppppppppaaaaaappppaapppaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaappppapaaaa";
+const char True_SpellEntryfmt[]=      "iiiiiiiiiixiiiifiiiisixxiixxixiiiiiiixiiiiixiixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiifffiiiiiiiiiiiiiiiiiifffiiifffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffffffiiiiiiiiiii";
+const std::string CustomSpellEntryIndex = "Id";
+const char SpellEntryfmt[]=           "niiiiiiiiixiiiifiiiisixxiixxixiiiiiiixiiiiixiix";
 const std::string CustomSpellEntryfmt="ppppppppppapppppppppaaaappaapapppppppappppppppa";
-const std::string CustomSpellEntryIndex="id";
 const char SpellAuraOptionsfmt[]="niiii";
 const std::string CustomSpellAuraOptionsEntryfmt="ppppp";
 const std::string CustomSpellAuraOptionsEntryIndex="id";
@@ -135,8 +139,8 @@ const std::string CustomSpellClassOptionsEntryIndex="id";
 const char SpellCooldownsfmt[]="niii";
 const std::string CustomSpellCooldownsEntryfmt="pppp";
 const std::string CustomSpellCooldownsEntryIndex="id";
-const char SpellEffectfmt[]="nifiiiffiiiiiifiifiiiiiiii";
-const std::string CustomSpellEffectEntryfmt="pppppppppppppppppppppppppp";
+const char SpellEffectfmt[]="nifiiiffiiiiiifixfiiiiiiii";
+const std::string CustomSpellEffectEntryfmt="ppppppapppppppppappppppppp";
 const std::string CustomSpellEffectEntryIndex="id";
 const char SpellEquippedItemsfmt[]="niii";
 const std::string CustomSpellEquippedItemsEntryfmt="pppp";
@@ -172,11 +176,11 @@ const char SpellRadiusfmt[]="nfxf";
 const char SpellRangefmt[]="nffffixx";
 const char SpellRuneCostfmt[]="niiii";
 const char SpellShapeshiftFormfmt[]="nxxiixiiixxiiiiiiiixx";
-const char SummonPropertiesfmt[]="niiiii";
-const char GuildPerksfmt[]="nii";
+const char SummonPropertiesfmt[] = "niiiii";
+const char GuildPerksfmt[] = "nii";
 const char TalentEntryfmt[]="niiiiiiiiixxixxxxxx";
 const char TalentTabEntryfmt[]="nxxiiixxxii";
-const char TalentTreePrimarySpellsfmt[]="diix";
+const char TalentTreePrimarySpellsfmt[]="niix";
 const char TaxiNodesEntryfmt[]="nifffsii";
 const char TaxiPathEntryfmt[]="niii";
 const char TaxiPathNodeEntryfmt[]="diiifffiiii";
@@ -187,6 +191,5 @@ const char WMOAreaTableEntryfmt[]="niiixxxxxiixxxx";
 const char WorldMapAreaEntryfmt[]="xinxffffixxx";
 const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxx";
 const char WorldSafeLocsEntryfmt[]="nifffx";
-const char WorldStateEntryfmt[]="niiissisiisssisiii";
-
+const char PhaseEntryfmt[]="nsi";  //testing
 #endif

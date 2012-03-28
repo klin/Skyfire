@@ -1,10 +1,12 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -120,19 +122,19 @@ float InfernalSPWP[26][4]=//spawn points for the infernals in the horde base use
 
 float VeinPos[14][8]=//spawn points of the ancient gem veins
 {
-    {5184.84f,    -1982.59f,    1382.66f,    2.58079f,    0,    0,    0.960944f,    0.276742f}, //alliance
-    {5107.66f,    -2071.16f,    1368.37f,    2.65148f,    0,    0,    0.970124f,    0.242611f},   //alliance
-    {5040.53f,    -2227.65f,    1403.17f,    3.35049f,    0,    0,    0.99455f,    -0.104257f},   //alliance
-    {5187.59f,    -2453.12f,    1455.51f,    5.87943f,    0,    0,    0.20051f,    -0.979692f},   //alliance
-    {5429.43f,    -2340.65f,    1465.38f,    4.7681f,        0,    0,    0.687138f,    -0.726527f},   //alliance
-    {5463.99f,    -2315.95f,    1470.29f,    1.52045f,    0,    0,    0.689084f,    0.724682f},   //alliance
-    {5624.65f,    -2495.09f,    1510.11f,    0.0124869f,    0,    0,    0.00624342f,    0.999981f},   //alliance
-    {5285.41f,    -3348.32f,    1663.01f,    1.57152f,    0,    0,    0.707362f,    0.706852f},   //horde
-    {5417.69f,    -3372.52f,    1656.31f,    0.361993f,    0,    0,    0.18001f,    0.983665f},   //horde
-    {5315.34f,    -3238.32f,    1622.88f,    3.03627f,    0,    0,    0.998614f,    0.0526347f},   //horde
-    {5303.4f,    -3096.44f,    1596.41f,    1.72073f,    0,    0,    0.758081f,    0.65216f},   //horde
-    {5265.13f,    -3177.27f,    1616.22f,    0.813604f,    0,    0,    0.395674f,    0.918391f},   //horde
-    {5374.3f,    -3420.59f,    1653.43f,    1.45762f,    0,    0,    0.665981f,    0.745969f},   //horde
+    {5184.84f,    -1982.59f,    1382.66f,    2.58079f,    0,    0,    0.960944f,    0.276742f},  //alliance
+    {5107.66f,    -2071.16f,    1368.37f,    2.65148f,    0,    0,    0.970124f,    0.242611f},    //alliance
+    {5040.53f,    -2227.65f,    1403.17f,    3.35049f,    0,    0,    0.99455f,    -0.104257f},    //alliance
+    {5187.59f,    -2453.12f,    1455.51f,    5.87943f,    0,    0,    0.20051f,    -0.979692f},    //alliance
+    {5429.43f,    -2340.65f,    1465.38f,    4.7681f,        0,    0,    0.687138f,    -0.726527f},    //alliance
+    {5463.99f,    -2315.95f,    1470.29f,    1.52045f,    0,    0,    0.689084f,    0.724682f},    //alliance
+    {5624.65f,    -2495.09f,    1510.11f,    0.0124869f,    0,    0,    0.00624342f,    0.999981f},    //alliance
+    {5285.41f,    -3348.32f,    1663.01f,    1.57152f,    0,    0,    0.707362f,    0.706852f},    //horde
+    {5417.69f,    -3372.52f,    1656.31f,    0.361993f,    0,    0,    0.18001f,    0.983665f},    //horde
+    {5315.34f,    -3238.32f,    1622.88f,    3.03627f,    0,    0,    0.998614f,    0.0526347f},    //horde
+    {5303.4f,    -3096.44f,    1596.41f,    1.72073f,    0,    0,    0.758081f,    0.65216f},    //horde
+    {5265.13f,    -3177.27f,    1616.22f,    0.813604f,    0,    0,    0.395674f,    0.918391f},    //horde
+    {5374.3f,    -3420.59f,    1653.43f,    1.45762f,    0,    0,    0.665981f,    0.745969f},    //horde
     {5441.54f,    -3321.59f,    1651.55f,    0.258306f,    0,    0,    0.128794f,    0.991671f}   //horde
 };
 
@@ -491,7 +493,7 @@ void hyjalAI::SummonCreature(uint32 entry, float Base[4][3])
         // Increment Enemy Count to be used in World States and instance script
         ++EnemyCount;
 
-        creature->SetWalk(false);
+        creature->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
         creature->setActive(true);
         switch (entry)
         {
@@ -1011,7 +1013,7 @@ void hyjalAI::WaypointReached(uint32 i)
                 if ((*itr) && (*itr)->isAlive() && (*itr) != me && (*itr)->GetEntry() != JAINA)
                 {
                     if (!(*itr)->IsWithinDist(me, 60))
-                        (*itr)->SetWalk(false);
+                        (*itr)->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                     float x, y, z;
                     (*itr)->SetDefaultMovementType(IDLE_MOTION_TYPE);
                     (*itr)->GetMotionMaster()->Initialize();

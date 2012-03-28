@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -27,38 +30,35 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "magisters_terrace.h"
 
-enum eFireheart
-{
-    SAY_AGGRO                      = -1585000,
-    SAY_ENERGY                     = -1585001,
-    SAY_EMPOWERED                  = -1585002,
-    SAY_KILL_1                     = -1585003,
-    SAY_KILL_2                     = -1585004,
-    SAY_DEATH                      = -1585005,
-    EMOTE_CRYSTAL                  = -1585006,
+#define SAY_AGGRO                       -1585000
+#define SAY_ENERGY                      -1585001
+#define SAY_EMPOWERED                   -1585002
+#define SAY_KILL_1                      -1585003
+#define SAY_KILL_2                      -1585004
+#define SAY_DEATH                       -1585005
+#define EMOTE_CRYSTAL                   -1585006
 
-    //Crystal effect spells
-    SPELL_FEL_CRYSTAL_COSMETIC     = 44374,
-    SPELL_FEL_CRYSTAL_DUMMY        = 44329,
-    SPELL_FEL_CRYSTAL_VISUAL       = 44355,
-    SPELL_MANA_RAGE                = 44320,  // This spell triggers 44321, which changes scale and regens mana Requires an entry in spell_script_target
+//Crystal effect spells
+#define SPELL_FEL_CRYSTAL_COSMETIC      44374
+#define SPELL_FEL_CRYSTAL_DUMMY         44329
+#define SPELL_FEL_CRYSTAL_VISUAL        44355
+#define SPELL_MANA_RAGE                 44320               // This spell triggers 44321, which changes scale and regens mana Requires an entry in spell_script_target
 
-    //Selin's spells
-    SPELL_DRAIN_LIFE               = 44294,
-    SPELL_FEL_EXPLOSION            = 44314,
+//Selin's spells
+#define SPELL_DRAIN_LIFE                44294
+#define SPELL_FEL_EXPLOSION             44314
 
-    SPELL_DRAIN_MANA               = 46153,  // Heroic only
+#define SPELL_DRAIN_MANA                46153               // Heroic only
 
-    CRYSTALS_NUMBER                = 5,
-    DATA_CRYSTALS                  = 6,
+#define CRYSTALS_NUMBER                 5
+#define DATA_CRYSTALS                   6
 
-    CREATURE_FEL_CRYSTAL           = 24722
-};
+#define CREATURE_FEL_CRYSTAL            24722
 
 class boss_selin_fireheart : public CreatureScript
 {
 public:
-    boss_selin_fireheart() : CreatureScript("boss_selin_fireheart") {}
+    boss_selin_fireheart() : CreatureScript("boss_selin_fireheart") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
@@ -67,9 +67,9 @@ public:
 
     struct boss_selin_fireheartAI : public ScriptedAI
     {
-        boss_selin_fireheartAI(Creature* creature) : ScriptedAI(creature)
+        boss_selin_fireheartAI(Creature* c) : ScriptedAI(c)
         {
-            instance = creature->GetInstanceScript();
+            instance = c->GetInstanceScript();
 
             Crystals.clear();
             //GUIDs per instance is static, so we only need to load them once.
@@ -98,7 +98,7 @@ public:
         bool IsDraining;
         bool DrainingCrystal;
 
-        uint64 CrystalGUID;  // This will help us create a pointer to the crystal we are draining. We store GUIDs, never units in case unit is deleted/offline (offline if player of course).
+        uint64 CrystalGUID;                                     // This will help us create a pointer to the crystal we are draining. We store GUIDs, never units in case unit is deleted/offline (offline if player of course).
 
         void Reset()
         {
@@ -121,19 +121,18 @@ public:
 
                 instance->HandleGameObject(instance->GetData64(DATA_SELIN_ENCOUNTER_DOOR), true);
                 // Open the big encounter door. Close it in Aggro and open it only in JustDied(and here)
-                // Small door opened after event are expected to be closed by default
+                                                                // Small door opened after event are expected to be closed by default
                 // Set Inst data for encounter
                 instance->SetData(DATA_SELIN_EVENT, NOT_STARTED);
-            }
-            else sLog->outError(ERROR_INST_DATA);
+            } else sLog->outError(ERROR_INST_DATA);
 
-            DrainLifeTimer = urand(3000, 7000);
+            DrainLifeTimer = 3000 + rand()%4000;
             DrainManaTimer = DrainLifeTimer + 5000;
             FelExplosionTimer = 2100;
             if (IsHeroic())
-                DrainCrystalTimer = urand(10000, 15000);
+                DrainCrystalTimer = 10000 + rand()%5000;
             else
-                DrainCrystalTimer = urand(20000, 25000);
+                DrainCrystalTimer = 20000 + rand()%5000;
             EmpowerTimer = 10000;
 
             IsDraining = false;
@@ -148,21 +147,21 @@ public:
 
             //float ShortestDistance = 0;
             CrystalGUID = 0;
-            Unit* crystal = NULL;
+            Unit* pCrystal = NULL;
             Unit* CrystalChosen = NULL;
             //for (uint8 i =  0; i < CRYSTALS_NUMBER; ++i)
             for (std::list<uint64>::const_iterator itr = Crystals.begin(); itr != Crystals.end(); ++itr)
             {
-                crystal = NULL;
-                //crystal = Unit::GetUnit(*me, FelCrystals[i]);
-                crystal = Unit::GetUnit(*me, *itr);
-                if (crystal && crystal->isAlive())
+                pCrystal = NULL;
+                //pCrystal = Unit::GetUnit(*me, FelCrystals[i]);
+                pCrystal = Unit::GetUnit(*me, *itr);
+                if (pCrystal && pCrystal->isAlive())
                 {
                     // select nearest
-                    if (!CrystalChosen || me->GetDistanceOrder(crystal, CrystalChosen, false))
+                    if (!CrystalChosen || me->GetDistanceOrder(pCrystal, CrystalChosen, false))
                     {
-                        CrystalGUID = crystal->GetGUID();
-                        CrystalChosen = crystal; // Store a copy of crystal so we don't need to recreate a pointer to closest crystal for the movement and yell.
+                        CrystalGUID = pCrystal->GetGUID();
+                        CrystalChosen = pCrystal;               // Store a copy of pCrystal so we don't need to recreate a pointer to closest crystal for the movement and yell.
                     }
                 }
             }
@@ -173,10 +172,10 @@ public:
 
                 CrystalChosen->CastSpell(CrystalChosen, SPELL_FEL_CRYSTAL_COSMETIC, true);
 
-                float x, y, z;  // coords that we move to, close to the crystal.
+                float x, y, z;                                  // coords that we move to, close to the crystal.
                 CrystalChosen->GetClosePoint(x, y, z, me->GetObjectSize(), CONTACT_DISTANCE);
 
-                me->SetWalk(false);
+                me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                 me->GetMotionMaster()->MovePoint(1, x, y, z);
                 DrainingCrystal = true;
             }
@@ -190,10 +189,10 @@ public:
             //for (uint8 i = 0; i < CRYSTALS_NUMBER; ++i)
             for (std::list<uint64>::const_iterator itr = Crystals.begin(); itr != Crystals.end(); ++itr)
             {
-                //Creature* crystal = (Unit::GetCreature(*me, FelCrystals[i]));
-                Creature* crystal = Unit::GetCreature(*me, *itr);
-                if (crystal && crystal->isAlive())
-                    crystal->Kill(crystal);
+                //Creature* pCrystal = (Unit::GetCreature(*me, FelCrystals[i]));
+                Creature* pCrystal = Unit::GetCreature(*me, *itr);
+                if (pCrystal && pCrystal->isAlive())
+                    pCrystal->Kill(pCrystal);
             }
         }
 
@@ -240,9 +239,9 @@ public:
             if (!instance)
                 return;
 
-            instance->SetData(DATA_SELIN_EVENT, DONE);                                         // Encounter complete!
-            instance->HandleGameObject(instance->GetData64(DATA_SELIN_ENCOUNTER_DOOR), true);  // Open the encounter door
-            instance->HandleGameObject(instance->GetData64(DATA_SELIN_DOOR), true);            // Open the door leading further in
+            instance->SetData(DATA_SELIN_EVENT, DONE);         // Encounter complete!
+            instance->HandleGameObject(instance->GetData64(DATA_SELIN_ENCOUNTER_DOOR), true);                  // Open the encounter door
+            instance->HandleGameObject(instance->GetData64(DATA_SELIN_DOOR), true);                 // Open the door leading further in
             ShatterRemainingCrystals();
         }
 
@@ -260,8 +259,7 @@ public:
                     {
                         DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), SPELL_DRAIN_LIFE);
                         DrainLifeTimer = 10000;
-                    }
-                    else DrainLifeTimer -= diff;
+                    } else DrainLifeTimer -= diff;
 
                     // Heroic only
                     if (IsHeroic())
@@ -270,8 +268,7 @@ public:
                         {
                             DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_DRAIN_MANA);
                             DrainManaTimer = 10000;
-                        }
-                        else DrainManaTimer -= diff;
+                        } else DrainManaTimer -= diff;
                     }
                 }
 
@@ -282,8 +279,7 @@ public:
                         DoCast(me, SPELL_FEL_EXPLOSION);
                         FelExplosionTimer = 2000;
                     }
-                }
-                else FelExplosionTimer -= diff;
+                } else FelExplosionTimer -= diff;
 
                 // If below 10% mana, start recharging
                 maxPowerMana = me->GetMaxPower(POWER_MANA);
@@ -293,14 +289,12 @@ public:
                     {
                         SelectNearestCrystal();
                         if (IsHeroic())
-                            DrainCrystalTimer = urand(10000, 15000);
+                            DrainCrystalTimer = 10000 + rand()%5000;
                         else
-                            DrainCrystalTimer = urand(20000, 25000);
-                    }
-                    else DrainCrystalTimer -= diff;
+                            DrainCrystalTimer = 20000 + rand()%5000;
+                    } else DrainCrystalTimer -= diff;
                 }
-            }
-            else
+            }else
             {
                 if (IsDraining)
                 {
@@ -320,8 +314,7 @@ public:
 
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveChase(me->getVictim());
-                    }
-                    else EmpowerTimer -= diff;
+                    } else EmpowerTimer -= diff;
                 }
             }
 
@@ -333,7 +326,7 @@ public:
 class mob_fel_crystal : public CreatureScript
 {
 public:
-    mob_fel_crystal() : CreatureScript("mob_fel_crystal") {}
+    mob_fel_crystal() : CreatureScript("mob_fel_crystal") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
@@ -342,7 +335,7 @@ public:
 
     struct mob_fel_crystalAI : public ScriptedAI
     {
-        mob_fel_crystalAI(Creature* creature) : ScriptedAI(creature) {}
+        mob_fel_crystalAI(Creature* c) : ScriptedAI(c) {}
 
         void Reset() {}
         void EnterCombat(Unit* /*who*/) {}
@@ -370,8 +363,7 @@ public:
                         }
                     }
                 }
-            }
-            else sLog->outError(ERROR_INST_DATA);
+            } else sLog->outError(ERROR_INST_DATA);
         }
     };
 };

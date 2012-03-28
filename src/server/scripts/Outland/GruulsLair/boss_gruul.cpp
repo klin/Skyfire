@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -59,19 +67,19 @@ class boss_gruul : public CreatureScript
 public:
     boss_gruul() : CreatureScript("boss_gruul") { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new boss_gruulAI (creature);
+        return new boss_gruulAI (pCreature);
     }
 
     struct boss_gruulAI : public ScriptedAI
     {
-        boss_gruulAI(Creature* c) : ScriptedAI(c)
+        boss_gruulAI(Creature *c) : ScriptedAI(c)
         {
-            instance = c->GetInstanceScript();
+            pInstance = c->GetInstanceScript();
         }
 
-        InstanceScript* instance;
+        InstanceScript *pInstance;
 
         uint32 m_uiGrowth_Timer;
         uint32 m_uiCaveIn_Timer;
@@ -92,19 +100,19 @@ public:
             m_uiHurtfulStrike_Timer= 8000;
             m_uiReverberation_Timer= 60000+45000;
 
-            if (instance)
-                instance->SetData(DATA_GRUULEVENT, NOT_STARTED);
+            if (pInstance)
+                pInstance->SetData(DATA_GRUULEVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit * /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
 
-            if (instance)
-                instance->SetData(DATA_GRUULEVENT, IN_PROGRESS);
+            if (pInstance)
+                pInstance->SetData(DATA_GRUULEVENT, IN_PROGRESS);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit()
         {
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3), me);
         }
@@ -113,25 +121,25 @@ public:
         {
             DoScriptText(SAY_DEATH, me);
 
-            if (instance)
+            if (pInstance)
             {
-                instance->SetData(DATA_GRUULEVENT, DONE);
-                instance->HandleGameObject(instance->GetData64(DATA_GRUULDOOR), true);         // Open the encounter door
+                pInstance->SetData(DATA_GRUULEVENT, DONE);
+                pInstance->HandleGameObject(pInstance->GetData64(DATA_GRUULDOOR), true);         // Open the encounter door
             }
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* pSpell)
+        void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
         {
             //This to emulate effect1 (77) of SPELL_GROUND_SLAM, knock back to any direction
             //It's initially wrong, since this will cause fall damage, which is by comments, not intended.
             if (pSpell->Id == SPELL_GROUND_SLAM)
             {
-                if (target->GetTypeId() == TYPEID_PLAYER)
+                if (pTarget->GetTypeId() == TYPEID_PLAYER)
                 {
                     switch (urand(0, 1))
                     {
-                        case 0: target->CastSpell(target, SPELL_MAGNETIC_PULL, true, NULL, NULL, me->GetGUID()); break;
-                        case 1: target->CastSpell(target, SPELL_KNOCK_BACK, true, NULL, NULL, me->GetGUID()); break;
+                        case 0: pTarget->CastSpell(pTarget, SPELL_MAGNETIC_PULL, true, NULL, NULL, me->GetGUID()); break;
+                        case 1: pTarget->CastSpell(pTarget, SPELL_KNOCK_BACK, true, NULL, NULL, me->GetGUID()); break;
                     }
                 }
             }
@@ -140,10 +148,10 @@ public:
             if (pSpell->Id == SPELL_SHATTER)
             {
                 //this spell must have custom handling in the core, dealing damage based on distance
-                target->CastSpell(target, SPELL_SHATTER_EFFECT, true);
+                pTarget->CastSpell(pTarget, SPELL_SHATTER_EFFECT, true);
 
-                if (target->HasAura(SPELL_STONED))
-                    target->RemoveAurasDueToSpell(SPELL_STONED);
+                if (pTarget->HasAura(SPELL_STONED))
+                    pTarget->RemoveAurasDueToSpell(SPELL_STONED);
 
                 //clear this, if we are still performing
                 if (m_bPerformingGroundSlam)
@@ -151,7 +159,7 @@ public:
                     m_bPerformingGroundSlam = false;
 
                     //and correct movement, if not already
-                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+                    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
                     {
                         if (me->getVictim())
                             me->GetMotionMaster()->MoveChase(me->getVictim());
@@ -197,10 +205,10 @@ public:
                 // Hurtful Strike
                 if (m_uiHurtfulStrike_Timer <= uiDiff)
                 {
-                    Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 1);
+                    Unit *pTarget = SelectUnit(SELECT_TARGET_TOPAGGRO, 1);
 
-                    if (target && me->IsWithinMeleeRange(me->getVictim()))
-                        DoCast(target, SPELL_HURTFUL_STRIKE);
+                    if (pTarget && me->IsWithinMeleeRange(me->getVictim()))
+                        DoCast(pTarget, SPELL_HURTFUL_STRIKE);
                     else
                         DoCast(me->getVictim(), SPELL_HURTFUL_STRIKE);
 
@@ -213,7 +221,7 @@ public:
                 if (m_uiReverberation_Timer <= uiDiff)
                 {
                     DoCast(me->getVictim(), SPELL_REVERBERATION, true);
-                    m_uiReverberation_Timer = urand(15000, 25000);
+                    m_uiReverberation_Timer = 15000 + rand()%10000;
                 }
                 else
                     m_uiReverberation_Timer -= uiDiff;
@@ -221,8 +229,8 @@ public:
                 // Cave In
                 if (m_uiCaveIn_Timer <= uiDiff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(target, SPELL_CAVE_IN);
+                    if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        DoCast(pTarget, SPELL_CAVE_IN);
 
                     if (m_uiCaveIn_StaticTimer >= 4000)
                         m_uiCaveIn_StaticTimer -= 2000;

@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -35,20 +38,23 @@ enum eEnums
     SAY_KILL                        = -1585010,
     EMOTE_DISCHARGE_ENERGY          = -1585011,
 
+    //is this text for real?
+    //#define SAY_DEATH             "What...happen...ed."
+
     //Pure energy spell info
     SPELL_ENERGY_BOLT               = 46156,
     SPELL_ENERGY_FEEDBACK           = 44335,
 
     //Vexallus spell info
     SPELL_CHAIN_LIGHTNING           = 44318,
-    SPELL_H_CHAIN_LIGHTNING         = 46380,                // heroic spell
+    SPELL_H_CHAIN_LIGHTNING         = 46380,                //heroic spell
     SPELL_OVERLOAD                  = 44353,
     SPELL_ARCANE_SHOCK              = 44319,
-    SPELL_H_ARCANE_SHOCK            = 46381,                // heroic spell
+    SPELL_H_ARCANE_SHOCK            = 46381,                //heroic spell
 
-    SPELL_SUMMON_PURE_ENERGY        = 44322,                // mod scale -10
-    H_SPELL_SUMMON_PURE_ENERGY1     = 46154,                // mod scale -5
-    H_SPELL_SUMMON_PURE_ENERGY2     = 46159,                // mod scale -5
+    SPELL_SUMMON_PURE_ENERGY        = 44322,                //mod scale -10
+    H_SPELL_SUMMON_PURE_ENERGY1     = 46154,                //mod scale -5
+    H_SPELL_SUMMON_PURE_ENERGY2     = 46159,                //mod scale -5
 
     //Creatures
     NPC_PURE_ENERGY                 = 24745,
@@ -60,7 +66,7 @@ enum eEnums
 class boss_vexallus : public CreatureScript
 {
 public:
-    boss_vexallus() : CreatureScript("boss_vexallus") {}
+    boss_vexallus() : CreatureScript("boss_vexallus") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
@@ -69,9 +75,9 @@ public:
 
     struct boss_vexallusAI : public ScriptedAI
     {
-        boss_vexallusAI(Creature* creature) : ScriptedAI(creature)
+        boss_vexallusAI(Creature* c) : ScriptedAI(c)
         {
-            instance = creature->GetInstanceScript();
+            instance = c->GetInstanceScript();
         }
 
         InstanceScript* instance;
@@ -165,8 +171,7 @@ public:
                         DoCast(target, SPELL_CHAIN_LIGHTNING);
 
                     ChainLightningTimer = 8000;
-                }
-                else ChainLightningTimer -= diff;
+                } else ChainLightningTimer -= diff;
 
                 if (ArcaneShockTimer <= diff)
                 {
@@ -175,8 +180,7 @@ public:
                         DoCast(target, SPELL_ARCANE_SHOCK);
 
                     ArcaneShockTimer = 8000;
-                }
-                else ArcaneShockTimer -= diff;
+                } else ArcaneShockTimer -= diff;
             }
             else
             {
@@ -185,8 +189,7 @@ public:
                     DoCast(me->getVictim(), SPELL_OVERLOAD);
 
                     OverloadTimer = 2000;
-                }
-                else OverloadTimer -= diff;
+                } else OverloadTimer -= diff;
             }
 
             DoMeleeAttackIfReady();
@@ -197,7 +200,7 @@ public:
 class mob_pure_energy : public CreatureScript
 {
 public:
-    mob_pure_energy() : CreatureScript("mob_pure_energy") {}
+    mob_pure_energy() : CreatureScript("mob_pure_energy") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
@@ -206,7 +209,7 @@ public:
 
     struct mob_pure_energyAI : public ScriptedAI
     {
-        mob_pure_energyAI(Creature* creature) : ScriptedAI(creature) {}
+        mob_pure_energyAI(Creature* c) : ScriptedAI(c) {}
 
         void Reset() {}
 

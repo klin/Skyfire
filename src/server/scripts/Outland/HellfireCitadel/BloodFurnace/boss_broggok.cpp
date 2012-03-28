@@ -1,19 +1,27 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* ScriptData
@@ -48,12 +56,12 @@ class boss_broggok : public CreatureScript
 
         struct boss_broggokAI : public ScriptedAI
         {
-            boss_broggokAI(Creature* creature) : ScriptedAI(creature)
+            boss_broggokAI(Creature* pCreature) : ScriptedAI(pCreature)
             {
-                instance = creature->GetInstanceScript();
+                pInstance = pCreature->GetInstanceScript();
             }
 
-            InstanceScript* instance;
+            InstanceScript* pInstance;
 
             uint32 AcidSpray_Timer;
             uint32 PoisonSpawn_Timer;
@@ -64,24 +72,24 @@ class boss_broggok : public CreatureScript
                 AcidSpray_Timer = 10000;
                 PoisonSpawn_Timer = 5000;
                 PoisonBolt_Timer = 7000;
-                if (instance)
+                if (pInstance)
                 {
-                    instance->SetData(TYPE_BROGGOK_EVENT, NOT_STARTED);
-                    instance->HandleGameObject(instance->GetData64(DATA_DOOR4), true);
+                    pInstance->SetData(TYPE_BROGGOK_EVENT, NOT_STARTED);
+                    pInstance->HandleGameObject(pInstance->GetData64(DATA_DOOR4), true);
                 }
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit * /*who*/)
             {
                 DoScriptText(SAY_AGGRO, me);
-                if (instance)
+                if (pInstance)
                 {
-                    instance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
-                    instance->HandleGameObject(instance->GetData64(DATA_DOOR4), false);
+                    pInstance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
+                    pInstance->HandleGameObject(pInstance->GetData64(DATA_DOOR4), false);
                 }
             }
 
-            void JustSummoned(Creature* summoned)
+            void JustSummoned(Creature *summoned)
             {
                 summoned->setFaction(16);
                 summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -123,11 +131,11 @@ class boss_broggok : public CreatureScript
 
             void JustDied(Unit* /*who*/)
             {
-                if (instance)
+                if (pInstance)
                 {
-                    instance->HandleGameObject(instance->GetData64(DATA_DOOR4), true);
-                    instance->HandleGameObject(instance->GetData64(DATA_DOOR5), true);
-                    instance->SetData(TYPE_BROGGOK_EVENT, DONE);
+                    pInstance->HandleGameObject(pInstance->GetData64(DATA_DOOR4), true);
+                    pInstance->HandleGameObject(pInstance->GetData64(DATA_DOOR5), true);
+                    pInstance->SetData(TYPE_BROGGOK_EVENT, DONE);
                 }
             }
         };

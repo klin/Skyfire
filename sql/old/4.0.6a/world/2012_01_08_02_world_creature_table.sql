@@ -1,1 +1,0 @@
-ALTER TABLE `creature` DROP COLUMN `DeathState`;

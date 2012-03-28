@@ -56,7 +56,7 @@ bool OpenPatchedFile(HANDLE hMpq, const char * szFileName, DWORD dwReserved, HAN
     dwReserved = dwReserved;
 
     // First of all, try to open the original version of the file in any of the patch chain
-    while (ha != NULL)
+    while(ha != NULL)
     {
         // Construct the name of the patch file
         strcpy(szPatchFileName, ha->szPatchPrefix);
@@ -91,7 +91,7 @@ bool OpenPatchedFile(HANDLE hMpq, const char * szFileName, DWORD dwReserved, HAN
     ha = ha->haPatch;
 
     // Now keep going in the patch chain and open every patch file that is there
-    while (ha != NULL)
+    while(ha != NULL)
     {
         // Construct patch file name
         strcpy(szPatchFileName, ha->szPatchPrefix);
@@ -116,7 +116,7 @@ bool OpenPatchedFile(HANDLE hMpq, const char * szFileName, DWORD dwReserved, HAN
     }
 
     // Now we need to free all files that are below the highest unpatched version
-    while (hfBase != hfLast)
+    while(hfBase != hfLast)
     {
         TMPQFile * hfNext = hfBase->hfPatchFile;
 
@@ -170,7 +170,7 @@ int WINAPI SFileEnumLocales(
     if (dwSearchScope == SFILE_OPEN_FROM_MPQ)
     {
         pFirstHash = pHash = GetFirstHashEntry(ha, szFileName);
-        while (pHash != NULL)
+        while(pHash != NULL)
         {
             dwLocales++;
             pHash = GetNextHashEntry(ha, pFirstHash, pHash);
@@ -195,7 +195,7 @@ int WINAPI SFileEnumLocales(
     if (dwSearchScope == SFILE_OPEN_FROM_MPQ)
     {
         pFirstHash = pHash = GetFirstHashEntry(ha, szFileName);
-        while (pHash != NULL)
+        while(pHash != NULL)
         {
             *plcLocales++ = pHash->lcLocale;
             pHash = GetNextHashEntry(ha, pFirstHash, pHash);
@@ -268,7 +268,7 @@ bool WINAPI SFileOpenFileEx(HANDLE hMpq, const char * szFileName, DWORD dwSearch
     // Prepare the file opening
     if (nError == ERROR_SUCCESS)
     {
-        switch (dwSearchScope)
+        switch(dwSearchScope)
         {
             case SFILE_OPEN_PATCHED_FILE:
 

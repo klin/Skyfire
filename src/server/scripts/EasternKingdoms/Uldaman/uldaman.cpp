@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
+ *
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2010 - 2012 ArkCORE <http://www.arkania.net/>
+ * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -46,7 +49,11 @@ enum eSpells
 class mob_jadespine_basilisk : public CreatureScript
 {
     public:
-        mob_jadespine_basilisk() : CreatureScript("mob_jadespine_basilisk") {}
+
+        mob_jadespine_basilisk()
+            : CreatureScript("mob_jadespine_basilisk")
+        {
+        }
 
         struct mob_jadespine_basiliskAI : public ScriptedAI
         {
@@ -59,16 +66,18 @@ class mob_jadespine_basilisk : public CreatureScript
                 uiCslumberTimer = 2000;
             }
 
-            void EnterCombat(Unit* /*who*/) {}
+            void EnterCombat(Unit* /*who*/)
+            {
+            }
 
-            void UpdateAI(const uint32 Diff)
+            void UpdateAI(const uint32 uiDiff)
             {
                 //Return since we have no target
                 if (!UpdateVictim())
                     return;
 
                 //uiCslumberTimer
-                if (uiCslumberTimer <= Diff)
+                if (uiCslumberTimer <= uiDiff)
                 {
                     //Cast
                     DoCastVictim(SPELL_CRYSTALLINE_SLUMBER, true);
@@ -83,7 +92,7 @@ class mob_jadespine_basilisk : public CreatureScript
 
                     if (target)
                         me->TauntApply(target);
-                } else uiCslumberTimer -= Diff;
+                } else uiCslumberTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();
             }
@@ -117,12 +126,16 @@ public:
 ## at_map_chamber
 ######*/
 
-#define QUEST_HIDDEN_CHAMBER      2240
+#define QUEST_HIDDEN_CHAMBER    2240
 
 class AreaTrigger_at_map_chamber : public AreaTriggerScript
 {
     public:
-        AreaTrigger_at_map_chamber() : AreaTriggerScript("at_map_chamber") {}
+
+        AreaTrigger_at_map_chamber()
+            : AreaTriggerScript("at_map_chamber")
+        {
+        }
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
         {
@@ -137,28 +150,31 @@ class AreaTrigger_at_map_chamber : public AreaTriggerScript
 ## npc_lore_keeper_of_norgannon
 ######*/
 
-#define GOSSIP_HELLO_KEEPER       "Who are the Earthen?"
-#define GOSSIP_SELECT_KEEPER1     "What is a \"subterranean being matrix\"?"
-#define GOSSIP_SELECT_KEEPER2     "What are the anomalies you speak of?"
-#define GOSSIP_SELECT_KEEPER3     "What is a resilient foundation of construction?"
-#define GOSSIP_SELECT_KEEPER4     "So... the Earthen were made out of stone?"
-#define GOSSIP_SELECT_KEEPER5     "Anything else I should know about the Earthen?"
-#define GOSSIP_SELECT_KEEPER6     "I think I understand the Creators' design intent for the Earthen now. What are the Earthen's anomalies that you spoke of earlier?"
-#define GOSSIP_SELECT_KEEPER7     "What high-stress environments would cause the Earthen to destabilize?"
-#define GOSSIP_SELECT_KEEPER8     "What happens when the Earthen destabilize?"
-#define GOSSIP_SELECT_KEEPER9     "Troggs?! Are the troggs you mention the same as the ones in the world today?"
-#define GOSSIP_SELECT_KEEPER10    "You mentioned two results when the Earthen destabilize. What is the second?"
-#define GOSSIP_SELECT_KEEPER11    "Dwarves!!! Now you're telling me that dwarves originally came from the Earthen?!"
-#define GOSSIP_SELECT_KEEPER12    "These dwarves are the same ones today, yes? Do the dwarves maintain any other links to the Earthen?"
-#define GOSSIP_SELECT_KEEPER13    "Who are the Creators?"
-#define GOSSIP_SELECT_KEEPER14    "This is a lot to think about."
-#define GOSSIP_SELECT_KEEPER15    "I will access the discs now."
+#define GOSSIP_HELLO_KEEPER     "Who are the Earthen?"
+#define GOSSIP_SELECT_KEEPER1   "What is a \"subterranean being matrix\"?"
+#define GOSSIP_SELECT_KEEPER2   "What are the anomalies you speak of?"
+#define GOSSIP_SELECT_KEEPER3   "What is a resilient foundation of construction?"
+#define GOSSIP_SELECT_KEEPER4   "So... the Earthen were made out of stone?"
+#define GOSSIP_SELECT_KEEPER5   "Anything else I should know about the Earthen?"
+#define GOSSIP_SELECT_KEEPER6   "I think I understand the Creators' design intent for the Earthen now. What are the Earthen's anomalies that you spoke of earlier?"
+#define GOSSIP_SELECT_KEEPER7   "What high-stress environments would cause the Earthen to destabilize?"
+#define GOSSIP_SELECT_KEEPER8   "What happens when the Earthen destabilize?"
+#define GOSSIP_SELECT_KEEPER9   "Troggs?! Are the troggs you mention the same as the ones in the world today?"
+#define GOSSIP_SELECT_KEEPER10  "You mentioned two results when the Earthen destabilize. What is the second?"
+#define GOSSIP_SELECT_KEEPER11  "Dwarves!!! Now you're telling me that dwarves originally came from the Earthen?!"
+#define GOSSIP_SELECT_KEEPER12  "These dwarves are the same ones today, yes? Do the dwarves maintain any other links to the Earthen?"
+#define GOSSIP_SELECT_KEEPER13  "Who are the Creators?"
+#define GOSSIP_SELECT_KEEPER14  "This is a lot to think about."
+#define GOSSIP_SELECT_KEEPER15  "I will access the discs now."
 
 class npc_lore_keeper_of_norgannon : public CreatureScript
 {
     public:
 
-        npc_lore_keeper_of_norgannon() : CreatureScript("npc_lore_keeper_of_norgannon") {}
+        npc_lore_keeper_of_norgannon()
+            : CreatureScript("npc_lore_keeper_of_norgannon")
+        {
+        }
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
@@ -170,10 +186,10 @@ class npc_lore_keeper_of_norgannon : public CreatureScript
             return true;
         }
 
-        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*Sender*/, uint32 Action)
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
         {
             player->PlayerTalkClass->ClearMenus();
-            switch (Action)
+            switch (uiAction)
             {
                 case GOSSIP_ACTION_INFO_DEF+1:
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SELECT_KEEPER1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -251,3 +267,4 @@ void AddSC_uldaman()
     new AreaTrigger_at_map_chamber();
     new npc_lore_keeper_of_norgannon();
 }
+

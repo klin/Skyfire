@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -331,16 +331,6 @@ set_source_files_properties(Atomic_Op_Sparc.c Rtems_init.c PROPERTIES LANGUAGE C
 add_definitions(-DACE_BUILD_DLL)
 
 add_library(ace SHARED ${ace_STAT_SRCS})
-
-if( WIN32 )
-    if (MSYS OR MINGW)
-        find_library(WS2_32_LIBRARY ws2_32)
-        target_link_libraries(ace ${WS2_32_LIBRARY})
-        #MESSAGE(STATUS "Link Flags for ACE: ${CMAKE_SHARED_LINKER_FLAGS}")
-        #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lws2_32")
-        #MESSAGE(STATUS "Link Flags for ACE after: ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif()
-endif()
 
 add_native_precompiled_header(ace ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/WinAcePCH)
 

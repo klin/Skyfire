@@ -1,22 +1,28 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include "gamePCH.h"
 /*
  * Interaction between core and LFGScripts
  */
@@ -29,45 +35,9 @@
 #include "LFGScripts.h"
 #include "LFGMgr.h"
 
-LFGPlayerScript::LFGPlayerScript() : PlayerScript("LFGPlayerScript")
-{
-}
+LFGScripts::LFGScripts(): GroupScript("LFGScripts"), PlayerScript("LFGScripts") {}
 
-void LFGPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
-{
-    sLFGMgr->InitializeLockedDungeons(player);
-}
-
-void LFGPlayerScript::OnLogout(Player* player)
-{
-    sLFGMgr->Leave(player);
-    LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
-    player->GetSession()->SendLfgUpdateParty(updateData);
-    player->GetSession()->SendLfgUpdatePlayer(updateData);
-    player->GetSession()->SendLfgUpdateSearch(false);
-    uint64 guid = player->GetGUID();
-    // TODO - Do not remove, add timer before deleting
-    sLFGMgr->RemovePlayerData(guid);
-}
-
-void LFGPlayerScript::OnLogin(Player* player)
-{
-    sLFGMgr->InitializeLockedDungeons(player);
-    // TODO - Restore LfgPlayerData and send proper status to player if it was in a group
-}
-
-void LFGPlayerScript::OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool /*permanent*/)
-{
-    MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-    if (mapEntry->IsDungeon() && difficulty > DUNGEON_DIFFICULTY_NORMAL)
-        sLFGMgr->InitializeLockedDungeons(player);
-}
-
-LFGGroupScript::LFGGroupScript() : GroupScript("LFGGroupScript")
-{
-}
-
-void LFGGroupScript::OnAddMember(Group* group, uint64 guid)
+void LFGScripts::OnAddMember(Group* group, uint64 guid)
 {
     uint64 gguid = group->GetGUID();
     if (!gguid)
@@ -75,9 +45,9 @@ void LFGGroupScript::OnAddMember(Group* group, uint64 guid)
 
     sLog->outDebug(LOG_FILTER_LFG, "LFGScripts::OnAddMember [" UI64FMTD "]: added [" UI64FMTD "]", gguid, guid);
     LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_CLEAR_LOCK_LIST);
-    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+    for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        if (Player* plrg = itr->getSource())
+        if (Player *plrg = itr->getSource())
         {
             plrg->GetSession()->SendLfgUpdatePlayer(updateData);
             plrg->GetSession()->SendLfgUpdateParty(updateData);
@@ -89,11 +59,11 @@ void LFGGroupScript::OnAddMember(Group* group, uint64 guid)
         sLFGMgr->Leave(NULL, group);
 
     if (sLFGMgr->GetState(guid) == LFG_STATE_QUEUED)
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
-            sLFGMgr->Leave(player);
+        if (Player *plr = sObjectMgr->GetPlayer(guid))
+            sLFGMgr->Leave(plr);
 }
 
-void LFGGroupScript::OnRemoveMember(Group* group, uint64 guid, RemoveMethod method, uint64 kicker, char const* reason)
+void LFGScripts::OnRemoveMember(Group* group, uint64 guid, RemoveMethod& method, uint64 kicker, const char* reason)
 {
     uint64 gguid = group->GetGUID();
     if (!gguid || method == GROUP_REMOVEMETHOD_DEFAULT)
@@ -120,8 +90,7 @@ void LFGGroupScript::OnRemoveMember(Group* group, uint64 guid, RemoveMethod meth
     }
 
     sLFGMgr->ClearState(guid);
-    sLFGMgr->SetState(guid, LFG_STATE_NONE);
-    if (Player* player = ObjectAccessor::FindPlayer(guid))
+    if (Player *plr = sObjectMgr->GetPlayer(guid))
     {
         /*
         if (method == GROUP_REMOVEMETHOD_LEAVE)
@@ -131,16 +100,16 @@ void LFGGroupScript::OnRemoveMember(Group* group, uint64 guid, RemoveMethod meth
         */
 
         LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_LEADER);
-        player->GetSession()->SendLfgUpdateParty(updateData);
-        if (player->GetMap()->IsDungeon())                    // Teleport player out the dungeon
-            sLFGMgr->TeleportPlayer(player, true);
+        plr->GetSession()->SendLfgUpdateParty(updateData);
+        if (plr->GetMap()->IsDungeon())                    // Teleport player out the dungeon
+            sLFGMgr->TeleportPlayer(plr, true);
     }
 
     if (sLFGMgr->GetState(gguid) != LFG_STATE_FINISHED_DUNGEON)// Need more players to finish the dungeon
         sLFGMgr->OfferContinue(group);
 }
 
-void LFGGroupScript::OnDisband(Group* group)
+void LFGScripts::OnDisband(Group* group)
 {
     uint64 gguid = group->GetGUID();
     sLog->outDebug(LOG_FILTER_LFG, "LFGScripts::OnDisband [" UI64FMTD "]", gguid);
@@ -148,28 +117,28 @@ void LFGGroupScript::OnDisband(Group* group)
     sLFGMgr->RemoveGroupData(gguid);
 }
 
-void LFGGroupScript::OnChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid)
+void LFGScripts::OnChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid)
 {
     uint64 gguid = group->GetGUID();
     if (!gguid)
         return;
 
     sLog->outDebug(LOG_FILTER_LFG, "LFGScripts::OnChangeLeader [" UI64FMTD "]: old [" UI64FMTD "] new [" UI64FMTD "]", gguid, newLeaderGuid, oldLeaderGuid);
-    Player* player = ObjectAccessor::FindPlayer(newLeaderGuid);
+    Player *plr = sObjectMgr->GetPlayer(newLeaderGuid);
 
     LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_LEADER);
-    if (player)
-        player->GetSession()->SendLfgUpdateParty(updateData);
+    if (plr)
+        plr->GetSession()->SendLfgUpdateParty(updateData);
 
-    player = ObjectAccessor::FindPlayer(oldLeaderGuid);
-    if (player)
+    plr = sObjectMgr->GetPlayer(oldLeaderGuid);
+    if (plr)
     {
         updateData.updateType = LFG_UPDATETYPE_GROUP_DISBAND;
-        player->GetSession()->SendLfgUpdateParty(updateData);
+        plr->GetSession()->SendLfgUpdateParty(updateData);
     }
 }
 
-void LFGGroupScript::OnInviteMember(Group* group, uint64 guid)
+void LFGScripts::OnInviteMember(Group* group, uint64 guid)
 {
     uint64 gguid = group->GetGUID();
     if (!gguid)
@@ -177,4 +146,34 @@ void LFGGroupScript::OnInviteMember(Group* group, uint64 guid)
 
     sLog->outDebug(LOG_FILTER_LFG, "LFGScripts::OnInviteMember [" UI64FMTD "]: invite [" UI64FMTD "] leader [" UI64FMTD "]", gguid, guid, group->GetLeaderGUID());
     sLFGMgr->Leave(NULL, group);
+}
+
+void LFGScripts::OnLevelChanged(Player* player, uint8 /*newLevel*/)
+{
+    sLFGMgr->InitializeLockedDungeons(player);
+}
+
+void LFGScripts::OnLogout(Player* player)
+{
+    sLFGMgr->Leave(player);
+    LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
+    player->GetSession()->SendLfgUpdateParty(updateData);
+    player->GetSession()->SendLfgUpdatePlayer(updateData);
+    player->GetSession()->SendLfgUpdateSearch(false);
+    uint64 guid = player->GetGUID();
+    // TODO - Do not remove, add timer before deleting
+    sLFGMgr->RemovePlayerData(guid);
+}
+
+void LFGScripts::OnLogin(Player* player)
+{
+    sLFGMgr->InitializeLockedDungeons(player);
+    // TODO - Restore LfgPlayerData and send proper status to player if it was in a group
+}
+
+void LFGScripts::OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool permanent)
+{
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
+    if (mapEntry->IsDungeon() && difficulty > DUNGEON_DIFFICULTY_NORMAL)
+        sLFGMgr->InitializeLockedDungeons(player);
 }
